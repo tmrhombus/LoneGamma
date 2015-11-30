@@ -83,6 +83,11 @@ using namespace RooFit;
 class plot {
 public :
    // Declaration of leaf types
+   TString inpath;
+   TString outpath;
+   TString Tsubmitbase;
+   TString Tversion;
+
    TFile* datafile;
    TFile* mcfile;
    TFile* outfile;
