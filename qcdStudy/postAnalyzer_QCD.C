@@ -95,7 +95,7 @@ void postAnalyzer_QCD::Loop(TString outfilename, Bool_t isMC, Double_t weight)
         (phoEt->at(bkgPCvint[0]) > ptbins[ptb]) &&
         (phoEt->at(bkgPCvint[0]) < ptbins[ptb+1])
        ){
-      FillSigHistograms(ptb, bkgPCvint[0], event_weight);
+      FillBkgHistograms(ptb, bkgPCvint[0], event_weight);
      }
     }
     if(  // also do an inclusive pT plot
