@@ -83,31 +83,27 @@ using namespace RooFit;
 class plot {
 public :
    // Declaration of leaf types
-   TFile* f1;
-   TFile* f2;
-   TFile* f3;
+   TFile* datafile;
+   TFile* mcfile;
+   TFile* outfile;
 
    plot();
    virtual ~plot();
    virtual void Loop();
    //My functions
-   void  getFraction(TFile* f1, 
-                       TFile* f2,
-                        TFile* f3,
-                         std::vector<double>& fractionQCD,
-                           std::vector<double>& fractionQCDErr,
-                            std::vector<double>& fractionQCDSam,
-                               std::vector<double>& fractionQCDErrSam
-                             );
+   void  getFraction(TFile* datafile, 
+                     TFile* mcfile,
+                     TFile* outfile,
+                     std::vector<double>& fractionQCD,
+                     std::vector<double>& fractionQCDErr,
+                     std::vector<double>& fractionQCDSam,
+                     std::vector<double>& fractionQCDErrSam
+                    );
 
-   void  getCorrectedFakeRatio(TFile* f1,
-                                TFile* f3,
-                                 std::vector<double> qcdfraction,
-                                   std::vector<double> qcderr);
-
-  bool biggerBins;
-  bool smallerBins;
-  bool normalBins;
+   void  getCorrectedFakeRatio(TFile* datafile,
+                               TFile* outfile,
+                               std::vector<double> qcdfraction,
+                               std::vector<double> qcderr);
 
 };
 #endif

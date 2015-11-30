@@ -1,64 +1,43 @@
-#define plot_cxx                                                                                                                                                                 
+#define plot_cxx 
 #include "plot.h"
-
-
 
 void plot::Loop()
 {
-  
 
-//2012 full data with fake rate method 
-
-//PIXEL 
-f1= new TFile("RawFakeRate_2012FullData_PFMedium_Pixel.root","READ");
-
-
-//PhotnJet MC
- f2 = new TFile("RawFakeRate_PhoJet_PFMedium_PIXEL.root","READ");
-
-//-------------
- //output file 
-//------------ 
- f3=new TFile("CorrFakeRate_withData_PIXEL.root","RECREATE");
-
-
-
-
- biggerBins=false;
- smallerBins=false;
- normalBins=true;
+datafile = new TFile("RawFakeRate_2012FullData_PFMedium_Pixel.root","READ");
+mcfile   = new TFile("RawFakeRate_PhoJet_PFMedium_PIXEL.root","READ");
+outfile  = new TFile("CorrFakeRate_withData_PIXEL.root","RECREATE");
 
 //Vector with QCD fractions
- std::vector<double> qcdFrac;
-  qcdFrac.clear();
+std::vector<double> qcdFrac;
+ qcdFrac.clear();
 std:: vector<double> qcdFracErr;
-  qcdFracErr.clear();
+ qcdFracErr.clear();
 
 //second meth without phojet MC
- std::vector<double> qcdFracSam;
-  qcdFracSam.clear();
+std::vector<double> qcdFracSam;
+ qcdFracSam.clear();
 std:: vector<double> qcdFracErrSam;
-  qcdFracErrSam.clear();
+ qcdFracErrSam.clear();
 
+// Do fitting 
+getFraction(
+ datafile,
+ mcfile,
+ outfile,
+ qcdFrac,
+ qcdFracErr,
+ qcdFracSam,
+ qcdFracErrSam   
+);
 
-                 getFraction(f1,
-                               f2,
-                                f3,
-                                 qcdFrac,
-                                  qcdFracErr,
-                                   qcdFracSam,
-                                     qcdFracErrSam   
-                                 );
-
-
-
-
-                 //Using RooFit
-                  getCorrectedFakeRatio(f1,
-                                          f3,
-                                           qcdFrac,
-                                            qcdFracErr);
-
+//Using RooFit result
+getCorrectedFakeRatio(
+ datafile,
+ outfile,
+ qcdFrac,
+ qcdFracErr
+);
 
 }
 
@@ -66,15 +45,16 @@ std:: vector<double> qcdFracErrSam;
 //------------------------------------
 //  get fraction fits from templates
 //------------------------------------
-void plot::getFraction(TFile* f1,   //<-data histo
-                         TFile* f2,     //<-----MC histo
-                           TFile* f3,       //<--Output histo
-                            std::vector<double>& fractionQCD, //<<---This get filled here
-                              std::vector<double>& fractionQCDErr, //<<--this get filled here
-                                std::vector<double>& fractionQCDSam, //<<---This get filled here
-                                   std::vector<double>& fractionQCDErrSam //<<--this get filled here
-                                  ){
-
+void plot::getFraction(
+ TFile* datafile,  
+ TFile* mcfile,    
+ TFile* outfile,   
+ std::vector<double>& fractionQCD,      //<<---This gets filled here
+ std::vector<double>& fractionQCDErr,   //<<---This gets filled here
+ std::vector<double>& fractionQCDSam,   //<<---This gets filled here
+ std::vector<double>& fractionQCDErrSam //<<---This gets filled here
+ )
+{
 
   TCanvas* canvas = new TCanvas("canvas","canvas",900,100,500,500);   
 
@@ -84,8 +64,7 @@ void plot::getFraction(TFile* f1,   //<-data histo
   TH1D* hqcdfractionSam;
   TH1D* hqcdfraction;
 
-  double lower[8];                                                                                                                                                               
-
+  double lower[8];   
   string shistname;
   TString histname;
 
@@ -105,7 +84,7 @@ void plot::getFraction(TFile* f1,   //<-data histo
     infile_xvar >>cxvariable;
     string xvariable(cxvariable);
 
-    if(strncmp(cxvariable,"#",1)==0)
+    if(strncmp(cxvariable,"#",1)==0) // ignore lines starting with #
       {	continue; }
 
     histname  = xvariable;
@@ -118,16 +97,16 @@ void plot::getFraction(TFile* f1,   //<-data histo
 
 
     //get Data template and QCD template from data
-    f1->cd();
+    datafile->cd();
     cout<<datahistname<<endl;
-    hdata = (TH1D*)f1->Get(datahistname)->Clone();
+    hdata = (TH1D*)datafile->Get(datahistname)->Clone();
     //QCD histo
-    hqcd  = (TH1D*)f1->Get(qcdhistname)->Clone();
+    hqcd  = (TH1D*)datafile->Get(qcdhistname)->Clone();
     double integ_data = hdata->Integral();
     double integ_qcd = hqcd->Integral();
     //get photon+jet signal tempalte
-    f2->cd();
-    hphojet  = (TH1D*)f2->Get(fullhistname)->Clone();
+    mcfile->cd();
+    hphojet  = (TH1D*)mcfile->Get(fullhistname)->Clone();
     double integ_phojet = hphojet->Integral();
     int nbins = hphojet->GetNbinsX();
 
@@ -187,8 +166,7 @@ void plot::getFraction(TFile* f1,   //<-data histo
   for(int bincount = 1; bincount <= hphojet->GetNbinsX();bincount++){
     if(hphojet->GetBinContent(bincount) == 0.) hphojet->SetBinContent(bincount,1.e-04);
     }
-
-                   
+                  
   //set variable       
   RooRealVar sinin("sinin","sigieie Title",sininmin,sininmax);
   sinin.setRange("sigrange",0.005,0.011);
@@ -313,7 +291,7 @@ void plot::getFraction(TFile* f1,   //<-data histo
  
 
 
-   f3->cd(); 
+   outfile->cd(); 
   hqcdfractionSam->Write();
   hqcdfraction->Write();
   return;
@@ -327,8 +305,8 @@ void plot::getFraction(TFile* f1,   //<-data histo
 //----------------------------------------------
 //   Get the Corrected Fake Ratio
 //--------------------------------------------
-void plot::getCorrectedFakeRatio(TFile* f1,  //<----data file
-                                  TFile* f3,   //<---output file
+void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
+                                  TFile* outfile,   //<---output file
                                     vector<double> corrFactor,  //<--input corr. factor
                                       vector<double> corrErr     //<--input error
                                        ){
@@ -387,11 +365,11 @@ void plot::getCorrectedFakeRatio(TFile* f1,  //<----data file
     gStyle->SetGridStyle(3);
 
     //get the numerator and denominator
-    f1->cd();
+    datafile->cd();
     //deno
-    hdatadeno = (TH1D*)f1->Get(datahistnamedeno)->Clone();
+    hdatadeno = (TH1D*)datafile->Get(datahistnamedeno)->Clone();
     //num
-    hdatanum = (TH1D*)f1->Get(datahistnamenum)->Clone();
+    hdatanum = (TH1D*)datafile->Get(datahistnamenum)->Clone();
     
     
     //another histos with several bins added up
@@ -421,8 +399,8 @@ void plot::getCorrectedFakeRatio(TFile* f1,  //<----data file
    }          
 
     //also add the entries for denonoweight 
-    TH1D *hdatanumnw = (TH1D*)f1->Get(("data_"+shistname+"noweight_num").c_str())->Clone();
-    TH1D *hdatadenonw = (TH1D*)f1->Get(("data_"+shistname+"noweight_deno").c_str())->Clone();
+    TH1D *hdatanumnw = (TH1D*)datafile->Get(("data_"+shistname+"noweight_num").c_str())->Clone();
+    TH1D *hdatadenonw = (TH1D*)datafile->Get(("data_"+shistname+"noweight_deno").c_str())->Clone();
     
     TH1D *hdataratio;
     hdataratio = new TH1D("hdataratio","ratio : data",(nbins),lower);
@@ -542,7 +520,7 @@ void plot::getCorrectedFakeRatio(TFile* f1,  //<----data file
     hdataratioUncorrected->Draw("E0");
 
 
-   f3->cd();
+   outfile->cd();
    hdataratio->Write();
    hdataratioUncorrected->Write();
    hdatanumCorrected->Write();  
