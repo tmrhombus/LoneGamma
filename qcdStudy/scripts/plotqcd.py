@@ -13,6 +13,7 @@ import cmsPrelim as cpr
 
 import argparse
 parser = argparse.ArgumentParser()
+parser.add_argument("-v","--version",        help="version name")
 parser.add_argument("-id","--inpdir",        help="/full/path/to/input/directory")
 parser.add_argument("-mn","--mc_filename",   help="mc filename (.root)")
 parser.add_argument("-dn","--data_filename", help="data filename (.root)")
@@ -23,6 +24,7 @@ parser.add_argument("-rng","--ptrange",      help="pT range (ex. 250to400")
 parser.add_argument("-log","--do_log",  action='store_true', help="Set Log Scale")
 args = parser.parse_args()
 
+version        = args.version
 inpdir         = args.inpdir        
 mc_filename    = args.mc_filename   
 data_filename  = args.data_filename   
@@ -31,6 +33,7 @@ out_filename   = args.out_filename
 variable       = args.variable
 ptrange        = args.ptrange
 do_log         = args.do_log
+webdir = "/afs/hep.wisc.edu/user/tperry/www/MonoPhoton/qcdPlots/%s"%(version)
 
 xn = ""
 if(do_log): out_filename+="_log"
@@ -77,7 +80,7 @@ h_ntot.SetLineColor(c_ntot)
 h_ntot.SetLineWidth(4)
 h_ntot.SetFillStyle(fs)
 h_ntot.SetLineStyle(n_ls)
-h_ntot.Draw()
+h_ntot.Draw("GOFF")
 h_ntot.Scale( 1. / max(h_ntot.Integral(-1,-1),1.) )
 themax = h_ntot.GetMaximum()
 
@@ -89,7 +92,7 @@ h_nbkg.SetLineColor(c_nbkg)
 h_nbkg.SetLineWidth(2)
 h_nbkg.SetFillStyle(fs)
 h_nbkg.SetLineStyle(n_ls)
-h_nbkg.Draw()
+h_nbkg.Draw("GOFF")
 h_nbkg.Scale( 0.5 / max(h_nbkg.Integral(-1,-1),1.) )
 themax = max( themax, h_nbkg.GetMaximum() )
 
@@ -101,7 +104,7 @@ h_nsig.SetLineColor(c_nsig)
 h_nsig.SetLineWidth(2)
 h_nsig.SetFillStyle(fs)
 h_nsig.SetLineStyle(n_ls)
-h_nsig.Draw()
+h_nsig.Draw("GOFF")
 h_nsig.Scale( 0.5 / max(h_nsig.Integral(-1,-1),1.) )
 themax = max( themax, h_nsig.GetMaximum() )
 
@@ -113,12 +116,12 @@ h_deno.SetLineColor(c_deno)
 h_deno.SetLineWidth(2)
 h_deno.SetFillStyle(fs)
 h_deno.SetLineStyle(d_ls)
-h_deno.Draw()
+h_deno.Draw("GOFF")
 h_deno.Scale( 0.5 / max(h_deno.Integral(-1,-1),1.) )
 themax = max( themax, h_nsig.GetMaximum() )
 
 # fill legend
-leg=TLegend(0.6,0.4,0.88,0.88)
+leg=TLegend(0.5,0.55,0.88,0.88)
 leg.AddEntry(h_ntot,"Numerator (total)")
 leg.AddEntry(h_nsig,"Numerator (signal)")
 leg.AddEntry(h_nbkg,"Numerator (background)")
@@ -128,6 +131,14 @@ leg.SetBorderSize(0)
 
 # and draw
 h_ntot.SetMaximum( 1.2*themax )
+
+h_ntot.Draw("GOFF")
+h_ntot.GetYaxis().SetTitle("Relative Events")
+h_ntot.GetXaxis().SetTitle("#sigma(i#eta,i#eta) Full 5x5")
+#h_ntot.GetXaxis().SetTitle("%s"%(variable))
+
+#if(do_log):  h_ntot.SetMaximum( 50*themax ) 
+if(do_log):  h_ntot.SetMaximum( 11 ) 
 c.cd()
 h_ntot.Draw('hist,GOFF')
 h_nbkg.Draw('hist,GOFF,sames')
@@ -136,12 +147,17 @@ h_deno.Draw('hist,GOFF,sames')
 leg.Draw('sames,GOFF')
 
 cpr.prelim_tdr(lumi=1200,hor=0.17)
-#tex.SetTextAlign(11) #left, bottom
-#tex.DrawLatex(0.1,0.9,title)
+tex.SetTextSize(0.03)
+tex.SetTextAlign(11) #left, bottom
+tex.DrawLatex(0.13,0.75,"pT Range [GeV]: %s"%(ptrange))
 
 c.Update()
 time.sleep(1)
 
-c.Print("%s/%s.png"%(outdir,out_filename))
+#c.Print("%s/%s.png"%(outdir,out_filename))
+#c.SaveAs("%s/%s.eps"%(outdir,out_filename))
+#c.SaveAs("%s/%s.C"%(outdir,out_filename))
+#c.SaveAs("%s/%s.pdf"%(outdir,out_filename))
+c.SaveAs("%s/%s.pdf"%(webdir,out_filename))
 print(  "%s/%s.png"%(outdir,out_filename))
 
