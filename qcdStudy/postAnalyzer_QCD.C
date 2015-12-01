@@ -14,17 +14,17 @@ void postAnalyzer_QCD::Loop(TString outfilename, Bool_t isMC, Double_t weight)
 
  //Float_t ptbins[12] = {75.,100.,125.,145.,155.,165.,175.,190.,250.,400.,700.,1000.};
  ptbins.clear();
- ptbins.push_back(75);
- ptbins.push_back(100);
- ptbins.push_back(125);
- ptbins.push_back(145);
- ptbins.push_back(155);
- ptbins.push_back(165);
+ //ptbins.push_back(75);
+ //ptbins.push_back(100);
+ //ptbins.push_back(125);
+ //ptbins.push_back(145);
+ //ptbins.push_back(155);
+ //ptbins.push_back(165);
  ptbins.push_back(175);
  ptbins.push_back(190);
  ptbins.push_back(250);
- ptbins.push_back(400);
- ptbins.push_back(700);
+ //ptbins.push_back(400);
+ //ptbins.push_back(700);
  ptbins.push_back(1000);
 
  Long64_t nentries = fChain->GetEntriesFast();
@@ -130,7 +130,7 @@ void postAnalyzer_QCD::Loop(TString outfilename, Bool_t isMC, Double_t weight)
  // write these histograms to file
  TFile *outfile = new TFile(outfilename,"RECREATE");
  outfile->cd();
- WriteHistograms();
+ WriteHistograms(ptbins.size());
  outfile->Close();
  sw.Stop();
  std::cout<<"Real Time: "<<sw.RealTime()/60.0 <<" minutes"<<std::endl;
@@ -190,8 +190,8 @@ std::vector<int> postAnalyzer_QCD::pcPassSel(int sel, double phoPtLo, double pho
      
       bool passVLooseSel = ( 
                             ((*phoHoverE)[p]                <  0.05   ) &&
-                            //((*phoSigmaIEtaIEtaFull5x5)[p]  <  0.0106 ) &&
-                            //((*phohasPixelSeed)[p]              ==  0      ) &&
+                            ((*phoSigmaIEtaIEtaFull5x5)[p]  <  0.0102 ) &&
+                            ((*phohasPixelSeed)[p]              ==  0      ) &&
                             ( TMath::Max( ( (*phoPFChIso)[p]  - rho*EAcharged((*phoSCEta)[p]) ), 0.0) < vloosePFCharged )  &&  
                             ( TMath::Max( ( (*phoPFNeuIso)[p] - rho*EAneutral((*phoSCEta)[p]) ), 0.0) < vloosePFNeutral )  &&  
                             ( TMath::Max( ( (*phoPFPhoIso)[p] - rho*EAphoton((*phoSCEta)[p])  ), 0.0) < vloosePFPhoton )

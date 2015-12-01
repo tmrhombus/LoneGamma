@@ -36,10 +36,10 @@ public :
    std::vector<int> denPCvint;
    std::vector<int> ptbins;
    // 12 pT bins: 75,100,125,145,155,165,175,190,250,400,700,1000
-   std::vector<TString> ptbinnames; //12 
-   TH1F h_sig_et[12], h_sig_eta[12], h_sig_sieieF5x5[12], h_sig_pfMET[12];
-   TH1F h_bkg_et[12], h_bkg_eta[12], h_bkg_sieieF5x5[12], h_bkg_pfMET[12];
-   TH1F h_den_et[12], h_den_eta[12], h_den_sieieF5x5[12], h_den_pfMET[12];
+   std::vector<TString> ptbinnames; //12
+   TH1F h_sig_et[4], h_sig_eta[4], h_sig_sieieF5x5[4], h_sig_pfMET[4];
+   TH1F h_bkg_et[4], h_bkg_eta[4], h_bkg_sieieF5x5[4], h_bkg_pfMET[4];
+   TH1F h_den_et[4], h_den_eta[4], h_den_sieieF5x5[4], h_den_pfMET[4];
 
    double event_weight;
    bool passQCD;
@@ -805,7 +805,7 @@ public :
    Bool_t FillSigHistograms(int ptbin, int photonIndex, double weight);
    Bool_t FillBkgHistograms(int ptbin, int photonIndex, double weight);
    Bool_t FillDenHistograms(int ptbin, int photonIndex, double weight);
-   Bool_t WriteHistograms();
+   Bool_t WriteHistograms(int nrhistos);
 };
 
 #endif
@@ -863,18 +863,21 @@ void postAnalyzer_QCD::Init(TTree *tree, Bool_t isMC)
    // (once per file to be processed).
 
    ptbinnames.clear();
-   ptbinnames.push_back("75to100");
-   ptbinnames.push_back("100to125");
-   ptbinnames.push_back("125to145");
-   ptbinnames.push_back("145to155");
-   ptbinnames.push_back("155to165");
-   ptbinnames.push_back("165to175");
+   //ptbinnames.push_back("75to100");
+   //ptbinnames.push_back("100to125");
+   //ptbinnames.push_back("125to145");
+   //ptbinnames.push_back("145to155");
+   //ptbinnames.push_back("155to165");
+   //ptbinnames.push_back("165to175");
+
    ptbinnames.push_back("175to190");
    ptbinnames.push_back("190to250");
-   ptbinnames.push_back("250to400");
-   ptbinnames.push_back("400to700");
-   ptbinnames.push_back("700to1000");
-   ptbinnames.push_back("75to1000");
+   ptbinnames.push_back("250to1000");
+   ptbinnames.push_back("175to1000");
+   //ptbinnames.push_back("250to400");
+   //ptbinnames.push_back("400to700");
+   //ptbinnames.push_back("700to1000");
+   //ptbinnames.push_back("175to1000");
 
    for(unsigned int i=0; i<ptbinnames.size(); ++i){
     // set up names
@@ -895,39 +898,39 @@ void postAnalyzer_QCD::Init(TTree *tree, Bool_t isMC)
 
     // reserve histograms
     h_sig_et[i].Clear();
-    h_sig_et[i] = TH1F(histname_sig_et,"Photon Transverse Energy",200,0.,1000.);
+    h_sig_et[i] = TH1F(histname_sig_et,"Photon Transverse Energy",165,175.,1000.);
     h_sig_et[i].Sumw2();
 
     h_bkg_et[i].Clear();
-    h_bkg_et[i] = TH1F(histname_bkg_et,"Photon Transverse Energy",200,0.,1000.);
+    h_bkg_et[i] = TH1F(histname_bkg_et,"Photon Transverse Energy",165,175.,1000.);
     h_bkg_et[i].Sumw2();
 
     h_den_et[i].Clear();
-    h_den_et[i] = TH1F(histname_den_et,"Photon Transverse Energy",200,0.,1000.);
+    h_den_et[i] = TH1F(histname_den_et,"Photon Transverse Energy",165,175.,1000.);
     h_den_et[i].Sumw2();
     //
     h_sig_eta[i].Clear();
-    h_sig_eta[i] = TH1F(histname_sig_eta,"Leading Photon Eta",20,-2.,2.);
+    h_sig_eta[i] = TH1F(histname_sig_eta,"Leading Photon Eta",100,-2.,2.);
     h_sig_eta[i].Sumw2();
 
     h_bkg_eta[i].Clear();
-    h_bkg_eta[i] = TH1F(histname_bkg_eta,"Leading Photon Eta",20,-2.,2.);
+    h_bkg_eta[i] = TH1F(histname_bkg_eta,"Leading Photon Eta",100,-2.,2.);
     h_bkg_eta[i].Sumw2();
 
     h_den_eta[i].Clear();
-    h_den_eta[i] = TH1F(histname_den_eta,"Leading Photon Eta",20,-2.,2.);
+    h_den_eta[i] = TH1F(histname_den_eta,"Leading Photon Eta",100,-2.,2.);
     h_den_eta[i].Sumw2();
     //
     h_sig_sieieF5x5[i].Clear();
-    h_sig_sieieF5x5[i] = TH1F(histname_sig_sieieF5x5,"Leading Photon SigmaIetaIeta",100,0.,0.1);
+    h_sig_sieieF5x5[i] = TH1F(histname_sig_sieieF5x5,"Leading Photon SigmaIetaIeta",100,0.,0.025);
     h_sig_sieieF5x5[i].Sumw2();
 
     h_bkg_sieieF5x5[i].Clear();
-    h_bkg_sieieF5x5[i] = TH1F(histname_bkg_sieieF5x5,"Leading Photon SigmaIetaIeta",100,0.,0.1);
+    h_bkg_sieieF5x5[i] = TH1F(histname_bkg_sieieF5x5,"Leading Photon SigmaIetaIeta",100,0.,0.025);
     h_bkg_sieieF5x5[i].Sumw2();
 
     h_den_sieieF5x5[i].Clear();
-    h_den_sieieF5x5[i] = TH1F(histname_den_sieieF5x5,"Leading Photon SigmaIetaIeta",100,0.,0.1);
+    h_den_sieieF5x5[i] = TH1F(histname_den_sieieF5x5,"Leading Photon SigmaIetaIeta",100,0.,0.025);
     h_den_sieieF5x5[i].Sumw2();
     //
     h_sig_pfMET[i].Clear();
@@ -1711,8 +1714,8 @@ Bool_t postAnalyzer_QCD::FillDenHistograms(int ptbin, int photonIndex, double we
  return kTRUE;
 }
 
-Bool_t postAnalyzer_QCD::WriteHistograms(){
- for(int i=0; i<12; ++i){
+Bool_t postAnalyzer_QCD::WriteHistograms(int nrhistos){
+ for(int i=0; i<nrhistos; ++i){
   h_sig_et[i].Write();
   h_sig_eta[i].Write();
   h_sig_sieieF5x5[i].Write();

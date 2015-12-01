@@ -35,15 +35,16 @@ void callQCDAnalyzer(void)
 // //hdfs/store/user/jjbuch/GJets_HT-600ToInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/
 // Double_t weight = 93.38; // +- 0.46
  
- Bool_t isMC=kFALSE;
+ Bool_t isMC=kTRUE;
+ //Bool_t isMC=kFALSE;
  TString path = "./test";
- //TString outfilename=path+"/QCDs_MC.root";
- TString outfilename=path+"/QCDs_Data.root";
+ TString outfilename=path+"/QCDs_MC.root";
+ //TString outfilename=path+"/QCDs_Data.root";
  std::cout << "Output File Name: " << outfilename << std::endl;
  
  // get each filename from list and add it to TChain
- //TString inputListName=path+"/filenames_MC_short.txt";
- TString inputListName=path+"/filenames_Data2015D_short.txt";
+ TString inputListName=path+"/filenames_MC_short.txt";
+ //TString inputListName=path+"/filenames_Data2015D_short.txt";
  std::vector<TString> infilename_dump;
   
  // open file_name_list.txt
