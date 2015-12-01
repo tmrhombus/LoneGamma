@@ -62,6 +62,7 @@
 #include "TStyle.h"
 #include <algorithm>
 #include "RooGlobalFunc.h" 
+#include "TLatex.h"
 
  
 #ifdef __MAKECINT__                           
@@ -70,6 +71,7 @@
 #pragma link C++ class map<string,TLegend*>;
 #pragma link C++ class map<string,TGraphErrors*>;
 #pragma link C++ class map<string,TLine*>;
+#pragma link C++ class map<string,TLatex*>;
 #pragma link C++ class vector<bool>+;
 #pragma link C++ class vector<double>+;
 #pragma link C++ class map<TString,TH1D*>+;

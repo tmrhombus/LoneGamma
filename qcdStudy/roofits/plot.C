@@ -74,7 +74,7 @@ void plot::getFraction(
   TH1D* hqcdfractionSam;
   TH1D* hqcdfraction;
 
-  double lower[6];   
+  double lower[4];   
   string shistname;
   TString histname;
 
@@ -139,12 +139,16 @@ void plot::getFraction(
     double uqcd_tot    = hqcd->Integral();
     
     double corr_scfac = ( data_gt - phojet_gt*data_tot  )/( uqcd_gt - phojet_gt*uqcd_tot  ); 
+    cout<<" corr_scfac = "<<corr_scfac<<endl;
     
    ///scaled QCD
    double sqcd_lt = corr_scfac*uqcd_lt;
+   cout<<" sqcd_lt = "<<sqcd_lt<<endl;
 
    double sigperc_lt = (data_lt-sqcd_lt)/data_lt;
+   cout<<" sigperc_lt = "<<sigperc_lt<<endl;
    double qcdperc_lt = (sqcd_lt)/data_lt;
+   cout<<" qcdperc_lt = "<<qcdperc_lt<<endl;
 
    //push results into vector
     if(data_lt >0.0){
@@ -227,8 +231,10 @@ void plot::getFraction(
   gPad->SetLogy();
   gPad->SetTickx();
   gPad->SetTicky();
+  gStyle->SetLineWidth(3);
   //Legend
-  TLegend *leg1 = new TLegend(0.655172,0.699153,0.886494,0.883475 );
+  TLegend *leg1 = new TLegend(0.65,0.6,0.88,0.88 );
+  //TLegend *leg1 = new TLegend(0.655172,0.699153,0.886494,0.883475 );
    leg1->SetFillColor(kWhite);
    leg1->SetTextSize(0.02);
    leg1->SetHeader("");
@@ -237,6 +243,39 @@ void plot::getFraction(
    leg1->AddEntry(xframe->findObject("model_Norm[sinin]_Comp[Signal]"), "signal (MC)", "L");
    leg1->AddEntry(xframe->findObject("model_Norm[sinin]_Comp[Background]"), "fake (data)", "L");
    leg1->Draw("same");
+
+   // Title
+   TText* title = new TText(1,1,"") ;
+   title->SetTextSize(0.07);
+   title->SetTextColor(kBlack);
+   title->SetTextAlign(13);
+   title->SetTextFont(62);
+   title->DrawTextNDC(0.17,0.89,"CMS");
+   xframe->addObject(title);
+
+   TText* extra = new TText(1,1,"") ;
+   extra->SetTextSize(0.05);
+   extra->SetTextColor(kBlack);
+   extra->SetTextAlign(13);
+   extra->SetTextFont(52);
+   extra->DrawTextNDC(0.17,0.83,"Preliminary");
+   xframe->addObject(extra);
+
+   TText* lumi = new TText(1,1,"") ;
+   lumi->SetTextSize(0.05);
+   lumi->SetTextColor(kBlack);
+   lumi->SetTextAlign(31);
+   lumi->SetTextFont(42);
+   lumi->DrawTextNDC(0.9,0.91,"1.2 /fb (13 TeV)");
+   xframe->addObject(lumi);
+
+   TText* ptrange = new TText(1,1,"") ;
+   ptrange->SetTextSize(0.03);
+   ptrange->SetTextColor(kBlack);
+   ptrange->SetTextAlign(11);
+   ptrange->SetTextFont(42);
+   ptrange->DrawTextNDC(0.13,0.75,"pT Range [GeV]: "+histname);
+   xframe->addObject(ptrange);
 
    canvas->SaveAs(outpath+"/Fitted_"+datahistname+".C");
    canvas->SaveAs(outpath+"/Fitted_"+datahistname+".pdf");
@@ -267,29 +306,26 @@ void plot::getFraction(
 } //+++++++++ Loop over xvariable.list lines +++++++++++++++++++++++++++
 
 
+ // 
 
  //-----another histos with several bins added up
     lower[0]=175.0;
     lower[1]=190.0;
     lower[2]=250.0;
-    lower[3]=400.0;
-    lower[4]=700.0;
-    lower[5]=1000.0;
+    lower[3]=1000.0;
 
-   int nqfbins=5;
-    
+   int nqfbins=3;
   //PLOT RooFit fractions
     hqcdfraction = new TH1D("hqcdfraction"," QCD Fraction in Num. (RooFit)",(nqfbins),lower);
-   for(int ibin=1; ibin<=5; ibin++)
+   for(int ibin=1; ibin<=nqfbins+1; ibin++)
     {           
         hqcdfraction->SetBinContent(ibin,fractionQCD[ibin-1]);
         hqcdfraction->SetBinError(ibin,fractionQCDErr[ibin-1]);
     } 
 
-
   //PLOT Sam fractions   
     hqcdfractionSam = new TH1D("hqcdfractionSam"," QCD Fraction in Num. (Sam) ",(nqfbins),lower);
-    for(int ibin=1; ibin<=5; ibin++)
+    for(int ibin=1; ibin<=nqfbins+1; ibin++)
     {           
         hqcdfractionSam->SetBinContent(ibin,fractionQCDSam[ibin-1]);
         hqcdfractionSam->SetBinError(ibin,fractionQCDErrSam[ibin-1]);
@@ -380,14 +416,12 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
     
     
     //another histos with several bins added up
-    double lower[6];
+    double lower[4];
 
     lower[0]=175.0;
     lower[1]=190.0;
     lower[2]=250.0;
-    lower[3]=400.0;
-    lower[4]=700.0;
-    lower[5]=1000.0;
+    lower[3]=1000.0;
 
     int nbins   = hdatanum->GetNbinsX();
 
