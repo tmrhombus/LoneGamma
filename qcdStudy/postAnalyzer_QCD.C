@@ -184,9 +184,9 @@ std::vector<int> postAnalyzer_QCD::pcPassSel(int sel, double phoPtLo, double pho
      }
      else if(sel==2){ // denominator
 
-      double  vloosePFCharged= TMath::Min(5.0*(2.06) , 0.20*(*phoEt)[p]);
-      double  vloosePFPhoton = TMath::Min(5.0*(0.40 + (0.0053 * (*phoEt)[p])) , 0.20*(*phoEt)[p]);
-      double  vloosePFNeutral= TMath::Min(5.0*(8.28 + (0.014 * (*phoEt)[p]) + (0.000019 * pow((*phoEt)[p], 2.0))) , 0.20*(*phoEt)[p]);
+      double  vloosePFCharged= TMath::Min(5.0*(3.32) , 0.20*(*phoEt)[p]);
+      double  vloosePFPhoton = TMath::Min(5.0*(0.81+ (0.0053 * (*phoEt)[p])) , 0.20*(*phoEt)[p]);
+      double  vloosePFNeutral= TMath::Min(5.0*(1.92 + (0.014 * (*phoEt)[p]) + (0.000019 * pow((*phoEt)[p], 2.0))) , 0.20*(*phoEt)[p]);
      
       bool passVLooseSel = ( 
                             ((*phoHoverE)[p]                <  0.05   ) &&
@@ -196,14 +196,22 @@ std::vector<int> postAnalyzer_QCD::pcPassSel(int sel, double phoPtLo, double pho
                             ( TMath::Max( ( (*phoPFNeuIso)[p] - rho*EAneutral((*phoSCEta)[p]) ), 0.0) < vloosePFNeutral )  &&  
                             ( TMath::Max( ( (*phoPFPhoIso)[p] - rho*EAphoton((*phoSCEta)[p])  ), 0.0) < vloosePFPhoton )
                            ); 
-      bool passLooseSel = (
-                            ( TMath::Max( ( (*phoPFChIso)[p]  - rho*EAcharged((*phoSCEta)[p]) ), 0.0) < 3.32 )  ||  
-                            ( TMath::Max( ( (*phoPFNeuIso)[p] - rho*EAneutral((*phoSCEta)[p]) ), 0.0) <
-                              (1.92 + (0.014* (*phoEt)[p]) + (0.000019 * pow((*phoEt)[p], 2.0))))  ||  
-                            ( TMath::Max( ( (*phoPFPhoIso)[p] - rho*EAphoton((*phoSCEta)[p])  ), 0.0) <
+      //bool passLooseSel = (
+      //                      ( TMath::Max( ( (*phoPFChIso)[p]  - rho*EAcharged((*phoSCEta)[p]) ), 0.0) < 3.32 )  ||  
+      //                      ( TMath::Max( ( (*phoPFNeuIso)[p] - rho*EAneutral((*phoSCEta)[p]) ), 0.0) <
+      //                        (1.92 + (0.014* (*phoEt)[p]) + (0.000019 * pow((*phoEt)[p], 2.0))))  ||  
+      //                      ( TMath::Max( ( (*phoPFPhoIso)[p] - rho*EAphoton((*phoSCEta)[p])  ), 0.0) <
+      //                        (0.81 + (0.0053 * (*phoEt)[p])) )
+      //                     ); 
+      //photonId = ( !passLooseSel && passVLooseSel );
+      bool failLooseSel = (
+                            ( TMath::Max( ( (*phoPFChIso)[p]  - rho*EAcharged((*phoSCEta)[p]) ), 0.0) > 3.32 )  ||  
+                            ( TMath::Max( ( (*phoPFNeuIso)[p] - rho*EAneutral((*phoSCEta)[p]) ), 0.0) >
+                              (1.92 + (0.014* (*phoEt)[p]) + (0.000019 * pow((*phoEt)[p], 2.0))))  || 
+                            ( TMath::Max( ( (*phoPFPhoIso)[p] - rho*EAphoton((*phoSCEta)[p])  ), 0.0) >
                               (0.81 + (0.0053 * (*phoEt)[p])) )
                            ); 
-      photonId = ( !passLooseSel && passVLooseSel );
+      photonId = ( failLooseSel && passVLooseSel );
      }
      if(photonId && kinematic){
        //std::cout<<" Found a photon, pfMET="<<pfMET<<" pT="<<phoEt->at(p)<<" sel: "<<sel<<std::endl;
@@ -212,6 +220,7 @@ std::vector<int> postAnalyzer_QCD::pcPassSel(int sel, double phoPtLo, double pho
     }
   return tmpCand;
 }
+
 
 // Effective area to be needed in PF Iso for photon ID
 // https://indico.cern.ch/event/455258/contribution/0/attachments/1173322/1695132/SP15_253rd.pdf -- slide-5
