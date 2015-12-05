@@ -64,6 +64,7 @@
 #include "RooGlobalFunc.h" 
 #include "TLatex.h"
 
+#include <boost/lexical_cast.hpp>
  
 #ifdef __MAKECINT__                           
 #pragma link C++ class map<string,TCanvas*>;
@@ -87,6 +88,7 @@ public :
    // Declaration of leaf types
    TString inpath;
    TString outpath;
+   TString wwwpath;
    TString Tsubmitbase;
    TString Tversion;
 
