@@ -36,10 +36,12 @@ public :
    std::vector<int> denPCvint;
    std::vector<int> ptbins;
    // 12 pT bins: 75,100,125,145,155,165,175,190,250,400,700,1000
+   // 8 syst bins: "", "_sbUP","_sbDown","_metUP","_metDown","_binUP","_binDown","_noPiso"
    std::vector<TString> ptbinnames; //12
-   TH1F h_sig_et[4], h_sig_eta[4], h_sig_sieieF5x5[4], h_sig_pfMET[4];
-   TH1F h_bkg_et[4], h_bkg_eta[4], h_bkg_sieieF5x5[4], h_bkg_pfMET[4];
-   TH1F h_den_et[4], h_den_eta[4], h_den_sieieF5x5[4], h_den_pfMET[4];
+   std::vector<TString> systnames; //8
+   TH1F h_sig_et[6][8], h_sig_eta[6][8], h_sig_sieieF5x5[6][8], h_sig_pfMET[6][8];
+   TH1F h_bkg_et[6][8], h_bkg_eta[6][8], h_bkg_sieieF5x5[6][8], h_bkg_pfMET[6][8];
+   TH1F h_den_et[6][8], h_den_eta[6][8], h_den_sieieF5x5[6][8], h_den_pfMET[6][8];
 
    double event_weight;
    bool passQCD;
@@ -863,6 +865,7 @@ void postAnalyzer_QCD::Init(TTree *tree, Bool_t isMC)
    // (once per file to be processed).
 
    ptbinnames.clear();
+   systnames.clear();
    //ptbinnames.push_back("75to100");
    //ptbinnames.push_back("100to125");
    //ptbinnames.push_back("125to145");
@@ -872,78 +875,90 @@ void postAnalyzer_QCD::Init(TTree *tree, Bool_t isMC)
 
    ptbinnames.push_back("175to190");
    ptbinnames.push_back("190to250");
-   ptbinnames.push_back("250to1000");
+   ptbinnames.push_back("250to400");
+   ptbinnames.push_back("400to700");
+   ptbinnames.push_back("700to1000");
    ptbinnames.push_back("175to1000");
-   //ptbinnames.push_back("250to400");
-   //ptbinnames.push_back("400to700");
-   //ptbinnames.push_back("700to1000");
-   //ptbinnames.push_back("175to1000");
 
+   systnames.push_back("_sbUP");
+   systnames.push_back("_sbDown");
+   systnames.push_back("_metUP");
+   systnames.push_back("_metDown");
+   systnames.push_back("_binUP");
+   systnames.push_back("_binDown");
+   systnames.push_back("_noPiso");
+
+   int nsieiebins;
    for(unsigned int i=0; i<ptbinnames.size(); ++i){
-    // set up names
-    TString histname_sig_et  = "h_sig_et_"+ptbinnames[i];
-    TString histname_sig_eta = "h_sig_eta_"+ptbinnames[i];
-    TString histname_sig_sieieF5x5 = "h_sig_sieieF5x5_"+ptbinnames[i];
-    TString histname_sig_pfMET = "h_sig_pfMET_"+ptbinnames[i];
+    for(unsigned int j=0; j<systnames.size(); ++j){
+     // set up names
+     TString histname_sig_et  = "h_sig_et_"+ptbinnames[i]+systnames[j];
+     TString histname_sig_eta = "h_sig_eta_"+ptbinnames[i]+systnames[j];
+     TString histname_sig_sieieF5x5 = "h_sig_sieieF5x5_"+ptbinnames[i]+systnames[j];
+     TString histname_sig_pfMET = "h_sig_pfMET_"+ptbinnames[i]+systnames[j];
 
-    TString histname_bkg_et  = "h_bkg_et_"+ptbinnames[i];
-    TString histname_bkg_eta = "h_bkg_eta_"+ptbinnames[i];
-    TString histname_bkg_sieieF5x5 = "h_bkg_sieieF5x5_"+ptbinnames[i];
-    TString histname_bkg_pfMET = "h_bkg_pfMET_"+ptbinnames[i];
+     TString histname_bkg_et  = "h_bkg_et_"+ptbinnames[i]+systnames[j];
+     TString histname_bkg_eta = "h_bkg_eta_"+ptbinnames[i]+systnames[j];
+     TString histname_bkg_sieieF5x5 = "h_bkg_sieieF5x5_"+ptbinnames[i]+systnames[j];
+     TString histname_bkg_pfMET = "h_bkg_pfMET_"+ptbinnames[i]+systnames[j];
 
-    TString histname_den_et  = "h_den_et_"+ptbinnames[i];
-    TString histname_den_eta = "h_den_eta_"+ptbinnames[i];
-    TString histname_den_sieieF5x5 = "h_den_sieieF5x5_"+ptbinnames[i];
-    TString histname_den_pfMET = "h_den_pfMET_"+ptbinnames[i];
+     TString histname_den_et  = "h_den_et_"+ptbinnames[i]+systnames[j];
+     TString histname_den_eta = "h_den_eta_"+ptbinnames[i]+systnames[j];
+     TString histname_den_sieieF5x5 = "h_den_sieieF5x5_"+ptbinnames[i]+systnames[j];
+     TString histname_den_pfMET = "h_den_pfMET_"+ptbinnames[i]+systnames[j];
 
-    // reserve histograms
-    h_sig_et[i].Clear();
-    h_sig_et[i] = TH1F(histname_sig_et,"Photon Transverse Energy",165,175.,1000.);
-    h_sig_et[i].Sumw2();
+     // reserve histograms
+     h_sig_et[i].Clear();
+     h_sig_et[i] = TH1F(histname_sig_et,"Photon Transverse Energy",165,175.,1000.);
+     h_sig_et[i].Sumw2();
 
-    h_bkg_et[i].Clear();
-    h_bkg_et[i] = TH1F(histname_bkg_et,"Photon Transverse Energy",165,175.,1000.);
-    h_bkg_et[i].Sumw2();
+     h_bkg_et[i].Clear();
+     h_bkg_et[i] = TH1F(histname_bkg_et,"Photon Transverse Energy",165,175.,1000.);
+     h_bkg_et[i].Sumw2();
 
-    h_den_et[i].Clear();
-    h_den_et[i] = TH1F(histname_den_et,"Photon Transverse Energy",165,175.,1000.);
-    h_den_et[i].Sumw2();
-    //
-    h_sig_eta[i].Clear();
-    h_sig_eta[i] = TH1F(histname_sig_eta,"Leading Photon Eta",100,-2.,2.);
-    h_sig_eta[i].Sumw2();
+     h_den_et[i].Clear();
+     h_den_et[i] = TH1F(histname_den_et,"Photon Transverse Energy",165,175.,1000.);
+     h_den_et[i].Sumw2();
+     //
+     h_sig_eta[i].Clear();
+     h_sig_eta[i] = TH1F(histname_sig_eta,"Leading Photon Eta",100,-2.,2.);
+     h_sig_eta[i].Sumw2();
 
-    h_bkg_eta[i].Clear();
-    h_bkg_eta[i] = TH1F(histname_bkg_eta,"Leading Photon Eta",100,-2.,2.);
-    h_bkg_eta[i].Sumw2();
+     h_bkg_eta[i].Clear();
+     h_bkg_eta[i] = TH1F(histname_bkg_eta,"Leading Photon Eta",100,-2.,2.);
+     h_bkg_eta[i].Sumw2();
 
-    h_den_eta[i].Clear();
-    h_den_eta[i] = TH1F(histname_den_eta,"Leading Photon Eta",100,-2.,2.);
-    h_den_eta[i].Sumw2();
-    //
-    h_sig_sieieF5x5[i].Clear();
-    h_sig_sieieF5x5[i] = TH1F(histname_sig_sieieF5x5,"Leading Photon SigmaIetaIeta",100,0.,0.025);
-    h_sig_sieieF5x5[i].Sumw2();
+     h_den_eta[i].Clear();
+     h_den_eta[i] = TH1F(histname_den_eta,"Leading Photon Eta",100,-2.,2.);
+     h_den_eta[i].Sumw2();
+     //
+     nsieiebins = 100;
+     if( systnames[j].CompareTo("_binUp")==0 ){ nsieiebins=200; }
+     if( systnames[j].CompareTo("_binDown")==0 ){ nsieiebins=50; }
+     h_sig_sieieF5x5[i].Clear();
+     h_sig_sieieF5x5[i] = TH1F(histname_sig_sieieF5x5,"Leading Photon SigmaIetaIeta",nsieiebins,0.,0.025);
+     h_sig_sieieF5x5[i].Sumw2();
 
-    h_bkg_sieieF5x5[i].Clear();
-    h_bkg_sieieF5x5[i] = TH1F(histname_bkg_sieieF5x5,"Leading Photon SigmaIetaIeta",100,0.,0.025);
-    h_bkg_sieieF5x5[i].Sumw2();
+     h_bkg_sieieF5x5[i].Clear();
+     h_bkg_sieieF5x5[i] = TH1F(histname_bkg_sieieF5x5,"Leading Photon SigmaIetaIeta",nsieiebins,0.,0.025);
+     h_bkg_sieieF5x5[i].Sumw2();
 
-    h_den_sieieF5x5[i].Clear();
-    h_den_sieieF5x5[i] = TH1F(histname_den_sieieF5x5,"Leading Photon SigmaIetaIeta",100,0.,0.025);
-    h_den_sieieF5x5[i].Sumw2();
-    //
-    h_sig_pfMET[i].Clear();
-    h_sig_pfMET[i] = TH1F(histname_sig_pfMET,"ParticleFlow MET",300,0.,300.);
-    h_sig_pfMET[i].Sumw2();
+     h_den_sieieF5x5[i].Clear();
+     h_den_sieieF5x5[i] = TH1F(histname_den_sieieF5x5,"Leading Photon SigmaIetaIeta",nsieiebins,0.,0.025);
+     h_den_sieieF5x5[i].Sumw2();
+     //
+     h_sig_pfMET[i].Clear();
+     h_sig_pfMET[i] = TH1F(histname_sig_pfMET,"ParticleFlow MET",300,0.,300.);
+     h_sig_pfMET[i].Sumw2();
 
-    h_bkg_pfMET[i].Clear();
-    h_bkg_pfMET[i] = TH1F(histname_bkg_pfMET,"ParticleFlow MET",300,0.,300.);
-    h_bkg_pfMET[i].Sumw2();
+     h_bkg_pfMET[i].Clear();
+     h_bkg_pfMET[i] = TH1F(histname_bkg_pfMET,"ParticleFlow MET",300,0.,300.);
+     h_bkg_pfMET[i].Sumw2();
 
-    h_den_pfMET[i].Clear();
-    h_den_pfMET[i] = TH1F(histname_den_pfMET,"ParticleFlow MET",300,0.,300.);
-    h_den_pfMET[i].Sumw2();
+     h_den_pfMET[i].Clear();
+     h_den_pfMET[i] = TH1F(histname_den_pfMET,"ParticleFlow MET",300,0.,300.);
+     h_den_pfMET[i].Sumw2();
+    }
    }
 
    // Set object pointer

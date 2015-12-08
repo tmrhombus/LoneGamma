@@ -23,8 +23,8 @@ void postAnalyzer_QCD::Loop(TString outfilename, Bool_t isMC, Double_t weight)
  ptbins.push_back(175);
  ptbins.push_back(190);
  ptbins.push_back(250);
- //ptbins.push_back(400);
- //ptbins.push_back(700);
+ ptbins.push_back(400);
+ ptbins.push_back(700);
  ptbins.push_back(1000);
 
  Long64_t nentries = fChain->GetEntriesFast();
@@ -158,6 +158,7 @@ std::vector<int> postAnalyzer_QCD::pcPassSel(int sel, double phoPtLo, double pho
      if(sel==0){  // numerator signal
       photonId = (
                   ((*phoHoverE)[p] < 0.05 ) &&
+                  ((*phohasPixelSeed)[p]              ==  0      ) &&
                   //((*phoSigmaIEtaIEtaFull5x5)[p]  <  0.0102 ) &&
                   ( TMath::Max( ( (*phoPFChIso)[p]  - rho*EAcharged((*phoSCEta)[p]) ), 0.0) < 1.37 )  &&
                   ( TMath::Max( ( (*phoPFNeuIso)[p] - rho*EAneutral((*phoSCEta)[p]) ), 0.0) < 
@@ -171,6 +172,7 @@ std::vector<int> postAnalyzer_QCD::pcPassSel(int sel, double phoPtLo, double pho
      else if(sel==1){ // numerator background
       photonId = (
                   ((*phoHoverE)[p] < 0.05 ) &&
+                  ((*phohasPixelSeed)[p]              ==  0      ) &&
                   //((*phoSigmaIEtaIEtaFull5x5)[p]  <  0.0102 ) &&
                   ( TMath::Max( ( (*phoPFChIso)[p]  - rho*EAcharged((*phoSCEta)[p]) ), 0.0) > 5. )  &&
                   ( TMath::Max( ( (*phoPFChIso)[p]  - rho*EAcharged((*phoSCEta)[p]) ), 0.0) < 10. )  &&
@@ -190,28 +192,28 @@ std::vector<int> postAnalyzer_QCD::pcPassSel(int sel, double phoPtLo, double pho
      
       bool passVLooseSel = ( 
                             ((*phoHoverE)[p]                <  0.05   ) &&
-                            ((*phoSigmaIEtaIEtaFull5x5)[p]  <  0.0102 ) &&
+                            //((*phoSigmaIEtaIEtaFull5x5)[p]  <  0.0102 ) &&
                             ((*phohasPixelSeed)[p]              ==  0      ) &&
                             ( TMath::Max( ( (*phoPFChIso)[p]  - rho*EAcharged((*phoSCEta)[p]) ), 0.0) < vloosePFCharged )  &&  
                             ( TMath::Max( ( (*phoPFNeuIso)[p] - rho*EAneutral((*phoSCEta)[p]) ), 0.0) < vloosePFNeutral )  &&  
                             ( TMath::Max( ( (*phoPFPhoIso)[p] - rho*EAphoton((*phoSCEta)[p])  ), 0.0) < vloosePFPhoton )
                            ); 
-      //bool passLooseSel = (
-      //                      ( TMath::Max( ( (*phoPFChIso)[p]  - rho*EAcharged((*phoSCEta)[p]) ), 0.0) < 3.32 )  ||  
-      //                      ( TMath::Max( ( (*phoPFNeuIso)[p] - rho*EAneutral((*phoSCEta)[p]) ), 0.0) <
-      //                        (1.92 + (0.014* (*phoEt)[p]) + (0.000019 * pow((*phoEt)[p], 2.0))))  ||  
-      //                      ( TMath::Max( ( (*phoPFPhoIso)[p] - rho*EAphoton((*phoSCEta)[p])  ), 0.0) <
-      //                        (0.81 + (0.0053 * (*phoEt)[p])) )
-      //                     ); 
-      //photonId = ( !passLooseSel && passVLooseSel );
-      bool failLooseSel = (
-                            ( TMath::Max( ( (*phoPFChIso)[p]  - rho*EAcharged((*phoSCEta)[p]) ), 0.0) > 3.32 )  ||  
-                            ( TMath::Max( ( (*phoPFNeuIso)[p] - rho*EAneutral((*phoSCEta)[p]) ), 0.0) >
-                              (1.92 + (0.014* (*phoEt)[p]) + (0.000019 * pow((*phoEt)[p], 2.0))))  || 
-                            ( TMath::Max( ( (*phoPFPhoIso)[p] - rho*EAphoton((*phoSCEta)[p])  ), 0.0) >
+      bool passLooseSel = (
+                            ( TMath::Max( ( (*phoPFChIso)[p]  - rho*EAcharged((*phoSCEta)[p]) ), 0.0) < 3.32 )  &&
+                            ( TMath::Max( ( (*phoPFNeuIso)[p] - rho*EAneutral((*phoSCEta)[p]) ), 0.0) <
+                              (1.92 + (0.014* (*phoEt)[p]) + (0.000019 * pow((*phoEt)[p], 2.0))))  &&
+                            ( TMath::Max( ( (*phoPFPhoIso)[p] - rho*EAphoton((*phoSCEta)[p])  ), 0.0) <
                               (0.81 + (0.0053 * (*phoEt)[p])) )
                            ); 
-      photonId = ( failLooseSel && passVLooseSel );
+      photonId = ( !passLooseSel && passVLooseSel );
+      //bool failLooseSel = (
+      //                      ( TMath::Max( ( (*phoPFChIso)[p]  - rho*EAcharged((*phoSCEta)[p]) ), 0.0) > 3.32 )  ||  
+      //                      ( TMath::Max( ( (*phoPFNeuIso)[p] - rho*EAneutral((*phoSCEta)[p]) ), 0.0) >
+      //                        (1.92 + (0.014* (*phoEt)[p]) + (0.000019 * pow((*phoEt)[p], 2.0))))  || 
+      //                      ( TMath::Max( ( (*phoPFPhoIso)[p] - rho*EAphoton((*phoSCEta)[p])  ), 0.0) >
+      //                        (0.81 + (0.0053 * (*phoEt)[p])) )
+      //                     ); 
+      //photonId = ( failLooseSel && passVLooseSel );
      }
      if(photonId && kinematic){
        //std::cout<<" Found a photon, pfMET="<<pfMET<<" pT="<<phoEt->at(p)<<" sel: "<<sel<<std::endl;
