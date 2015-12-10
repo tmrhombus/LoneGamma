@@ -12,21 +12,6 @@ void postAnalyzer_QCD::Loop(TString outfilename, Bool_t isMC, Double_t weight)
 
  if (fChain == 0) return;
 
- //Float_t ptbins[12] = {75.,100.,125.,145.,155.,165.,175.,190.,250.,400.,700.,1000.};
- ptbins.clear();
- //ptbins.push_back(75);
- //ptbins.push_back(100);
- //ptbins.push_back(125);
- //ptbins.push_back(145);
- //ptbins.push_back(155);
- //ptbins.push_back(165);
- ptbins.push_back(175);
- ptbins.push_back(190);
- ptbins.push_back(250);
- ptbins.push_back(400);
- ptbins.push_back(700);
- ptbins.push_back(1000);
-
  Long64_t nentries = fChain->GetEntriesFast();
 
  Long64_t nbytes = 0, nb = 0;
@@ -58,80 +43,96 @@ void postAnalyzer_QCD::Loop(TString outfilename, Bool_t isMC, Double_t weight)
    (HLTPho>>12&1 == 1) ||
    (HLTPho>>22&1 == 1) )
   {   
+
+   // systnames   "" "_sbUP" "_sbDown" "_metUP" "_metDown" "_binUP" "_binDown" "_noPiso"
+
    // vector of ints, each int corresponds to location in vector of photons of photon passing cut
-   sigPCvint = pcPassSel(0); // passes signal selection (no sieie cut)
-   bkgPCvint = pcPassSel(1); // passes background selection (no sieie cut)
-   denPCvint = pcPassSel(2); // passes denominator selection (no sieie cut)
-  
-   // QCD Cut
-   passQCD = pfMET < 30; 
-  
-   // Fill Numerator Signal Histograms
-   if( sigPCvint.size()>0 && passQCD ){ // if any photon indexes passed sig selection
-    //std::cout<<" passed QCD, pT="<<phoEt->at(sigPCvint[0])<<std::endl;
+   // one such vector for each systematic bin
 
-    for(unsigned int ptb=0; ptb<(ptbins.size()-1); ++ptb){ // break into pT bins
-     //std::cout<<"  pt bin="<<ptb<<" for "<<ptbins.at(ptb)<<"-"<<ptbins.at(ptb+1)<<std::endl;
-     if(
-        (phoEt->at(sigPCvint[0]) > ptbins[ptb]) &&
-        (phoEt->at(sigPCvint[0]) < ptbins[ptb+1])
+   for(unsigned int sysb=0; sysb<(systnames.size()-1); ++sysb){
+  std::cout<<"aa"<<std::endl;
+    sigPCvint[sysb] = pcPassSel(0,sysb); // passes signal selection (no sieie cut)
+  std::cout<<"bb"<<std::endl;
+    bkgPCvint[sysb] = pcPassSel(1,sysb); // passes background selection (no sieie cut)
+  std::cout<<"cc"<<std::endl;
+    denPCvint[sysb] = pcPassSel(2,sysb); // passes denominator selection (no sieie cut)
+  std::cout<<"dd"<<std::endl;
+   }
+  std::cout<<"d"<<std::endl;
+
+// fill histograms
+   for(unsigned int sysb=0; sysb<(systnames.size()-1); ++sysb){
+  std::cout<<"e"<<std::endl;
+    // Fill Numerator Signal Histograms
+    if( sigPCvint[sysb].size()>0 ){ // if any photon indexes passed sig selection
+     for(unsigned int ptb=0; ptb<(ptbins.size()-1); ++ptb){ // break into pT bins
+      if(
+         (phoEt->at(sigPCvint[sysb][0]) > ptbins[ptb]) &&
+         (phoEt->at(sigPCvint[sysb][0]) < ptbins[ptb+1])
+        ){
+       FillSigHistograms(ptb, sysb, sigPCvint[sysb][0], event_weight);
+      }
+     }
+     if(  // also do an inclusive pT plot
+        (phoEt->at(sigPCvint[sysb][0]) > ptbins[0]) &&
+        (phoEt->at(sigPCvint[sysb][0]) < ptbins[ptbins.size()-1])
        ){
-      //std::cout<<"writing signal"<<std::endl; std::cout<<phoEt->at(sigPCvint[0])<<std::endl;
-      FillSigHistograms(ptb, sigPCvint[0], event_weight);
+      FillSigHistograms(ptbins.size()-1, sysb, sigPCvint[sysb][0], event_weight);
      }
     }
-    if(  // also do an inclusive pT plot
-       (phoEt->at(sigPCvint[0]) > ptbins[0]) &&
-       (phoEt->at(sigPCvint[0]) < ptbins[ptbins.size()-1])
-      ){
-     FillSigHistograms(ptbins.size()-1, sigPCvint[0], event_weight);
-    }
-   }
 
-   // Fill Numerator Background Histograms
-   if( bkgPCvint.size()>0 && passQCD ){ // if any photon indexes passed bkg selection
-    for(unsigned int ptb=0; ptb<(ptbins.size()-1); ++ptb){ // break into pT bins
-     if(
-        (phoEt->at(bkgPCvint[0]) > ptbins[ptb]) &&
-        (phoEt->at(bkgPCvint[0]) < ptbins[ptb+1])
+    // Fill Numerator Background Histograms
+    if( bkgPCvint[sysb].size()>0 ){ // if any photon indexes passed bkg selection
+  std::cout<<"f"<<std::endl;
+     for(unsigned int ptb=0; ptb<(ptbins.size()-1); ++ptb){ // break into pT bins
+      if(
+         (phoEt->at(bkgPCvint[sysb][0]) > ptbins[ptb]) &&
+         (phoEt->at(bkgPCvint[sysb][0]) < ptbins[ptb+1])
+        ){
+       FillBkgHistograms(ptb, sysb, bkgPCvint[sysb][0], event_weight);
+      }
+     }
+     if(  // also do an inclusive pT plot
+        (phoEt->at(bkgPCvint[sysb][0]) > ptbins[0]) &&
+        (phoEt->at(bkgPCvint[sysb][0]) < ptbins[ptbins.size()-1])
        ){
-      FillBkgHistograms(ptb, bkgPCvint[0], event_weight);
+      FillBkgHistograms(ptbins.size()-1, sysb, bkgPCvint[sysb][0], event_weight);
      }
     }
-    if(  // also do an inclusive pT plot
-       (phoEt->at(bkgPCvint[0]) > ptbins[0]) &&
-       (phoEt->at(bkgPCvint[0]) < ptbins[ptbins.size()-1])
-      ){
-     FillBkgHistograms(ptbins.size()-1, bkgPCvint[0], event_weight);
-    }
-   }
 
-   // Fill Denominator Histograms
-   if( denPCvint.size()>0 && passQCD ){ // if any photon indexes passed bkg selection
-    for(unsigned int ptb=0; ptb<(ptbins.size()-1); ++ptb){ // break into pT bins
-     if(
-        (phoEt->at(denPCvint[0]) > ptbins[ptb]) &&
-        (phoEt->at(denPCvint[0]) < ptbins[ptb+1])
+    // Fill Denominator Histograms
+    if( denPCvint[sysb].size()>0 ){ // if any photon indexes passed bkg selection
+  std::cout<<"g"<<std::endl;
+     for(unsigned int ptb=0; ptb<(ptbins.size()-1); ++ptb){ // break into pT bins
+      if(
+         (phoEt->at(denPCvint[sysb][0]) > ptbins[ptb]) &&
+         (phoEt->at(denPCvint[sysb][0]) < ptbins[ptb+1])
+        ){
+       FillDenHistograms(ptb, sysb, denPCvint[sysb][0], event_weight);
+      }
+     }
+     if(  // also do an inclusive pT plot
+        (phoEt->at(denPCvint[sysb][0]) > ptbins[0]) &&
+        (phoEt->at(denPCvint[sysb][0]) < ptbins[ptbins.size()-1])
        ){
-      FillDenHistograms(ptb, denPCvint[0], event_weight);
+      FillDenHistograms(ptbins.size()-1, sysb, denPCvint[sysb][0], event_weight);
      }
     }
-    if(  // also do an inclusive pT plot
-       (phoEt->at(denPCvint[0]) > ptbins[0]) &&
-       (phoEt->at(denPCvint[0]) < ptbins[ptbins.size()-1])
-      ){
-     FillDenHistograms(ptbins.size()-1, denPCvint[0], event_weight);
-    }
    }
+// end fill histograms
 
   } //end if passes MonoPhoton triggers
  } //end loop through entries
 
  // write these histograms to file
+  std::cout<<"made it through"<<std::endl;
  TFile *outfile = new TFile(outfilename,"RECREATE");
  outfile->cd();
- WriteHistograms(ptbins.size());
+  std::cout<<"a"<<std::endl;
+ WriteHistograms(ptbins.size(),systnames.size());
+  std::cout<<"b"<<std::endl;
  outfile->Close();
+  std::cout<<"c"<<std::endl;
  sw.Stop();
  std::cout<<"Real Time: "<<sw.RealTime()/60.0 <<" minutes"<<std::endl;
  std::cout<<"CPU Time: "<<sw.CpuTime()/60.0 <<" minutes"<<std::endl;
@@ -140,82 +141,101 @@ void postAnalyzer_QCD::Loop(TString outfilename, Bool_t isMC, Double_t weight)
 } //end Loop()
 
 //   pcPassSel photons passing selections: ( num_sig(0), num_bkg(1), den(2) )
-std::vector<int> postAnalyzer_QCD::pcPassSel(int sel, double phoPtLo, double phoPtHi, double phoEtaMax){
+ // systnames   "" "_sbUP" "_sbDown" "_metUP" "_metDown" "_binUP" "_binDown" "_noPiso"
+std::vector<int> postAnalyzer_QCD::pcPassSel(int sel, int sys, double phoPtLo, double phoPtHi, double phoEtaMax){
   std::vector<int> tmpCand;
   tmpCand.clear();
-  bool kinematic;
-  bool photonId;
+  bool passKinematics;
+  bool passMET;
+
+  bool passHoEPSeed;
+  bool passPhoNHMedIso;
+  bool passCHMedIso; 
+  double chIsoLB, chIsoUB;
+  bool passCHBkgIso; 
+  double vloosePFCharged;
+  double vloosePFPhoton ;
+  double vloosePFNeutral;
+  bool passLooseIso;
+  bool passLoosePIso;
+  bool passVLooseIso;
+
+  bool passPhotonID;
   //Loop over photons
   for(int p=0;p<nPho;p++)  // nPho from ntuple (should = phoE->length() )
     {
-     kinematic = (
-                  ( (*phoEt)[p] > phoPtLo  ) &&
-                  ( (*phoEt)[p] <= phoPtHi ) &&
-                  ( fabs((*phoSCEta)[p]) < phoEtaMax)
-                 );
-
      // from https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedPhotonIdentificationRun2#SPRING15_selections_25_ns
+     //passCutSieie = ((*phoSigmaIEtaIEtaFull5x5)[p]  <  0.0102 );  // don't need for us
+
+     passKinematics = (
+                       ( (*phoEt)[p] > phoPtLo  ) &&
+                       ( (*phoEt)[p] <= phoPtHi ) &&
+                       ( fabs((*phoSCEta)[p]) < phoEtaMax)
+                      );
+
+
+     passMET = pfMET < 30.;
+     if(sys==3){ passMET = pfMET < 35.;}
+     if(sys==4){ passMET = pfMET < 20.;}
+
+     // nsig, nbkg, deno
+     passHoEPSeed = (
+                     ((*phoHoverE)[p] < 0.05 ) &&
+                     ((*phohasPixelSeed)[p] ==  0 )
+                    );
+     // nsig, nbkg
+     passPhoNHMedIso = (
+                        ( TMath::Max( ( (*phoPFNeuIso)[p] - rho*EAneutral((*phoSCEta)[p]) ), 0.0) < 
+                           1.06 + (0.014 * (*phoEt)[p]) + (0.000019 * pow((*phoEt)[p], 2.0))
+                        )  &&
+                        ( TMath::Max( ( (*phoPFPhoIso)[p] - rho*EAphoton((*phoSCEta)[p])  ), 0.0) < 
+                           0.28 + (0.0053 * (*phoEt)[p])
+                        )
+                       );
+
+     // nsig
+     passCHMedIso = ( TMath::Max( ( (*phoPFChIso)[p] - rho*EAcharged((*phoSCEta)[p]) ), 0.0) < 1.37 );
+
+     // nbkg
+     chIsoLB = 5.;
+     chIsoUB = 10.;
+     if(sys==1){chIsoUB = 12.;}
+     if(sys==2){chIsoUB = 8.;}
+     passCHBkgIso = (
+                     ( TMath::Max( ( (*phoPFChIso)[p] - rho*EAcharged((*phoSCEta)[p]) ), 0.0) > chIsoLB )  &&
+                     ( TMath::Max( ( (*phoPFChIso)[p] - rho*EAcharged((*phoSCEta)[p]) ), 0.0) < chIsoUB ) 
+                    );
+
+     // deno
+     vloosePFCharged= TMath::Min(5.0*(3.32) , 0.20*(*phoEt)[p]);
+     vloosePFPhoton = TMath::Min(5.0*(0.81+ (0.0053 * (*phoEt)[p])) , 0.20*(*phoEt)[p]);
+     vloosePFNeutral= TMath::Min(5.0*(1.92 + (0.014 * (*phoEt)[p]) + (0.000019 * pow((*phoEt)[p], 2.0))) , 0.20*(*phoEt)[p]);
+     passVLooseIso = ( 
+                      ( TMath::Max( ( (*phoPFChIso)[p]  - rho*EAcharged((*phoSCEta)[p]) ), 0.0) < vloosePFCharged )  &&  
+                      ( TMath::Max( ( (*phoPFNeuIso)[p] - rho*EAneutral((*phoSCEta)[p]) ), 0.0) < vloosePFNeutral )  &&  
+                      ( TMath::Max( ( (*phoPFPhoIso)[p] - rho*EAphoton((*phoSCEta)[p])  ), 0.0) < vloosePFPhoton )
+                     ); 
+     passLoosePIso = 
+                     ( TMath::Max( ( (*phoPFPhoIso)[p] - rho*EAphoton((*phoSCEta)[p])  ), 0.0) <
+                       (0.81 + (0.0053 * (*phoEt)[p])) );
+     if(sys==7){passLoosePIso= true;}
+     passLooseIso = (  // deno must fail this cut
+                     ( TMath::Max( ( (*phoPFChIso)[p]  - rho*EAcharged((*phoSCEta)[p]) ), 0.0) < 3.32 )  &&
+                     ( TMath::Max( ( (*phoPFNeuIso)[p] - rho*EAneutral((*phoSCEta)[p]) ), 0.0) <
+                       (1.92 + (0.014* (*phoEt)[p]) + (0.000019 * pow((*phoEt)[p], 2.0))))  &&
+                     passLoosePIso
+                    );
+
      if(sel==0){  // numerator signal
-      photonId = (
-                  ((*phoHoverE)[p] < 0.05 ) &&
-                  ((*phohasPixelSeed)[p]              ==  0      ) &&
-                  //((*phoSigmaIEtaIEtaFull5x5)[p]  <  0.0102 ) &&
-                  ( TMath::Max( ( (*phoPFChIso)[p]  - rho*EAcharged((*phoSCEta)[p]) ), 0.0) < 1.37 )  &&
-                  ( TMath::Max( ( (*phoPFNeuIso)[p] - rho*EAneutral((*phoSCEta)[p]) ), 0.0) < 
-                     1.06 + (0.014 * (*phoEt)[p]) + (0.000019 * pow((*phoEt)[p], 2.0))
-                  )  &&
-                  ( TMath::Max( ( (*phoPFPhoIso)[p] - rho*EAphoton((*phoSCEta)[p])  ), 0.0) < 
-                     0.28 + (0.0053 * (*phoEt)[p])
-                  )
-                 );
+      passPhotonID = passHoEPSeed && passPhoNHMedIso && passCHMedIso;
      }
      else if(sel==1){ // numerator background
-      photonId = (
-                  ((*phoHoverE)[p] < 0.05 ) &&
-                  ((*phohasPixelSeed)[p]              ==  0      ) &&
-                  //((*phoSigmaIEtaIEtaFull5x5)[p]  <  0.0102 ) &&
-                  ( TMath::Max( ( (*phoPFChIso)[p]  - rho*EAcharged((*phoSCEta)[p]) ), 0.0) > 5. )  &&
-                  ( TMath::Max( ( (*phoPFChIso)[p]  - rho*EAcharged((*phoSCEta)[p]) ), 0.0) < 10. )  &&
-                  ( TMath::Max( ( (*phoPFNeuIso)[p] - rho*EAneutral((*phoSCEta)[p]) ), 0.0) < 
-                     1.06 + (0.014 * (*phoEt)[p]) + (0.000019 * pow((*phoEt)[p], 2.0))
-                  )  &&
-                  ( TMath::Max( ( (*phoPFPhoIso)[p] - rho*EAphoton((*phoSCEta)[p])  ), 0.0) < 
-                     0.28 + (0.0053 * (*phoEt)[p])
-                  )
-                 );
+      passPhotonID = passHoEPSeed && passPhoNHMedIso && passCHBkgIso;
      }
      else if(sel==2){ // denominator
-
-      double  vloosePFCharged= TMath::Min(5.0*(3.32) , 0.20*(*phoEt)[p]);
-      double  vloosePFPhoton = TMath::Min(5.0*(0.81+ (0.0053 * (*phoEt)[p])) , 0.20*(*phoEt)[p]);
-      double  vloosePFNeutral= TMath::Min(5.0*(1.92 + (0.014 * (*phoEt)[p]) + (0.000019 * pow((*phoEt)[p], 2.0))) , 0.20*(*phoEt)[p]);
-     
-      bool passVLooseSel = ( 
-                            ((*phoHoverE)[p]                <  0.05   ) &&
-                            //((*phoSigmaIEtaIEtaFull5x5)[p]  <  0.0102 ) &&
-                            ((*phohasPixelSeed)[p]              ==  0      ) &&
-                            ( TMath::Max( ( (*phoPFChIso)[p]  - rho*EAcharged((*phoSCEta)[p]) ), 0.0) < vloosePFCharged )  &&  
-                            ( TMath::Max( ( (*phoPFNeuIso)[p] - rho*EAneutral((*phoSCEta)[p]) ), 0.0) < vloosePFNeutral )  &&  
-                            ( TMath::Max( ( (*phoPFPhoIso)[p] - rho*EAphoton((*phoSCEta)[p])  ), 0.0) < vloosePFPhoton )
-                           ); 
-      bool passLooseSel = (
-                            ( TMath::Max( ( (*phoPFChIso)[p]  - rho*EAcharged((*phoSCEta)[p]) ), 0.0) < 3.32 )  &&
-                            ( TMath::Max( ( (*phoPFNeuIso)[p] - rho*EAneutral((*phoSCEta)[p]) ), 0.0) <
-                              (1.92 + (0.014* (*phoEt)[p]) + (0.000019 * pow((*phoEt)[p], 2.0))))  &&
-                            ( TMath::Max( ( (*phoPFPhoIso)[p] - rho*EAphoton((*phoSCEta)[p])  ), 0.0) <
-                              (0.81 + (0.0053 * (*phoEt)[p])) )
-                           ); 
-      photonId = ( !passLooseSel && passVLooseSel );
-      //bool failLooseSel = (
-      //                      ( TMath::Max( ( (*phoPFChIso)[p]  - rho*EAcharged((*phoSCEta)[p]) ), 0.0) > 3.32 )  ||  
-      //                      ( TMath::Max( ( (*phoPFNeuIso)[p] - rho*EAneutral((*phoSCEta)[p]) ), 0.0) >
-      //                        (1.92 + (0.014* (*phoEt)[p]) + (0.000019 * pow((*phoEt)[p], 2.0))))  || 
-      //                      ( TMath::Max( ( (*phoPFPhoIso)[p] - rho*EAphoton((*phoSCEta)[p])  ), 0.0) >
-      //                        (0.81 + (0.0053 * (*phoEt)[p])) )
-      //                     ); 
-      //photonId = ( failLooseSel && passVLooseSel );
+      passPhotonID = ( passHoEPSeed && !passLooseIso && passVLooseIso );
      }
-     if(photonId && kinematic){
+     if(passPhotonID && passKinematics){
        //std::cout<<" Found a photon, pfMET="<<pfMET<<" pT="<<phoEt->at(p)<<" sel: "<<sel<<std::endl;
        tmpCand.push_back(p);
      }
