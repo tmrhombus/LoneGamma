@@ -16,11 +16,11 @@ void postAnalyzer_QCD::Loop(TString outfilename, Bool_t isMC, Double_t weight)
 
  Long64_t nbytes = 0, nb = 0;
  for (Long64_t jentry=0; jentry<nentries;jentry++) {
-  if (jentry%20000 == 0)
-    {
+  //if (jentry%20000 == 0)
+  //  {
       std::cout<<"Starting entry "<<jentry<<"/"<<(nentries)<<" at "<<sw.RealTime()<<" RealTime, "<<sw.CpuTime()<<" CpuTime"<<std::endl;
       sw.Continue();
-    }
+  //  }
   Long64_t ientry = LoadTree(jentry);
   if (ientry < 0) break;
   nb = fChain->GetEntry(jentry);   nbytes += nb;
@@ -50,7 +50,7 @@ void postAnalyzer_QCD::Loop(TString outfilename, Bool_t isMC, Double_t weight)
 
    int inclptbin = ptbins.size()-1;
    int lastptbin = ptbinnames.size()-1;
-   int lastsysbin = sysbinnames.size()-1;
+   int lastsysbin = sysbinnames.size();
    for(unsigned int sysb=0; sysb<lastsysbin; ++sysb){
     sigPCvint[lastptbin][sysb] = pcPassSel(0,sysb); // passes signal selection (no sieie cut)
     bkgPCvint[lastptbin][sysb] = pcPassSel(1,sysb); // passes background selection (no sieie cut)
@@ -79,6 +79,7 @@ void postAnalyzer_QCD::Loop(TString outfilename, Bool_t isMC, Double_t weight)
      FillSigHistograms(lastptbin, sysb, sigPCvint[lastptbin][sysb].at(0), event_weight);
      
     }
+
 
     //// Fill Numerator Background Histograms
     //if( bkgPCvint[sysb].size()>0 ){ // if any photon indexes passed bkg selection
@@ -228,16 +229,17 @@ std::vector<int> postAnalyzer_QCD::pcPassSel(int sel, int sys, double phoPtLo, d
                     );
 
      if(sel==0){  // numerator signal
-      passPhotonID = passHoEPSeed && passPhoNHMedIso && passCHMedIso;
+      passPhotonID = passMET && passHoEPSeed && passPhoNHMedIso && passCHMedIso;
      }
      else if(sel==1){ // numerator background
-      passPhotonID = passHoEPSeed && passPhoNHMedIso && passCHBkgIso;
+      passPhotonID = passMET && passHoEPSeed && passPhoNHMedIso && passCHBkgIso;
      }
      else if(sel==2){ // denominator
-      passPhotonID = ( passHoEPSeed && !passLooseIso && passVLooseIso );
+      passPhotonID = passMET && passHoEPSeed && !passLooseIso && passVLooseIso;
      }
      if(passPhotonID && passKinematics){
-       std::cout<<" Found a photon, pfMET="<<pfMET<<" pT="<<phoEt->at(p)<<" sel: "<<sel<<std::endl;
+       std::cout<<" Found a photon, pfMET="<<pfMET<<" pT="<<phoEt->at(p)<<" sel: "<<sel<<" sys: "<<sys<<std::endl;
+       std::cout<<"  CHiso:  "<<TMath::Max( ( (*phoPFChIso)[p] - rho*EAcharged((*phoSCEta)[p]) ), 0.0)<<std::endl;
        tmpCand.push_back(p);
      }
     }
