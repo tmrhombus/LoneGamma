@@ -43,7 +43,7 @@ void callQCDAnalyzer(void)
  std::cout << "Output File Name: " << outfilename << std::endl;
  
  // get each filename from list and add it to TChain
- TString inputListName=path+"/filenames_MC_short.txt";
+ TString inputListName=path+"/filenames_MC_20.txt";
  //TString inputListName=path+"/filenames_Data2015D_short.txt";
  std::vector<TString> infilename_dump;
   

@@ -25,10 +25,6 @@ void postAnalyzer_QCD::Loop(TString outfilename, Bool_t isMC, Double_t weight)
   if (ientry < 0) break;
   nb = fChain->GetEntry(jentry);   nbytes += nb;
 
-  sigPCvint.clear();
-  bkgPCvint.clear();
-  denPCvint.clear();
-
   //=1.0 for real data
   event_weight=1.0;
   if(isMC){ event_weight=weight; }
@@ -44,80 +40,81 @@ void postAnalyzer_QCD::Loop(TString outfilename, Bool_t isMC, Double_t weight)
    (HLTPho>>22&1 == 1) )
   {   
 
-   // systnames   "" "_sbUP" "_sbDown" "_metUP" "_metDown" "_binUP" "_binDown" "_noPiso"
+   // sysbinnames = "" "_sbUP" "_sbDown" "_metUP" "_metDown" "_binUP" "_binDown" "_noPiso"
+   // ptbins = 175, 190, 250, 400, 700, 1000
+   // ptbinnames = "175to190" "190to250" "250to400" "400to700" "700to1000" "175to1000" "allpt"
 
-   // vector of ints, each int corresponds to location in vector of photons of photon passing cut
-   // one such vector for each systematic bin
+   // vector of vector of ints, each int corresponds to location in vector of photons of photon passing cut
+   // one such vector for each pt and systematic bin
+   // start by filling inclusive (last) pt bin for systematics, then divvy up
 
-   for(unsigned int sysb=0; sysb<(systnames.size()-1); ++sysb){
-  std::cout<<"aa"<<std::endl;
-    sigPCvint[sysb] = pcPassSel(0,sysb); // passes signal selection (no sieie cut)
-  std::cout<<"bb"<<std::endl;
-    bkgPCvint[sysb] = pcPassSel(1,sysb); // passes background selection (no sieie cut)
-  std::cout<<"cc"<<std::endl;
-    denPCvint[sysb] = pcPassSel(2,sysb); // passes denominator selection (no sieie cut)
-  std::cout<<"dd"<<std::endl;
+   int inclptbin = ptbins.size()-1;
+   int lastptbin = ptbinnames.size()-1;
+   int lastsysbin = sysbinnames.size()-1;
+   for(unsigned int sysb=0; sysb<lastsysbin; ++sysb){
+    sigPCvint[lastptbin][sysb] = pcPassSel(0,sysb); // passes signal selection (no sieie cut)
+    bkgPCvint[lastptbin][sysb] = pcPassSel(1,sysb); // passes background selection (no sieie cut)
+    denPCvint[lastptbin][sysb] = pcPassSel(2,sysb); // passes denominator selection (no sieie cut)
    }
-  std::cout<<"d"<<std::endl;
 
 // fill histograms
-   for(unsigned int sysb=0; sysb<(systnames.size()-1); ++sysb){
-  std::cout<<"e"<<std::endl;
+   for(unsigned int sysb=0; sysb<lastsysbin; ++sysb){
     // Fill Numerator Signal Histograms
-    if( sigPCvint[sysb].size()>0 ){ // if any photon indexes passed sig selection
-     for(unsigned int ptb=0; ptb<(ptbins.size()-1); ++ptb){ // break into pT bins
+    if( sigPCvint[lastptbin][sysb].size()>0 ){ // if any photon indexes passed sig selection
+     for(unsigned int ptb=0; ptb<lastptbin-2; ++ptb){ // break into pT bins
       if(
-         (phoEt->at(sigPCvint[sysb][0]) > ptbins[ptb]) &&
-         (phoEt->at(sigPCvint[sysb][0]) < ptbins[ptb+1])
+         (phoEt->at(sigPCvint[lastptbin][sysb].at(0)) > ptbins[ptb]) &&
+         (phoEt->at(sigPCvint[lastptbin][sysb].at(0)) < ptbins[ptb+1])
         ){
-       FillSigHistograms(ptb, sysb, sigPCvint[sysb][0], event_weight);
+       FillSigHistograms(ptb, sysb, sigPCvint[lastptbin][sysb].at(0), event_weight);
       }
      }
-     if(  // also do an inclusive pT plot
-        (phoEt->at(sigPCvint[sysb][0]) > ptbins[0]) &&
-        (phoEt->at(sigPCvint[sysb][0]) < ptbins[ptbins.size()-1])
+     if(  // do an inclusive pT plot from bins
+        (phoEt->at(sigPCvint[lastptbin][sysb].at(0)) > ptbins[0]) &&
+        (phoEt->at(sigPCvint[lastptbin][sysb].at(0)) < ptbins[inclptbin])
        ){
-      FillSigHistograms(ptbins.size()-1, sysb, sigPCvint[sysb][0], event_weight);
+      FillSigHistograms(lastptbin-1, sysb, sigPCvint[lastptbin][sysb].at(0), event_weight);
      }
+     // and one fully inclusive in pT
+     FillSigHistograms(lastptbin, sysb, sigPCvint[lastptbin][sysb].at(0), event_weight);
+     
     }
 
-    // Fill Numerator Background Histograms
-    if( bkgPCvint[sysb].size()>0 ){ // if any photon indexes passed bkg selection
-  std::cout<<"f"<<std::endl;
-     for(unsigned int ptb=0; ptb<(ptbins.size()-1); ++ptb){ // break into pT bins
-      if(
-         (phoEt->at(bkgPCvint[sysb][0]) > ptbins[ptb]) &&
-         (phoEt->at(bkgPCvint[sysb][0]) < ptbins[ptb+1])
-        ){
-       FillBkgHistograms(ptb, sysb, bkgPCvint[sysb][0], event_weight);
-      }
-     }
-     if(  // also do an inclusive pT plot
-        (phoEt->at(bkgPCvint[sysb][0]) > ptbins[0]) &&
-        (phoEt->at(bkgPCvint[sysb][0]) < ptbins[ptbins.size()-1])
-       ){
-      FillBkgHistograms(ptbins.size()-1, sysb, bkgPCvint[sysb][0], event_weight);
-     }
-    }
+    //// Fill Numerator Background Histograms
+    //if( bkgPCvint[sysb].size()>0 ){ // if any photon indexes passed bkg selection
+    // for(unsigned int ptb=0; ptb<(ptbins.size()-1); ++ptb){ // break into pT bins
+    //  if(
+    //     (phoEt->at(bkgPCvint[lastptbin][sysb]) > ptbins[ptb]) &&
+    //     (phoEt->at(bkgPCvint[lastptbin][sysb]) < ptbins[ptb+1])
+    //    ){
+    //   FillBkgHistograms(ptb, sysb, bkgPCvint[lastptbin][sysb], event_weight);
+    //  }
+    // }
+    // if(  // also do an inclusive pT plot
+    //    (phoEt->at(bkgPCvint[lastptbin][sysb]) > ptbins[0]) &&
+    //    (phoEt->at(bkgPCvint[lastptbin][sysb]) < ptbins[ptbins.size()-1])
+    //   ){
+    //  FillBkgHistograms(ptbins.size()-1, sysb, bkgPCvint[lastptbin][sysb], event_weight);
+    // }
+    //}
 
-    // Fill Denominator Histograms
-    if( denPCvint[sysb].size()>0 ){ // if any photon indexes passed bkg selection
-  std::cout<<"g"<<std::endl;
-     for(unsigned int ptb=0; ptb<(ptbins.size()-1); ++ptb){ // break into pT bins
-      if(
-         (phoEt->at(denPCvint[sysb][0]) > ptbins[ptb]) &&
-         (phoEt->at(denPCvint[sysb][0]) < ptbins[ptb+1])
-        ){
-       FillDenHistograms(ptb, sysb, denPCvint[sysb][0], event_weight);
-      }
-     }
-     if(  // also do an inclusive pT plot
-        (phoEt->at(denPCvint[sysb][0]) > ptbins[0]) &&
-        (phoEt->at(denPCvint[sysb][0]) < ptbins[ptbins.size()-1])
-       ){
-      FillDenHistograms(ptbins.size()-1, sysb, denPCvint[sysb][0], event_weight);
-     }
-    }
+    //// Fill Denominator Histograms
+    //if( denPCvint[sysb].size()>0 ){ // if any photon indexes passed bkg selection
+    // for(unsigned int ptb=0; ptb<(ptbins.size()-1); ++ptb){ // break into pT bins
+    //  if(
+    //     (phoEt->at(denPCvint[lastptbin][sysb]) > ptbins[ptb]) &&
+    //     (phoEt->at(denPCvint[lastptbin][sysb]) < ptbins[ptb+1])
+    //    ){
+    //   FillDenHistograms(ptb, sysb, denPCvint[lastptbin][sysb], event_weight);
+    //  }
+    // }
+    // if(  // also do an inclusive pT plot
+    //    (phoEt->at(denPCvint[lastptbin][sysb]) > ptbins[0]) &&
+    //    (phoEt->at(denPCvint[lastptbin][sysb]) < ptbins[ptbins.size()-1])
+    //   ){
+    //  FillDenHistograms(ptbins.size()-1, sysb, denPCvint[lastptbin][sysb], event_weight);
+    // }
+    //}
    }
 // end fill histograms
 
@@ -128,8 +125,12 @@ void postAnalyzer_QCD::Loop(TString outfilename, Bool_t isMC, Double_t weight)
   std::cout<<"made it through"<<std::endl;
  TFile *outfile = new TFile(outfilename,"RECREATE");
  outfile->cd();
-  std::cout<<"a"<<std::endl;
- WriteHistograms(ptbins.size(),systnames.size());
+ std::cout<<"a"<<std::endl;
+ for(unsigned int i=0; i<ptbinnames.size(); ++i){
+  for(unsigned int j=0; j<sysbinnames.size(); ++j){
+   WriteHistograms(i,j);
+  }
+ }
   std::cout<<"b"<<std::endl;
  outfile->Close();
   std::cout<<"c"<<std::endl;
@@ -236,7 +237,7 @@ std::vector<int> postAnalyzer_QCD::pcPassSel(int sel, int sys, double phoPtLo, d
       passPhotonID = ( passHoEPSeed && !passLooseIso && passVLooseIso );
      }
      if(passPhotonID && passKinematics){
-       //std::cout<<" Found a photon, pfMET="<<pfMET<<" pT="<<phoEt->at(p)<<" sel: "<<sel<<std::endl;
+       std::cout<<" Found a photon, pfMET="<<pfMET<<" pT="<<phoEt->at(p)<<" sel: "<<sel<<std::endl;
        tmpCand.push_back(p);
      }
     }

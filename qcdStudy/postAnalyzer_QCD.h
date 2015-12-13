@@ -31,18 +31,21 @@ public :
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
    Int_t           fCurrent; //!current Tree number in a TChain
 
-   // std::vector<int> for each systemtaic bin
-   std::vector<std::vector<int>> sigPCvint;
-   std::vector<std::vector<int>> bkgPCvint;
-   std::vector<std::vector<int>> denPCvint;
-   std::vector<int> ptbins;
-   // 6 pT bins: 175,190,250,400,700,1000
-   // 8 syst bins: "", "_sbUP","_sbDown","_metUP","_metDown","_binUP","_binDown","_noPiso"
-   std::vector<TString> ptbinnames; //6
-   std::vector<TString> systnames; //8
-   TH1F h_sig_et[6][8], h_sig_eta[6][8], h_sig_sieieF5x5[6][8], h_sig_pfMET[6][8];
-   TH1F h_bkg_et[6][8], h_bkg_eta[6][8], h_bkg_sieieF5x5[6][8], h_bkg_pfMET[6][8];
-   TH1F h_den_et[6][8], h_den_eta[6][8], h_den_sieieF5x5[6][8], h_den_pfMET[6][8];
+   // 6 pT bins: 175,190,250,400,700,1000,
+   // 7 pt bin names : overflow
+   // 8 syst bins: "", "_sbUp","_sbDown","_metUp","_metDown","_binUp","_binDown","_noPiso"
+   std::vector<int> ptbins;          //6
+   std::vector<TString> ptbinnames;  //7 = (6-1)+1+1
+   std::vector<TString> sysbinnames; //8
+   TH1F h_sig_et[7][8], h_sig_eta[7][8], h_sig_sieieF5x5[7][8], h_sig_pfMET[7][8];
+   TH1F h_bkg_et[7][8], h_bkg_eta[7][8], h_bkg_sieieF5x5[7][8], h_bkg_pfMET[7][8];
+   TH1F h_den_et[7][8], h_den_eta[7][8], h_den_sieieF5x5[7][8], h_den_pfMET[7][8];
+   // std::vector<int> for each ( pt / systemtaic bin )
+    //  each int is number of entry in vector of photon in
+    //  vector<float> *phoEt for example
+   std::vector<int> sigPCvint[7][8]; // [pt bin name][sys bin name] 
+   std::vector<int> bkgPCvint[7][8];
+   std::vector<int> denPCvint[7][8];
 
    double event_weight;
 
@@ -807,7 +810,7 @@ public :
    Bool_t FillSigHistograms(int ptbin, int sysbin, int photonIndex, double weight);
    Bool_t FillBkgHistograms(int ptbin, int sysbin, int photonIndex, double weight);
    Bool_t FillDenHistograms(int ptbin, int sysbin, int photonIndex, double weight);
-   Bool_t WriteHistograms(int nptbins, int nsysbins);
+   Bool_t WriteHistograms(int ptbin, int sysbin);
 
 };
 
@@ -867,7 +870,7 @@ void postAnalyzer_QCD::Init(TTree *tree, Bool_t isMC)
 
    ptbins.clear();
    ptbinnames.clear();
-   systnames.clear();
+   sysbinnames.clear();
 
    ptbins.push_back(175);
    ptbins.push_back(190);
@@ -882,34 +885,35 @@ void postAnalyzer_QCD::Init(TTree *tree, Bool_t isMC)
    ptbinnames.push_back("400to700");
    ptbinnames.push_back("700to1000");
    ptbinnames.push_back("175to1000");
+   ptbinnames.push_back("allpt");
 
-   systnames.push_back("");
-   systnames.push_back("_sbUP");
-   systnames.push_back("_sbDown");
-   systnames.push_back("_metUP");
-   systnames.push_back("_metDown");
-   systnames.push_back("_binUP");
-   systnames.push_back("_binDown");
-   systnames.push_back("_noPiso");
+   sysbinnames.push_back("");
+   sysbinnames.push_back("_sbUp");
+   sysbinnames.push_back("_sbDown");
+   sysbinnames.push_back("_metUp");
+   sysbinnames.push_back("_metDown");
+   sysbinnames.push_back("_binUp");
+   sysbinnames.push_back("_binDown");
+   sysbinnames.push_back("_noPiso");
 
    int nsieiebins;
    for(unsigned int i=0; i<ptbinnames.size(); ++i){
-    for(unsigned int j=0; j<systnames.size(); ++j){
+    for(unsigned int j=0; j<sysbinnames.size(); ++j){
      // set up names
-     TString histname_sig_et  = "h_sig_et_"+ptbinnames[i]+systnames[j];
-     TString histname_sig_eta = "h_sig_eta_"+ptbinnames[i]+systnames[j];
-     TString histname_sig_sieieF5x5 = "h_sig_sieieF5x5_"+ptbinnames[i]+systnames[j];
-     TString histname_sig_pfMET = "h_sig_pfMET_"+ptbinnames[i]+systnames[j];
+     TString histname_sig_et  = "h_sig_et_"+ptbinnames[i]+sysbinnames[j];
+     TString histname_sig_eta = "h_sig_eta_"+ptbinnames[i]+sysbinnames[j];
+     TString histname_sig_sieieF5x5 = "h_sig_sieieF5x5_"+ptbinnames[i]+sysbinnames[j];
+     TString histname_sig_pfMET = "h_sig_pfMET_"+ptbinnames[i]+sysbinnames[j];
 
-     TString histname_bkg_et  = "h_bkg_et_"+ptbinnames[i]+systnames[j];
-     TString histname_bkg_eta = "h_bkg_eta_"+ptbinnames[i]+systnames[j];
-     TString histname_bkg_sieieF5x5 = "h_bkg_sieieF5x5_"+ptbinnames[i]+systnames[j];
-     TString histname_bkg_pfMET = "h_bkg_pfMET_"+ptbinnames[i]+systnames[j];
+     TString histname_bkg_et  = "h_bkg_et_"+ptbinnames[i]+sysbinnames[j];
+     TString histname_bkg_eta = "h_bkg_eta_"+ptbinnames[i]+sysbinnames[j];
+     TString histname_bkg_sieieF5x5 = "h_bkg_sieieF5x5_"+ptbinnames[i]+sysbinnames[j];
+     TString histname_bkg_pfMET = "h_bkg_pfMET_"+ptbinnames[i]+sysbinnames[j];
 
-     TString histname_den_et  = "h_den_et_"+ptbinnames[i]+systnames[j];
-     TString histname_den_eta = "h_den_eta_"+ptbinnames[i]+systnames[j];
-     TString histname_den_sieieF5x5 = "h_den_sieieF5x5_"+ptbinnames[i]+systnames[j];
-     TString histname_den_pfMET = "h_den_pfMET_"+ptbinnames[i]+systnames[j];
+     TString histname_den_et  = "h_den_et_"+ptbinnames[i]+sysbinnames[j];
+     TString histname_den_eta = "h_den_eta_"+ptbinnames[i]+sysbinnames[j];
+     TString histname_den_sieieF5x5 = "h_den_sieieF5x5_"+ptbinnames[i]+sysbinnames[j];
+     TString histname_den_pfMET = "h_den_pfMET_"+ptbinnames[i]+sysbinnames[j];
 
      // reserve histograms
      h_sig_et[i][j].Clear();
@@ -937,8 +941,8 @@ void postAnalyzer_QCD::Init(TTree *tree, Bool_t isMC)
      h_den_eta[i][j].Sumw2();
      //
      nsieiebins = 100;
-     if( systnames[j].CompareTo("_binUp")==0 ){ nsieiebins=200; }
-     if( systnames[j].CompareTo("_binDown")==0 ){ nsieiebins=50; }
+     if( sysbinnames[j].CompareTo("_binUp")==0 ){ nsieiebins=200; }
+     if( sysbinnames[j].CompareTo("_binDown")==0 ){ nsieiebins=50; }
      h_sig_sieieF5x5[i][j].Clear();
      h_sig_sieieF5x5[i][j] = TH1F(histname_sig_sieieF5x5,"Leading Photon SigmaIetaIeta",nsieiebins,0.,0.025);
      h_sig_sieieF5x5[i][j].Sumw2();
@@ -1733,25 +1737,21 @@ Bool_t postAnalyzer_QCD::FillDenHistograms(int ptbin, int sysbin, int photonInde
  return kTRUE;
 }
 
-Bool_t postAnalyzer_QCD::WriteHistograms(int nptbins, int nsysbins){
- for(int i=0; i<nptbins; ++i){
-  for(int j=0; j<nsysbins; ++j){
-   h_sig_et[i][j].Write();
-   h_sig_eta[i][j].Write();
-   h_sig_sieieF5x5[i][j].Write();
-   h_sig_pfMET[i][j].Write();
+Bool_t postAnalyzer_QCD::WriteHistograms(int ptbin, int sysbin){
+ h_sig_et[ptbin][sysbin].Write();
+ h_sig_eta[ptbin][sysbin].Write();
+ h_sig_sieieF5x5[ptbin][sysbin].Write();
+ h_sig_pfMET[ptbin][sysbin].Write();
  
-   h_bkg_et[i][j].Write();
-   h_bkg_eta[i][j].Write();
-   h_bkg_sieieF5x5[i][j].Write();
-   h_bkg_pfMET[i][j].Write();
+ h_bkg_et[ptbin][sysbin].Write();
+ h_bkg_eta[ptbin][sysbin].Write();
+ h_bkg_sieieF5x5[ptbin][sysbin].Write();
+ h_bkg_pfMET[ptbin][sysbin].Write();
  
-   h_den_et[i][j].Write();
-   h_den_eta[i][j].Write();
-   h_den_sieieF5x5[i][j].Write();
-   h_den_pfMET[i][j].Write();
-  }
- }
+ h_den_et[ptbin][sysbin].Write();
+ h_den_eta[ptbin][sysbin].Write();
+ h_den_sieieF5x5[ptbin][sysbin].Write();
+ h_den_pfMET[ptbin][sysbin].Write();
  return kTRUE;
 }
 
