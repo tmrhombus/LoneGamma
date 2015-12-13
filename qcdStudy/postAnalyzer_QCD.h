@@ -31,9 +31,9 @@ public :
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
    Int_t           fCurrent; //!current Tree number in a TChain
 
-   // 6 pT bins: 175,190,250,400,700,1000,
-   // 7 pt bin names : overflow
-   // 8 syst bins: "", "_sbUp","_sbDown","_metUp","_metDown","_binUp","_binDown","_noPiso"
+   // 6 pT bins: 175 190 250 400 700 1000 
+   // 7 pt bin names : "175to190" "190to250" "250to400" "400to700" "700to1000" "175to1000" "allpt"
+   // 8 syst bins: ""  "_sbUp" "_sbDown" "_metUp" "_metDown" "_binUp" "_binDown" "_noPiso"
    std::vector<int> ptbins;          //6
    std::vector<TString> ptbinnames;  //7 = (6-1)+1+1
    std::vector<TString> sysbinnames; //8

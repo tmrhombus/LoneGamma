@@ -16,11 +16,11 @@ void postAnalyzer_QCD::Loop(TString outfilename, Bool_t isMC, Double_t weight)
 
  Long64_t nbytes = 0, nb = 0;
  for (Long64_t jentry=0; jentry<nentries;jentry++) {
-  //if (jentry%20000 == 0)
-  //  {
+  if (jentry%20000 == 0)
+    {
       std::cout<<"Starting entry "<<jentry<<"/"<<(nentries)<<" at "<<sw.RealTime()<<" RealTime, "<<sw.CpuTime()<<" CpuTime"<<std::endl;
       sw.Continue();
-  //  }
+    }
   Long64_t ientry = LoadTree(jentry);
   if (ientry < 0) break;
   nb = fChain->GetEntry(jentry);   nbytes += nb;
@@ -79,7 +79,6 @@ void postAnalyzer_QCD::Loop(TString outfilename, Bool_t isMC, Double_t weight)
      FillSigHistograms(lastptbin, sysb, sigPCvint[lastptbin][sysb].at(0), event_weight);
     }
 
-
     // Fill Numerator Background Histograms
     if( bkgPCvint[lastptbin][sysb].size()>0 ){ // if any photon indexes passed sig selection
      for(unsigned int ptb=0; ptb<lastptbin-2; ++ptb){ // break into pT bins
@@ -119,80 +118,22 @@ void postAnalyzer_QCD::Loop(TString outfilename, Bool_t isMC, Double_t weight)
      // and one fully inclusive in pT
      FillDenHistograms(lastptbin, sysb, denPCvint[lastptbin][sysb].at(0), event_weight);
     }
-
-
-    //// Fill Denominator Histograms
-    //if( denPCvint[sysb].size()>0 ){ // if any photon indexes passed bkg selection
-    // for(unsigned int ptb=0; ptb<(ptbins.size()-1); ++ptb){ // break into pT bins
-    //  if(
-    //     (phoEt->at(denPCvint[lastptbin][sysb]) > ptbins[ptb]) &&
-    //     (phoEt->at(denPCvint[lastptbin][sysb]) < ptbins[ptb+1])
-    //    ){
-    //   FillDenHistograms(ptb, sysb, denPCvint[lastptbin][sysb], event_weight);
-    //  }
-    // }
-    // if(  // also do an inclusive pT plot
-    //    (phoEt->at(denPCvint[lastptbin][sysb]) > ptbins[0]) &&
-    //    (phoEt->at(denPCvint[lastptbin][sysb]) < ptbins[ptbins.size()-1])
-    //   ){
-    //  FillDenHistograms(ptbins.size()-1, sysb, denPCvint[lastptbin][sysb], event_weight);
-    // }
-    //}
-
-    //// Fill Numerator Background Histograms
-    //if( bkgPCvint[sysb].size()>0 ){ // if any photon indexes passed bkg selection
-    // for(unsigned int ptb=0; ptb<(ptbins.size()-1); ++ptb){ // break into pT bins
-    //  if(
-    //     (phoEt->at(bkgPCvint[lastptbin][sysb]) > ptbins[ptb]) &&
-    //     (phoEt->at(bkgPCvint[lastptbin][sysb]) < ptbins[ptb+1])
-    //    ){
-    //   FillBkgHistograms(ptb, sysb, bkgPCvint[lastptbin][sysb], event_weight);
-    //  }
-    // }
-    // if(  // also do an inclusive pT plot
-    //    (phoEt->at(bkgPCvint[lastptbin][sysb]) > ptbins[0]) &&
-    //    (phoEt->at(bkgPCvint[lastptbin][sysb]) < ptbins[ptbins.size()-1])
-    //   ){
-    //  FillBkgHistograms(ptbins.size()-1, sysb, bkgPCvint[lastptbin][sysb], event_weight);
-    // }
-    //}
-
-    //// Fill Denominator Histograms
-    //if( denPCvint[sysb].size()>0 ){ // if any photon indexes passed bkg selection
-    // for(unsigned int ptb=0; ptb<(ptbins.size()-1); ++ptb){ // break into pT bins
-    //  if(
-    //     (phoEt->at(denPCvint[lastptbin][sysb]) > ptbins[ptb]) &&
-    //     (phoEt->at(denPCvint[lastptbin][sysb]) < ptbins[ptb+1])
-    //    ){
-    //   FillDenHistograms(ptb, sysb, denPCvint[lastptbin][sysb], event_weight);
-    //  }
-    // }
-    // if(  // also do an inclusive pT plot
-    //    (phoEt->at(denPCvint[lastptbin][sysb]) > ptbins[0]) &&
-    //    (phoEt->at(denPCvint[lastptbin][sysb]) < ptbins[ptbins.size()-1])
-    //   ){
-    //  FillDenHistograms(ptbins.size()-1, sysb, denPCvint[lastptbin][sysb], event_weight);
-    // }
-    //}
-   }
+   } // for each sysb in sysbins
 // end fill histograms
 
   } //end if passes MonoPhoton triggers
  } //end loop through entries
 
  // write these histograms to file
-  std::cout<<"made it through"<<std::endl;
+  std::cout<<"made it through, about to write"<<std::endl;
  TFile *outfile = new TFile(outfilename,"RECREATE");
  outfile->cd();
- std::cout<<"a"<<std::endl;
  for(unsigned int i=0; i<ptbinnames.size(); ++i){
   for(unsigned int j=0; j<sysbinnames.size(); ++j){
    WriteHistograms(i,j);
   }
  }
-  std::cout<<"b"<<std::endl;
  outfile->Close();
-  std::cout<<"c"<<std::endl;
  sw.Stop();
  std::cout<<"Real Time: "<<sw.RealTime()/60.0 <<" minutes"<<std::endl;
  std::cout<<"CPU Time: "<<sw.CpuTime()/60.0 <<" minutes"<<std::endl;
