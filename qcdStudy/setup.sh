@@ -1,3 +1,2 @@
-#export version="Mondah"
-export version="Tardi"
+export version="Caro"
 export submitbase="${CMSSW_BASE}/src/LoneGamma/qcdStudy"
