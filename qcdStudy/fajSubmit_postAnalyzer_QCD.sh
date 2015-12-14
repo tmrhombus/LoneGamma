@@ -86,24 +86,23 @@ then
 fi # ${domc} = true
 
 
-
-
-
-
 ######## Data ################################
 
 if [ ${dodata} = true ]
 then
  for data_samplename in \
-  "SinglePhoton_2015D"
+  "SinglePhoton"
 
  do
   printf "\n${data_samplename}\n"
   
-  # hdfs/store/user/gomber/SinglePhoton_2015D_1p2fb1_condor/run_data_2015D_74X-*root
+  #  /hdfs/store/user/gomber/SinglePhoton_v3_2p11fb_Sushil/*root
+  #  /hdfs/store/user/gomber/SinglePhoton_v4_2p11fb_Sushil/000*/*root
   printf " making list of files\n"
 
-  find /hdfs/store/user/gomber/${data_samplename}_1p2fb1_condor/run_data_2015D_74X-*root > \
+  find /hdfs/store/user/gomber/${data_samplename}_v3_2p11fb_Sushil/*root > \
+   ${submitbase}/${version}/lists/hdfslist_${data_samplename}.txt
+  find /hdfs/store/user/gomber/${data_samplename}_v4_2p11fb_Sushil/*/*root >> \
    ${submitbase}/${version}/lists/hdfslist_${data_samplename}.txt
 
   # format as xrootd
@@ -133,15 +132,15 @@ then
   then
   printf " submitting\n"
 
-  farmoutAnalysisJobs \
-   --infer-cmssw-path \
-   --fwklite \
-   --input-file-list=${xrdlist} \
-   --input-files-per-job=30 \
-   --use-hdfs \
-   --extra-inputs=${submitbase}/postAnalyzer_QCD.C,${submitbase}/postAnalyzer_QCD.h \
-   ${version} \
-   "${submitbase}/${version}/submit/${data_samplename}_callpostAnalyzer_QCD.cc"
+   farmoutAnalysisJobs \
+    --infer-cmssw-path \
+    --fwklite \
+    --input-file-list=${xrdlist} \
+    --input-files-per-job=30 \
+    --use-hdfs \
+    --extra-inputs=${submitbase}/postAnalyzer_QCD.C,${submitbase}/postAnalyzer_QCD.h \
+    ${version} \
+    "${submitbase}/${version}/submit/${data_samplename}_callpostAnalyzer_QCD.cc"
 
   fi # ${dosubmit} = true
 
