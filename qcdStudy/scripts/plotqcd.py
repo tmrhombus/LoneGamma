@@ -146,7 +146,7 @@ h_nsig.Draw('hist,GOFF,sames')
 h_deno.Draw('hist,GOFF,sames')
 leg.Draw('sames,GOFF')
 
-cpr.prelim_tdr(lumi=1200,hor=0.17)
+cpr.prelim_tdr(lumi=2100,hor=0.17)
 tex.SetTextSize(0.03)
 tex.SetTextAlign(11) #left, bottom
 tex.DrawLatex(0.13,0.75,"pT Range [GeV]: %s"%(ptrange))
@@ -158,6 +158,6 @@ time.sleep(1)
 #c.SaveAs("%s/%s.eps"%(outdir,out_filename))
 #c.SaveAs("%s/%s.C"%(outdir,out_filename))
 #c.SaveAs("%s/%s.pdf"%(outdir,out_filename))
-c.SaveAs("%s/%s.pdf"%(webdir,out_filename))
+c.SaveAs("%s/%s.png"%(webdir,out_filename))
 print(  "%s/%s.png"%(outdir,out_filename))
 

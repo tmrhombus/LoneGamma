@@ -15,8 +15,8 @@ do
  for ptrange in \
   "175to190" \
   "190to250" \
-  "250to1000" \
-  "175to1000"
+  "250to400" \
+  "400to1000"
  do
 #  python ${submitbase}/scripts/plotqcd.py \
 #   --version "${version}" \
@@ -31,10 +31,10 @@ do
   python ${submitbase}/scripts/plotqcd.py \
    --version "${version}" \
    --inpdir "${submitbase}/${version}/analyzed" \
-   --mc_filename "analyzed_GJets_Merged.root" \
-   --data_filename "analyzed_SinglePhoton_2015D.root" \
+   --mc_filename   "mrg4bins_GJets.root" \
+   --data_filename "mrg4bins_DataSP2015D.root" \
    --outdir "${submitbase}/${version}/plots" \
-   --out_filename "plotqcd_${var}_${ptrange}" \
+   --out_filename "plotqcd4bins_${var}_${ptrange}" \
    --variable "${var}" \
    --ptrange "${ptrange}" \
    --do_log

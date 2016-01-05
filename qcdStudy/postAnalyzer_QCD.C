@@ -237,8 +237,8 @@ std::vector<int> postAnalyzer_QCD::pcPassSel(int sel, int sys, double phoPtLo, d
       passPhotonID = passMET && passHoEPSeed && !passLooseIso && passVLooseIso;
      }
      if(passPhotonID && passKinematics){
-       std::cout<<" Found a photon, pfMET="<<pfMET<<" pT="<<phoEt->at(p)<<" sel: "<<sel<<" sys: "<<sys<<std::endl;
-       std::cout<<"  CHiso:  "<<TMath::Max( ( (*phoPFChIso)[p] - rho*EAcharged((*phoSCEta)[p]) ), 0.0)<<std::endl;
+      // std::cout<<" Found a photon, pfMET="<<pfMET<<" pT="<<phoEt->at(p)<<" sel: "<<sel<<" sys: "<<sys<<std::endl;
+      // std::cout<<"  CHiso:  "<<TMath::Max( ( (*phoPFChIso)[p] - rho*EAcharged((*phoSCEta)[p]) ), 0.0)<<std::endl;
        tmpCand.push_back(p);
      }
     }

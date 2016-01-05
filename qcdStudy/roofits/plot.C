@@ -11,12 +11,16 @@ version = getenv("version");
 Tsubmitbase = TString(submitbase);
 Tversion = TString(version);
 
+//TString extraname="";
+TString extraname="_clossure";
+
 inpath = TString(Tsubmitbase+"/"+Tversion+"/analyzed");
 outpath = TString(Tsubmitbase+"/"+Tversion+"/plots");
 wwwpath = TString("/afs/hep.wisc.edu/user/tperry/www/MonoPhoton/qcdPlots/"+Tversion);
 
-datafile = new TFile(inpath+"/analyzed_SinglePhoton_2015D.root","READ");
-mcfile   = new TFile(inpath+"/analyzed_GJets_Merged.root","READ");
+datafile = new TFile(inpath+"/mrg4bins_DataSP2015D.root","READ");
+mcfile   = new TFile(inpath+"/mrg4bins_GJets.root","READ");
+qcdfile   = new TFile(inpath+"/mrg4bins_QCD.root","READ");
 outfile  = new TFile(outpath+"/Fitted.root","RECREATE");
 
 //Vector with QCD fractions
@@ -35,11 +39,13 @@ std:: vector<double> qcdFracErrSam;
 getFraction(
  datafile,
  mcfile,
+ qcdfile,
  outfile,
  qcdFrac,
  qcdFracErr,
  qcdFracSam,
- qcdFracErrSam   
+ qcdFracErrSam,
+ extraname
 );
 
 //Using RooFit result
@@ -59,23 +65,27 @@ getCorrectedFakeRatio(
 void plot::getFraction(
  TFile* datafile,  
  TFile* mcfile,    
+ TFile* qcdfile,    
  TFile* outfile,   
  std::vector<double>& fractionQCD,      //<<---This gets filled here
  std::vector<double>& fractionQCDErr,   //<<---This gets filled here
  std::vector<double>& fractionQCDSam,   //<<---This gets filled here
- std::vector<double>& fractionQCDErrSam //<<---This gets filled here
+ std::vector<double>& fractionQCDErrSam,//<<---This gets filled here
+ TString extraname
  )
 {
 
   TCanvas* canvas = new TCanvas("canvas","canvas",900,100,500,500);   
 
   TH1D* hdata;
+  TH1D* htemp;
   TH1D* hqcd;
   TH1D* hphojet;
   TH1D* hqcdfractionSam;
   TH1D* hqcdfraction;
 
-  double lower[4];   
+  Double_t lower[5];   
+  //Double_t lower[4];   
   string shistname;
   TString histname;
 
@@ -107,11 +117,22 @@ void plot::getFraction(
     qcdhistname  = "h_bkg_sieieF5x5_"+histname; //data histos with very loose id and  sideband of track iso
 
 
-    //get Data template and QCD template from data
-    datafile->cd();
-    hdata = (TH1D*)datafile->Get(datahistname)->Clone();
+    // for closure test
+    //get "Data" template = MC (GJ + QCD) 
+    hdata = (TH1D*)mcfile->Get(datahistname)->Clone();
+    htemp = (TH1D*)qcdfile->Get(qcdhistname)->Clone();
+    hdata->Add(htemp);
     //QCD histo
-    hqcd  = (TH1D*)datafile->Get(qcdhistname)->Clone();
+    hqcd  = (TH1D*)qcdfile->Get(qcdhistname)->Clone();
+
+    //  used and good
+    ////get Data template and QCD template from data
+    //datafile->cd();
+    //hdata = (TH1D*)datafile->Get(datahistname)->Clone();
+    ////QCD histo
+    //hqcd  = (TH1D*)datafile->Get(qcdhistname)->Clone();
+
+
     double integ_data = hdata->Integral();
     double integ_qcd = hqcd->Integral();
     //get photon+jet signal tempalte
@@ -169,6 +190,7 @@ void plot::getFraction(
   int ndataentries = hdata->GetEntries();
   float sininmin = 0.000; 
   float sininmax = 0.025;
+  float sdataentries = hdata->Integral();
     
  //Set some value not zero for roofit 
   for(int bincount = 1; bincount <= hqcd->GetNbinsX();bincount++){
@@ -249,14 +271,17 @@ void plot::getFraction(
   fractionQCD.push_back(frQCD);
   fractionQCDErr.push_back(frQCDerr);
 
-  TString sdata_lt = TString(boost::lexical_cast<string>( data_lt ));
-  TString sndataentries = TString(boost::lexical_cast<string>( ndataentries ));
-  TString sfakevalue    = TString(boost::lexical_cast<string>( fakevalue    )); 
-  TString sfakeerrormax = TString(boost::lexical_cast<string>( fakeerrormax )); 
-  TString ssigvalue     = TString(boost::lexical_cast<string>( sigvalue     )); 
-  TString ssigerrormax  = TString(boost::lexical_cast<string>( sigerrormax  )); 
-  TString sfitvalue     = TString(boost::lexical_cast<string>( sqrt(sigvalue   *sigvalue   +fakevalue   *fakevalue   )  )); 
-  TString sfiterrormax  = TString(boost::lexical_cast<string>( sqrt(sigerrormax*sigerrormax+fakeerrormax*fakeerrormax)  )); 
+  TString sndataentries = TString(boost::lexical_cast<string>( boost::format("%.1f") % ndataentries ));
+  TString sdata_lt = TString(boost::lexical_cast<string>( boost::format("%.1f") % sdata_lt ));
+  TString sfakevalue    = TString(boost::lexical_cast<string>( boost::format("%.1f") % fakevalue    )); 
+  TString sfakeerrormax = TString(boost::lexical_cast<string>( boost::format("%.1f") % fakeerrormax )); 
+  TString ssigvalue     = TString(boost::lexical_cast<string>( boost::format("%.1f") % sigvalue     )); 
+  TString ssigerrormax  = TString(boost::lexical_cast<string>( boost::format("%.1f") % sigerrormax  )); 
+  TString sfitvalue     = TString(boost::lexical_cast<string>( boost::format("%.1f") % sqrt(sigvalue   *sigvalue   +fakevalue   *fakevalue   )  )); 
+  TString sfiterrormax  = TString(boost::lexical_cast<string>( boost::format("%.1f") % sqrt(sigerrormax*sigerrormax+fakeerrormax*fakeerrormax)  )); 
+
+  TString sfrQCD     = TString(boost::lexical_cast<string>( boost::format("%.3f") % frQCD    )); 
+  TString sfrQCDerr  = TString(boost::lexical_cast<string>( boost::format("%.3f") % frQCDerr )); 
 
 
   //plot              
@@ -266,7 +291,7 @@ void plot::getFraction(
   xframe->GetXaxis()->CenterTitle(1);
   xframe->SetYTitle("Events");
   xframe->GetYaxis()->CenterTitle(1);
-  xframe->SetMaximum(40000.);
+  xframe->SetMaximum(400000.);
 
   data.plotOn(xframe);
   model.plotOn(xframe);
@@ -287,17 +312,19 @@ void plot::getFraction(
    leg1->SetFillColor(kWhite);
    //leg1->SetTextSize(0.02);
    //leg1->SetHeader("");
-   leg1->AddEntry(xframe->findObject("h_data"), "data ("+sdata_lt+")", "P");
+   leg1->AddEntry(xframe->findObject("h_data"), "data", "P");
+   //leg1->AddEntry(xframe->findObject("h_data"), "data ("+sdata_lt+")", "P");
    //leg1->AddEntry(xframe->findObject("h_data"), "data ("+sndataentries+")", "P");
    leg1->AddEntry(xframe->findObject("model_Norm[sinin]"), "Fit", "L");
-   leg1->AddEntry(xframe->findObject("model_Norm[sinin]"), 
-    sfitvalue+" +- "+sfiterrormax, "L");
-   leg1->AddEntry(xframe->findObject("model_Norm[sinin]_Comp[Signal]"), "signal (MC) ", "L");
-   leg1->AddEntry(xframe->findObject("model_Norm[sinin]_Comp[Signal]"),
-    ssigvalue+" +- "+ssigerrormax, "L");
+   //leg1->AddEntry(xframe->findObject("model_Norm[sinin]"), 
+   // sfitvalue+" +- "+sfiterrormax, "L");
+   leg1->AddEntry(xframe->findObject("model_Norm[sinin]_Comp[Signal]"), "signal (GJ MC) ", "L");
+   //leg1->AddEntry(xframe->findObject("model_Norm[sinin]_Comp[Signal]"),
+   // ssigvalue+" +- "+ssigerrormax, "L");
+   //leg1->AddEntry(xframe->findObject("model_Norm[sinin]_Comp[Background]"), "fake (QCD MC)", "L");
    leg1->AddEntry(xframe->findObject("model_Norm[sinin]_Comp[Background]"), "fake (data)", "L");
-   leg1->AddEntry(xframe->findObject("model_Norm[sinin]_Comp[Background]"),
-    sfakevalue+" +- "+sfakeerrormax, "L");
+   //leg1->AddEntry(xframe->findObject("model_Norm[sinin]_Comp[Background]"),
+   // sfakevalue+" +- "+sfakeerrormax, "L");
    leg1->Draw("same");
 
    // Title
@@ -306,7 +333,7 @@ void plot::getFraction(
    title->SetTextColor(kBlack);
    title->SetTextAlign(13);
    title->SetTextFont(62);
-   title->DrawTextNDC(0.17,0.89,"CMS");
+   title->DrawTextNDC(0.17,0.87,"CMS");
    xframe->addObject(title);
 
    TText* extra = new TText(1,1,"") ;
@@ -314,7 +341,7 @@ void plot::getFraction(
    extra->SetTextColor(kBlack);
    extra->SetTextAlign(13);
    extra->SetTextFont(52);
-   extra->DrawTextNDC(0.17,0.83,"Preliminary");
+   extra->DrawTextNDC(0.17,0.81,"Preliminary");
    xframe->addObject(extra);
 
    TText* lumi = new TText(1,1,"") ;
@@ -322,7 +349,7 @@ void plot::getFraction(
    lumi->SetTextColor(kBlack);
    lumi->SetTextAlign(31);
    lumi->SetTextFont(42);
-   lumi->DrawTextNDC(0.9,0.91,"1.2 /fb (13 TeV)");
+   lumi->DrawTextNDC(0.9,0.91,"2.1 /fb (13 TeV)");
    xframe->addObject(lumi);
 
    TText* ptrange = new TText(1,1,"") ;
@@ -330,13 +357,22 @@ void plot::getFraction(
    ptrange->SetTextColor(kBlack);
    ptrange->SetTextAlign(11);
    ptrange->SetTextFont(42);
-   ptrange->DrawTextNDC(0.13,0.75,"pT Range [GeV]: "+histname);
+   ptrange->DrawTextNDC(0.13,0.73,"pT Range [GeV]: "+histname);
    xframe->addObject(ptrange);
 
-   canvas->SaveAs(outpath+"/Fitted_"+datahistname+".C");
-   canvas->SaveAs(outpath+"/Fitted_"+datahistname+".pdf");
-   canvas->SaveAs(outpath+"/Fitted_"+datahistname+".eps");
-   canvas->SaveAs(wwwpath+"/Fitted_"+datahistname+".pdf");
+   TText* sflabel = new TText(1,1,"") ;
+   sflabel->SetTextSize(0.07);
+   sflabel->SetTextColor(kBlack);
+   sflabel->SetTextAlign(11);
+   sflabel->SetTextFont(42);
+   sflabel->DrawTextNDC(0.450,0.45,"B/(S+B)= ");
+   sflabel->DrawTextNDC(0.450,0.30,sfrQCD+" +- "+sfrQCDerr);
+   xframe->addObject(sflabel);
+
+   canvas->SaveAs(outpath+"/Fitted_"+datahistname+extraname+".C");
+   canvas->SaveAs(outpath+"/Fitted_"+datahistname+extraname+".pdf");
+   canvas->SaveAs(outpath+"/Fitted_"+datahistname+extraname+".eps");
+   canvas->SaveAs(wwwpath+"/Fitted_"+datahistname+extraname+".png");
 
   delete xframe;
   
@@ -349,9 +385,12 @@ void plot::getFraction(
     lower[0]=175.0;
     lower[1]=190.0;
     lower[2]=250.0;
-    lower[3]=1000.0;
+    //lower[3]=1000.0;
+    lower[3]=400.0;
+    lower[4]=1000.0;
 
-   int nqfbins=3;
+   //int nqfbins=3;
+   int nqfbins=4;
   //PLOT RooFit fractions
     hqcdfraction = new TH1D("hqcdfraction"," QCD Fraction in Num. (RooFit)",(nqfbins),lower);
    for(int ibin=1; ibin<=nqfbins+1; ibin++)
@@ -417,18 +456,27 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
   TString numhistname;
 
   //bins 
-  double lower[4];
+  Double_t lower[4];
   lower[0]=175.0;
   lower[1]=190.0;
   lower[2]=250.0;
-  lower[3]=1000.0;
+  //lower[3]=1000.0;
+  lower[3]=400.0;
+  lower[4]=1000.0;
 
-  double size_num_uncor[3];
-  double err_num_uncor[3];
-  double size_num_corr[3];
-  double err_num_corr[3];
-  double size_den[3];
-  double err_den[3];
+  //Double_t size_num_uncor[3];
+  //Double_t err_num_uncor[3];
+  //Double_t size_num_corr[3];
+  //Double_t err_num_corr[3];
+  //Double_t size_den[3];
+  //Double_t err_den[3];
+  
+  Double_t size_num_uncor[4];
+  Double_t err_num_uncor[4];
+  Double_t size_num_corr[4];
+  Double_t err_num_corr[4];
+  Double_t size_den[4];
+  Double_t err_den[4];
   
   // temp variables to to in vectors above
   double snu,enu,snc,enc,sd,ed;
@@ -478,7 +526,7 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
   double sieiebin;
   sieiebin = hdatanum->FindBin(0.0102);
   size_num_uncor[varcounter] = double(hdatanum->Integral(1,sieiebin));
-  size_num_corr[varcounter] = double((1.-corrFactor[varcounter])) * double(hdatanum->Integral(1,sieiebin));
+  size_num_corr[varcounter] = double((corrFactor[varcounter])) * double(hdatanum->Integral(1,sieiebin));
   size_den[varcounter] = double(hdataden->Integral(1,sieiebin));
 
   double tmp_err_num_corr;
@@ -623,9 +671,9 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
   // hdatanumCorrected->Write();  
   varcounter++;
   }
-  cout<<size_num_uncor[0]<<" "<<size_num_uncor[1]<<" "<<size_num_uncor[2]<<endl;
-  cout<<size_num_corr[0]<<" "<<size_num_corr[1]<<" "<<size_num_corr[2]<<endl;
-  cout<<size_den[0]<<" "<<size_den[1]<<" "<<size_den[2]<<" "<<endl;
+  cout<<size_num_uncor[0]<<" "<<size_num_uncor[1]<<" "<<size_num_uncor[2]<<" "<<size_num_uncor[3]<<endl;
+  cout<<size_num_corr[0]<<" "<<size_num_corr[2]<<" "<<size_num_corr[2]<<" "<<size_num_corr[3]<<endl;
+  cout<<size_den[0]<<" "<<size_den[1]<<" "<<size_den[2]<<" "<<size_den[3]<<endl;
 
   cout<<err_num_uncor[0]<<" "<<err_num_uncor[1]<<" "<<err_num_uncor[2]<<endl;
   cout<<err_num_corr[0]<<" "<<err_num_corr[1]<<" "<<err_num_corr[2]<<endl;
@@ -633,19 +681,37 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
 
   TCanvas* canvas = new TCanvas("canvas","canvas",900,100,500,500);   
 
-  double mid[3];
+  //Double_t mid[3];
+  //mid[0]=182.5;
+  //mid[1]=220.;
+  //mid[2]=625.;
+
+  //Double_t miderr[3];
+  //miderr[0]=mid[0]-lower[0];
+  //miderr[1]=mid[1]-lower[1];
+  //miderr[2]=mid[2]-lower[2];
+
+  Double_t *mid = new Double_t[4]; //{182.5, 220., 325., 700. };
+  //std::vector<double> mid;
   mid[0]=182.5;
   mid[1]=220.;
-  mid[2]=625.;
+  mid[2]=325.;
+  mid[3]=700.;
 
-  double miderr[3];
+//  for(int i=0; i<9; i++){std::cout<<"mid:  "<<mid[i]<<std::endl;}
+//  for(int i=0; i<4; i++){std::cout<<"ratio:  "<<ratio[i]<<std::endl;}
+//  for(int i=0; i<4; i++){std::cout<<"miderr:  "<<miderr[i]<<std::endl;}
+//  for(int i=0; i<4; i++){std::cout<<"ratioerr:  "<<ratioerr[i]<<std::endl;}
+
+  Double_t *miderr = new Double_t[4];
   miderr[0]=mid[0]-lower[0];
   miderr[1]=mid[1]-lower[1];
   miderr[2]=mid[2]-lower[2];
+  miderr[3]=mid[3]-lower[3];
 
-  TGraphErrors *gr_num_uncor = new TGraphErrors(3,mid,size_num_uncor,miderr,err_num_uncor);
-  TGraphErrors *gr_num_corr  = new TGraphErrors(3,mid,size_num_corr,miderr,err_num_corr);
-  TGraphErrors *gr_den       = new TGraphErrors(3,mid,size_den,miderr,err_den);
+  TGraphErrors *gr_num_uncor = new TGraphErrors(4,mid,size_num_uncor,miderr,err_num_uncor);
+  TGraphErrors *gr_num_corr  = new TGraphErrors(4,mid,size_num_corr,miderr,err_num_corr);
+  TGraphErrors *gr_den       = new TGraphErrors(4,mid,size_den,miderr,err_den);
 
   // c1[xvariable] = new TCanvas(("c"+xvariable).c_str(), "transparent pad",179,30,698,498);
   gStyle->SetOptStat(0);
@@ -670,7 +736,7 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
   gr_den->SetLineColor(3);
   gr_den->SetMarkerStyle(23);
 
-  TH1F *hr = canvas->DrawFrame(175.,10.,1000.,1000000.,"");
+  TH1F *hr = canvas->DrawFrame(175.,10.,1000.,10000000.,"");
   hr->SetXTitle("photon pT [GeV]");
   hr->SetYTitle("Events"); 
 
@@ -679,14 +745,14 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
   title->SetTextColor(kBlack);
   title->SetTextAlign(13);
   title->SetTextFont(62);
-  title->DrawTextNDC(0.17,0.89,"CMS");
+  title->DrawTextNDC(0.17,0.87,"CMS");
 
   TText* extra = new TText(1,1,"") ;
   extra->SetTextSize(0.05);
   extra->SetTextColor(kBlack);
   extra->SetTextAlign(13);
   extra->SetTextFont(52);
-  extra->DrawTextNDC(0.17,0.83,"Preliminary");
+  extra->DrawTextNDC(0.17,0.81,"Preliminary");
   //xframe->addObject(extra);
 
   TText* lumi = new TText(1,1,"") ;
@@ -694,24 +760,25 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
   lumi->SetTextColor(kBlack);
   lumi->SetTextAlign(31);
   lumi->SetTextFont(42);
-  lumi->DrawTextNDC(0.9,0.91,"1.2 /fb (13 TeV)");
+  lumi->DrawTextNDC(0.9,0.91,"2.1 /fb (13 TeV)");
   //xframe->addObject(lumi);
 
   TLegend *leg2 = new TLegend(0.55,0.6,0.88,0.88 );
   leg2->SetFillColor(kWhite);
-  leg2->AddEntry( gr_num_uncor,"Numerator (uncorrected)", "L");
-  leg2->AddEntry( gr_num_corr,"Numerator (corrected)", "L");
+  leg2->AddEntry( gr_num_uncor,"Numerator", "L");
+  //leg2->AddEntry( gr_num_uncor,"Numerator (uncorrected)", "L");
+  //leg2->AddEntry( gr_num_corr,"Numerator (corrected)", "L");
   leg2->AddEntry( gr_den,"Denominator", "L");
   leg2->Draw("same");
 
   gr_num_uncor->Draw("P");
-  gr_num_corr->Draw("P");
+  //gr_num_corr->Draw("P");
   gr_den->Draw("P");
 
   canvas->SaveAs(outpath+"/Graph_NuNcD.C");
   canvas->SaveAs(outpath+"/Graph_NuNcD.pdf");
   canvas->SaveAs(outpath+"/Graph_NuNcD.eps");
-  canvas->SaveAs(wwwpath+"/Graph_NuNcD.pdf");
+  canvas->SaveAs(wwwpath+"/Graph_NuNcD.png");
 
   canvas->Clear();
   //////////////////////////////////////////////////////////////////////////////
@@ -723,29 +790,45 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
   gPad->SetTicky();
   gStyle->SetLineWidth(3);
 
-  double ratio[3];
+  //Double_t ratio[3];
+  Double_t *ratio = new Double_t[4];
   ratio[0] = size_num_corr[0]/size_den[0];
   ratio[1] = size_num_corr[1]/size_den[1];
   ratio[2] = size_num_corr[2]/size_den[2];
+  ratio[3] = size_num_corr[3]/size_den[3];
 
-  double err_ratio[3];
-  err_ratio[0]=0;
-  err_ratio[1]=0;
-  err_ratio[2]=0;
+  Double_t *ratioerr = new Double_t[4];
+  ratioerr[0]=0.5;
+  ratioerr[1]=0.5;
+  ratioerr[2]=0.5;
+  ratioerr[3]=0.5;
 
-  TGraphErrors *gr_ratio = new TGraphErrors(3,mid,ratio,miderr,err_ratio);
+  TGraphErrors *gr_ratio = new TGraphErrors(4,mid,ratio,miderr,ratioerr);
+
+  for(int i=0; i<9; i++){std::cout<<"mid:  "<<mid[i]<<std::endl;}
+  for(int i=0; i<4; i++){std::cout<<"ratio:  "<<ratio[i]<<std::endl;}
+  for(int i=0; i<4; i++){std::cout<<"miderr:  "<<miderr[i]<<std::endl;}
+  for(int i=0; i<4; i++){std::cout<<"ratioerr:  "<<ratioerr[i]<<std::endl;}
+
+  //gr_ratio->Set(4);
+  //TF1 *fit_ratio = new TF1("fit_ratio","[0]+[1]*x", 175, 1000);
+  //fit_ratio->SetParameter(0,0.05);
+  //fit_ratio->SetParameter(1,0.);
+  //TF1 *fit_ratio = new TF1("fit_ratio","pol1", 175, 1000);
+  //TF1 *fit_ratio = new TF1("fit_ratio","pol0(0)", 175, 1000);
+  //TF1 *fit_ratio = new TF1("fit_ratio","pol0", 175, 1000);
 
   gr_ratio->SetMarkerColor(2);
   gr_ratio->SetLineColor(2);
   gr_ratio->SetMarkerStyle(22);
 
-  TH1F *hs = c2->DrawFrame(175.,0.,1000.,10.,"");
+  TH1F *hs = c2->DrawFrame(175.,0.,1000.,0.5,"");
   hs->SetXTitle("photon pT [GeV]");
   hs->SetYTitle("Fake Ratio"); 
 
-  title->DrawTextNDC(0.17,0.89,"CMS");
-  extra->DrawTextNDC(0.17,0.83,"Preliminary");
-  lumi->DrawTextNDC(0.9,0.91,"1.2 /fb (13 TeV)");
+  title->DrawTextNDC(0.17,0.87,"CMS");
+  extra->DrawTextNDC(0.17,0.81,"Preliminary");
+  lumi->DrawTextNDC(0.9,0.91,"2.1 /fb (13 TeV)");
 
   TLegend *leg3 = new TLegend(0.55,0.6,0.88,0.88 );
   leg3->SetFillColor(kWhite);
@@ -753,15 +836,31 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
   leg3->Draw("same");
 
   gr_ratio->Draw("P");
+  gr_ratio->Fit("pol1");
+  //gr_ratio->Fit("pol0");
+  //TF1 *fit_ratio = gr_ratio->GetFunction("pol1");
+  //fit_ratio->SetLineColor(3);
+  //Double_t chi2 = fit_ratio->GetChisquare();
+  //Double_t p0 = fit_ratio->GetParameter(0);
+  //Double_t p1 = fit_ratio->GetParameter(1);
+  //Double_t e0 = fit_ratio->GetParError(0);
+  //Double_t e1 = fit_ratio->GetParError(1);
+
+  //std::cout<<"Fit : "<<chi2<<" "<<p0<<" "<<p1<<std::endl;
+
+  c2->Update();
+  
+  //gr_ratio->Draw("sames,A*");
 
   c2->SaveAs(outpath+"/Graph_FakeRatio.C");
   c2->SaveAs(outpath+"/Graph_FakeRatio.pdf");
   c2->SaveAs(outpath+"/Graph_FakeRatio.eps");
-  c2->SaveAs(wwwpath+"/Graph_FakeRatio.pdf");
+  c2->SaveAs(wwwpath+"/Graph_FakeRatio.png");
 
   c2->Clear();
 
   return;
 
 }
+
 

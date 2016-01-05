@@ -1,2 +1,2 @@
-export version="Caro"
+export version="CPow"
 export submitbase="${CMSSW_BASE}/src/LoneGamma/qcdStudy"

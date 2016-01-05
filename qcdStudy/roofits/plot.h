@@ -65,6 +65,7 @@
 #include "TLatex.h"
 
 #include <boost/lexical_cast.hpp>
+#include <boost/format.hpp>
  
 #ifdef __MAKECINT__                           
 #pragma link C++ class map<string,TCanvas*>;
@@ -94,6 +95,7 @@ public :
 
    TFile* datafile;
    TFile* mcfile;
+   TFile* qcdfile;
    TFile* outfile;
 
    plot();
@@ -102,11 +104,13 @@ public :
    //My functions
    void  getFraction(TFile* datafile, 
                      TFile* mcfile,
+                     TFile* qcdfile,
                      TFile* outfile,
                      std::vector<double>& fractionQCD,
                      std::vector<double>& fractionQCDErr,
                      std::vector<double>& fractionQCDSam,
-                     std::vector<double>& fractionQCDErrSam
+                     std::vector<double>& fractionQCDErrSam,
+                     TString extraname
                     );
 
    void  getCorrectedFakeRatio(TFile* datafile,
