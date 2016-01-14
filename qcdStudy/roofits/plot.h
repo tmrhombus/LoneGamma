@@ -99,6 +99,16 @@ public :
    TFile* qcdfile;
    TFile* outfile;
 
+   std::vector<std::vector<Double_t>> qcd_frac;
+   std::vector<std::vector<Double_t>> qcd_frac_err;
+
+   ofstream log;
+
+   std::vector<TString> sysnames;
+   std::vector<int> ptbinbounds;
+   int nptbins;
+   std::vector<TString> ptbinnames;
+
    plot();
    virtual ~plot();
    virtual void Loop();

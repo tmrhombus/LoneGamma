@@ -14,7 +14,6 @@ void plot::Loop()
  TString extraname="";
  //TString extraname="_clossure";
  
- std::vector<TString> sysnames;
  sysnames.push_back("");
  sysnames.push_back("_sbUp");
  sysnames.push_back("_sbDown");
@@ -23,6 +22,20 @@ void plot::Loop()
  sysnames.push_back("_binUp");
  sysnames.push_back("_binDown");
  sysnames.push_back("_noPiso");
+
+ ptbinbounds.push_back(175);
+ ptbinbounds.push_back(190);
+ ptbinbounds.push_back(250);
+ ptbinbounds.push_back(400);
+ ptbinbounds.push_back(1000);
+
+ nptbins = ptbinbounds.size() - 1;
+ //std::cout<<"nptbins:  "<<nptbins<<std::endl;
+ 
+ //std::vector<TString> ptbinnames;
+ for(unsigned int i=0; i<nptbins; ++i){
+  ptbinnames.push_back(TString(boost::lexical_cast<string>( boost::format("%ito%i") % ptbinbounds[i] % ptbinbounds[i+1] )));
+ }
  
  inpath = TString(Tsubmitbase+"/"+Tversion+"/analyzed");
  outpath = TString(Tsubmitbase+"/"+Tversion+"/plots");
@@ -32,6 +45,9 @@ void plot::Loop()
  mcfile   = new TFile(inpath+"/mrg4bins_GJets.root","READ");
  qcdfile  = new TFile(inpath+"/mrg4bins_QCD.root","READ");
  outfile  = new TFile(outpath+"/Fitted.root","RECREATE");
+
+ //ofstream log;
+ log.open (outpath+"/log.txt");
  
  //Vector with QCD fractions
  std::vector<double> qcdFrac;
@@ -50,7 +66,8 @@ void plot::Loop()
 
   sysname = sysnames[sn];
 
-  std::cout<<endl<<endl<<endl<<"xxxx  "<<sysname<<std::endl;
+  std::cout<<endl<<endl<<endl<<"Starting Systematic:   "<<sysname<<std::endl;
+  log<<boost::format("\n\nStarting Systematic:  %s \n") % sysname;
 
   getFraction(
    datafile,
@@ -64,6 +81,9 @@ void plot::Loop()
    sysname,
    extraname
   );
+
+ qcd_frac.push_back(qcdFrac);
+ qcd_frac_err.push_back(qcdFracErr);
   
   //Using RooFit result
   getCorrectedFakeRatio(
@@ -74,6 +94,16 @@ void plot::Loop()
    sysname
   );
  }
+
+
+ for(unsigned int sn=0; sn<sysnames.size(); ++sn){
+   log<<boost::format("\nSysname: %s \n") % sysnames[sn];
+  for(unsigned int j=0; j<nptbins; ++j){
+    log<<boost::format(" %s") % ptbinnames[j];
+    log<<boost::format(" %0.3d +- %0.3d \n") % qcd_frac[sn][j] % qcd_frac_err[sn][j];
+  }
+ }
+ log.close();
 
 }
 
@@ -112,24 +142,31 @@ void plot::getFraction(
   TString datahistname; //data histo
   TString qcdhistname;  //trkflip - > histos will go here
   TString fullhistname; //phojet
+
+ for(unsigned int ptb=0; ptb<ptbinnames.size(); ++ptb){
+   histname = ptbinnames[ptb];
+   std::cout<<" histname: "<<histname<<std::endl;
+   log<<boost::format(" %s \n") % histname;
+  //}
+  //ptbinnames.push_back(TString(boost::lexical_cast<string>( boost::format("%ito%i") % ptbinbounds[i] % ptbinbounds[i+1] )));
   
-  //read variables from .txt file  
-  char cxvariable[200];
-  ifstream infile_xvar;
-  infile_xvar.open("xvariables.list", ifstream::in );
-
-
-//--------Loop over all the histos------------
-  while(!infile_xvar.eof())
- {
-    infile_xvar >>cxvariable;
-    string xvariable(cxvariable);
-
-    if(strncmp(cxvariable,"#",1)==0) // ignore lines starting with #
-      {	continue; }
-
-    shistname = xvariable;
-    histname  = shistname; 
+//  //read variables from .txt file  
+//  char cxvariable[200];
+//  ifstream infile_xvar;
+//  infile_xvar.open("xvariables.list", ifstream::in );
+//
+//
+////--------Loop over all the histos------------
+//  while(!infile_xvar.eof())
+// {
+//    infile_xvar >>cxvariable;
+//    string xvariable(cxvariable);
+//
+//    if(strncmp(cxvariable,"#",1)==0) // ignore lines starting with #
+//      {	continue; }
+//
+//    shistname = xvariable;
+//    histname  = shistname; 
 
     //set template histo names
     datahistname = "h_sig_sieieF5x5_"+histname+sysname; //data histos with tigh ID and without sigIetaIeta cut
@@ -174,6 +211,7 @@ void plot::getFraction(
   cout<<"-----------------------------------------------------"<<endl;                       
   cout<<"                    Running Sam's Method              "<<endl;
   cout<<"-----------------------------------------------------"<<endl;
+  log<<boost::format(" Sam's Method \n");
 
   cout<<"bin corresponding ot 0.0102 : "<<hdata->FindBin(0.0102)<<endl;
   int myreqbin = (hphojet->FindBin(0.0102))-1;  ////should be 44 for 0.011; 52 if 0.013 not anymore
@@ -190,15 +228,19 @@ void plot::getFraction(
   
   double corr_scfac = ( data_gt - phojet_gt*data_tot  )/( uqcd_gt - phojet_gt*uqcd_tot  ); 
   cout<<" corr_scfac = "<<corr_scfac<<endl;
+  log<<boost::format("  corr_scfac:  %.3f \n") % corr_scfac;
   
   ///scaled QCD
   double sqcd_lt = corr_scfac*uqcd_lt;
   cout<<" sqcd_lt = "<<sqcd_lt<<endl;
+  log<<boost::format("  sqcd_lt:  %.3f \n") % sqcd_lt;
 
   double sigperc_lt = (data_lt-sqcd_lt)/data_lt;
   cout<<" sigperc_lt = "<<sigperc_lt<<endl;
+  log<<boost::format("  sigperc_lt:  %.3f \n") % sigperc_lt;
   double qcdperc_lt = (sqcd_lt)/data_lt;
   cout<<" qcdperc_lt = "<<qcdperc_lt<<endl;
+  log<<boost::format("  qcdperc_lt:  %.3f \n") % qcdperc_lt;
 
   //push results into vector
   if(data_lt >0.0){
