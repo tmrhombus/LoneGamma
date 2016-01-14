@@ -104,6 +104,8 @@ public :
 
    std::vector<std::vector<Double_t>> bincenterss;
    std::vector<std::vector<Double_t>> binerrorss;
+   std::vector<std::vector<Double_t>> ratioss;
+   std::vector<std::vector<Double_t>> ratioerrorss;
 
    std::vector<Double_t> ms;
    std::vector<Double_t> bs;
@@ -145,7 +147,11 @@ public :
                                TFile* outfile,
                                std::vector<double> qcdfraction,
                                std::vector<double> qcderr,
+                               std::vector<Double_t>& ratios,
+                               std::vector<Double_t>& ratioerrors,
                                int sn);
+
+   void drawAllRates();
 
 };
 #endif

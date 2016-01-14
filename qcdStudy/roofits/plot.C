@@ -65,6 +65,9 @@ void plot::Loop()
 
  std::vector<Double_t> bincenters;
  std::vector<Double_t> binerrors;
+
+ std::vector<Double_t> ratios;
+ std::vector<Double_t> ratioerrors;
  
  // Do fitting (fill qcdFrac* vectors)
  for(unsigned int sn=0; sn<sysnames.size(); ++sn){
@@ -74,6 +77,8 @@ void plot::Loop()
   qcdFracErrSam.clear();
   bincenters.clear();
   binerrors.clear();
+  ratios.clear();
+  ratioerrors.clear();
 
   sysname = sysnames[sn];
 
@@ -107,17 +112,24 @@ void plot::Loop()
    outfile,
    qcdFrac,
    qcdFracErr,
+   ratios,
+   ratioerrors,
    sn
    //sysname
   );
+
+ ratioss.push_back(ratios);
+ ratioerrorss.push_back(ratioerrors);
+
  }
 
  for(unsigned int sn=0; sn<sysnames.size(); ++sn){
    log<<boost::format("\nSysname: %s \n") % sysnames[sn];
   for(unsigned int j=0; j<nptbins; ++j){
     log<<boost::format(" %s\n") % ptbinnames[j];
-    log<<boost::format("  QCD Fraction: %0.3d +- %0.3d \n") % qcd_frac[sn][j] % qcd_frac_err[sn][j];
-    log<<boost::format("  Bin Centers: %0.3d +- %0.3d \n") % bincenterss[sn][j] % binerrorss[sn][j];
+    //log<<boost::format("  QCD Fraction: %0.3d +- %0.3d \n") % qcd_frac[sn][j] % qcd_frac_err[sn][j];
+    log<<boost::format("  Bin Center: %0.3d +- %0.3d \n") % bincenterss[sn][j] % binerrorss[sn][j];
+    log<<boost::format("  Ratio: %0.3d +- %0.3d \n") % ratioss[sn][j] % ratioerrorss[sn][j];
   }
     log<<boost::format(" y = (%0.3d +- %0.3d)x + (%0.3d +- %0.3d) \n") % ms[sn] % mes[sn] % bs[sn] % bes[sn] ;
  }
@@ -508,6 +520,8 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
                                  TFile* outfile,   //<---output file
                                  vector<double> corrFactor, //<--input corr. factor = QCD fraction
                                  vector<double> corrErr,    //<--input error
+                                 vector<Double_t>& ratios,
+                                 vector<Double_t>& ratioerrors,
                                  int sn
                                  //TString sysname
                                 ){
@@ -718,6 +732,16 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
   ratioerr[2]= ratio[2] * pow( pow(err_num_corr[2]/size_num_corr[2] + pow(err_den[2]/size_den[2] ,2) ,2) ,0.5); //0.005;
   ratioerr[3]= ratio[3] * pow( pow(err_num_corr[3]/size_num_corr[3] + pow(err_den[3]/size_den[3] ,2) ,2) ,0.5); //0.005;
 
+  ratios.push_back(ratio[0]);
+  ratios.push_back(ratio[1]);
+  ratios.push_back(ratio[2]);
+  ratios.push_back(ratio[3]);
+
+  ratioerrors.push_back(ratioerr[0]);
+  ratioerrors.push_back(ratioerr[1]);
+  ratioerrors.push_back(ratioerr[2]);
+  ratioerrors.push_back(ratioerr[3]);
+
   TGraph *gr_ratio_noe = new TGraph(4,mid,ratio);
   TGraphErrors *gr_ratio = new TGraphErrors(4,mid,ratio,miderr,ratioerr);
 
@@ -818,3 +842,295 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
 }
 
 
+
+void plot::drawAllRates(){
+
+  TCanvas* c3 = new TCanvas("c3","c3",900,100,500,500);   
+
+  gStyle->SetOptStat(0);
+  //gPad->SetLogy();
+  gPad->SetTickx();
+  gPad->SetTicky();
+  gStyle->SetLineWidth(3);
+
+  //gr_ratio->SetMarkerColor(2);
+  //gr_ratio->SetLineColor(2);
+  //gr_ratio->SetMarkerStyle(22);
+
+  //TH1F *hs = c2->DrawFrame(0.,0.,1000.,0.5,"");
+  TH1F *hs = c3->DrawFrame(175.,0.,1000.,0.5,"");
+  hs->SetXTitle("photon pT [GeV]");
+  hs->SetYTitle("Fake Ratio"); 
+
+  TText* title = new TText(1,1,"") ;
+  title->SetTextSize(0.07);
+  title->SetTextColor(kBlack);
+  title->SetTextAlign(13);
+  title->SetTextFont(62);
+  title->DrawTextNDC(0.17,0.87,"CMS");
+
+  TText* extra = new TText(1,1,"") ;
+  extra->SetTextSize(0.05);
+  extra->SetTextColor(kBlack);
+  extra->SetTextAlign(13);
+  extra->SetTextFont(52);
+  extra->DrawTextNDC(0.17,0.81,"Preliminary");
+  //xframe->addObject(extra);
+
+  TText* lumi = new TText(1,1,"") ;
+  lumi->SetTextSize(0.05);
+  lumi->SetTextColor(kBlack);
+  lumi->SetTextAlign(31);
+  lumi->SetTextFont(42);
+  lumi->DrawTextNDC(0.9,0.91,"2.1 /fb (13 TeV)");
+  //xframe->addObject(lumi);
+
+  title->DrawTextNDC(0.17,0.87,"CMS");
+  extra->DrawTextNDC(0.17,0.81,"Preliminary");
+  lumi->DrawTextNDC(0.9,0.91,"2.1 /fb (13 TeV)");
+
+  ////////// Draw points first, then lines
+
+  // x
+  Double_t *mid0 = new Double_t[nptbins];
+  Double_t *mid1 = new Double_t[nptbins];
+  Double_t *mid2 = new Double_t[nptbins];
+  Double_t *mid3 = new Double_t[nptbins];
+  Double_t *mid4 = new Double_t[nptbins];
+  Double_t *mid5 = new Double_t[nptbins];
+  Double_t *mid6 = new Double_t[nptbins];
+  Double_t *mid7 = new Double_t[nptbins];
+  for(unsigned int k=0; k<nptbins; ++k){ mid0[k]=bincenterss[0][k]; }
+  for(unsigned int k=0; k<nptbins; ++k){ mid1[k]=bincenterss[1][k]; }
+  for(unsigned int k=0; k<nptbins; ++k){ mid2[k]=bincenterss[2][k]; }
+  for(unsigned int k=0; k<nptbins; ++k){ mid3[k]=bincenterss[3][k]; }
+  for(unsigned int k=0; k<nptbins; ++k){ mid4[k]=bincenterss[4][k]; }
+  for(unsigned int k=0; k<nptbins; ++k){ mid5[k]=bincenterss[5][k]; }
+  for(unsigned int k=0; k<nptbins; ++k){ mid6[k]=bincenterss[6][k]; }
+  for(unsigned int k=0; k<nptbins; ++k){ mid7[k]=bincenterss[7][k]; }
+
+  Double_t *miderr0 = new Double_t[nptbins];
+  Double_t *miderr1 = new Double_t[nptbins];
+  Double_t *miderr2 = new Double_t[nptbins];
+  Double_t *miderr3 = new Double_t[nptbins];
+  Double_t *miderr4 = new Double_t[nptbins];
+  Double_t *miderr5 = new Double_t[nptbins];
+  Double_t *miderr6 = new Double_t[nptbins];
+  Double_t *miderr7 = new Double_t[nptbins];
+  for(unsigned int k=0; k<nptbins; ++k){ miderr0[k]=binerrorss[0][k]; }
+  for(unsigned int k=0; k<nptbins; ++k){ miderr1[k]=binerrorss[1][k]; }
+  for(unsigned int k=0; k<nptbins; ++k){ miderr2[k]=binerrorss[2][k]; }
+  for(unsigned int k=0; k<nptbins; ++k){ miderr3[k]=binerrorss[3][k]; }
+  for(unsigned int k=0; k<nptbins; ++k){ miderr4[k]=binerrorss[4][k]; }
+  for(unsigned int k=0; k<nptbins; ++k){ miderr5[k]=binerrorss[5][k]; }
+  for(unsigned int k=0; k<nptbins; ++k){ miderr6[k]=binerrorss[6][k]; }
+  for(unsigned int k=0; k<nptbins; ++k){ miderr7[k]=binerrorss[7][k]; }
+  
+  // y
+  Double_t *points0 = new Double_t[4];
+  Double_t *points1 = new Double_t[4];
+  Double_t *points2 = new Double_t[4];
+  Double_t *points3 = new Double_t[4];
+  Double_t *points4 = new Double_t[4];
+  Double_t *points5 = new Double_t[4];
+  Double_t *points6 = new Double_t[4];
+  Double_t *points7 = new Double_t[4];
+  for(unsigned int p=0; p<4; ++p){ points0[p]=ratioss[0][p]; }
+  for(unsigned int p=0; p<4; ++p){ points1[p]=ratioss[1][p]; }
+  for(unsigned int p=0; p<4; ++p){ points2[p]=ratioss[2][p]; }
+  for(unsigned int p=0; p<4; ++p){ points3[p]=ratioss[3][p]; }
+  for(unsigned int p=0; p<4; ++p){ points4[p]=ratioss[4][p]; }
+  for(unsigned int p=0; p<4; ++p){ points5[p]=ratioss[5][p]; }
+  for(unsigned int p=0; p<4; ++p){ points6[p]=ratioss[6][p]; }
+  for(unsigned int p=0; p<4; ++p){ points7[p]=ratioss[7][p]; }
+
+  Double_t *pointerrors0 = new Double_t[4];
+  Double_t *pointerrors1 = new Double_t[4];
+  Double_t *pointerrors2 = new Double_t[4];
+  Double_t *pointerrors3 = new Double_t[4];
+  Double_t *pointerrors4 = new Double_t[4];
+  Double_t *pointerrors5 = new Double_t[4];
+  Double_t *pointerrors6 = new Double_t[4];
+  Double_t *pointerrors7 = new Double_t[4];
+  for(unsigned int p=0; p<4; ++p){ pointerrors0[p]=ratioerrorss[0][p]; }
+  for(unsigned int p=0; p<4; ++p){ pointerrors1[p]=ratioerrorss[1][p]; }
+  for(unsigned int p=0; p<4; ++p){ pointerrors2[p]=ratioerrorss[2][p]; }
+  for(unsigned int p=0; p<4; ++p){ pointerrors3[p]=ratioerrorss[3][p]; }
+  for(unsigned int p=0; p<4; ++p){ pointerrors4[p]=ratioerrorss[4][p]; }
+  for(unsigned int p=0; p<4; ++p){ pointerrors5[p]=ratioerrorss[5][p]; }
+  for(unsigned int p=0; p<4; ++p){ pointerrors6[p]=ratioerrorss[6][p]; }
+  for(unsigned int p=0; p<4; ++p){ pointerrors7[p]=ratioerrorss[7][p]; }
+
+  // fill the graphs
+  TGraphErrors *gr_points0 = new TGraphErrors(4,mid0,points0,miderr0,pointerrors0);
+  TGraphErrors *gr_points1 = new TGraphErrors(4,mid1,points1,miderr1,pointerrors1);
+  TGraphErrors *gr_points2 = new TGraphErrors(4,mid2,points2,miderr2,pointerrors2);
+  TGraphErrors *gr_points3 = new TGraphErrors(4,mid3,points3,miderr3,pointerrors3);
+  TGraphErrors *gr_points4 = new TGraphErrors(4,mid4,points4,miderr4,pointerrors4);
+  TGraphErrors *gr_points5 = new TGraphErrors(4,mid5,points5,miderr5,pointerrors5);
+  TGraphErrors *gr_points6 = new TGraphErrors(4,mid6,points6,miderr6,pointerrors6);
+  TGraphErrors *gr_points7 = new TGraphErrors(4,mid7,points7,miderr7,pointerrors7);
+
+  // set colors
+  TColor *color0 = gROOT->GetColor(kBlack);    
+  TColor *color1 = gROOT->GetColor(kRed+1);
+  TColor *color2 = gROOT->GetColor(kYellow-3);
+  TColor *color3 = gROOT->GetColor(kGreen+1);
+  TColor *color4 = gROOT->GetColor(kGreen-9);
+  TColor *color5 = gROOT->GetColor(kAzure+10);
+  TColor *color6 = gROOT->GetColor(kBlue-9);
+  TColor *color7 = gROOT->GetColor(51);
+
+  //Color_t color0 = gROOT->GetColor(kBlack);
+  //Color_t color1 = gROOT->GetColor(kRed+1);
+  //Color_t color2 = gROOT->GetColor(kYellow-3);
+  //Color_t color3 = gROOT->GetColor(kGreen+1);
+  //Color_t color4 = gROOT->GetColor(kGreen-9);
+  //Color_t color5 = gROOT->GetColor(kAzure+10);
+  //Color_t color6 = gROOT->GetColor(kBlue-9);
+  //Color_t color7 = gROOT->GetColor(51);
+
+  gr_points0->SetMarkerColor(kBlack);    //         Color(color0);
+  gr_points1->SetMarkerColor(kRed+1);    //         Color(color1);
+  gr_points2->SetMarkerColor(kYellow-3); //         Color(color2);
+  gr_points3->SetMarkerColor(kGreen+1);  //         Color(color3);
+  gr_points4->SetMarkerColor(kGreen-9);  //         Color(color4);
+  gr_points5->SetMarkerColor(kAzure+10); //         Color(color5);
+  gr_points6->SetMarkerColor(kBlue-9);   //         Color(color6);
+  gr_points7->SetMarkerColor(51);        //         Color(color7);
+
+  gr_points0->SetLineWidth(2); //         Color(color0);
+  gr_points1->SetLineWidth(2); //         Color(color1);
+  gr_points2->SetLineWidth(2); //         Color(color2);
+  gr_points3->SetLineWidth(2); //         Color(color3);
+  gr_points4->SetLineWidth(2); //         Color(color4);
+  gr_points5->SetLineWidth(2); //         Color(color5);
+  gr_points6->SetLineWidth(2); //         Color(color6);
+  gr_points7->SetLineWidth(2); //         Color(color7);
+
+  gr_points0->SetLineColor(kBlack);    //         Color(color0);
+  gr_points1->SetLineColor(kRed+1);    //         Color(color1);
+  gr_points2->SetLineColor(kYellow-3); //         Color(color2);
+  gr_points3->SetLineColor(kGreen+1);  //         Color(color3);
+  gr_points4->SetLineColor(kGreen-9);  //         Color(color4);
+  gr_points5->SetLineColor(kAzure+10); //         Color(color5);
+  gr_points6->SetLineColor(kBlue-9);   //         Color(color6);
+  gr_points7->SetLineColor(51);        //         Color(color7);
+
+//   c_data = 1 
+//   c_qcd =   ROOT.EColor.kRed+1
+//   c_z =   ROOT.EColor.kOrange-3
+//   c_vv =   ROOT.EColor.kYellow-3
+//   c_t =  ROOT.EColor.kGreen+1
+//   c_tb =  ROOT.EColor.kGreen-5
+//   c_ttb = ROOT.EColor.kGreen-9
+//   c_wl =  ROOT.EColor.kAzure+10
+//   c_wc =  ROOT.EColor.kBlue+0
+//   c_wcc = ROOT.EColor.kBlue-9
+//   c_wbb = 51
+
+  gr_points1->Draw("P");
+  gr_points2->Draw("P,same");
+  gr_points3->Draw("P,same");
+  gr_points4->Draw("P,same");
+  gr_points5->Draw("P,same");
+  gr_points6->Draw("P,same");
+  gr_points7->Draw("P,same");
+  gr_points0->Draw("P,same");
+
+  TLegend *leg4 = new TLegend(0.12,0.4,0.88,0.75 );
+  leg4->SetFillColor(kWhite);
+  leg4->AddEntry( gr_points0,"standard: y = "
+   +TString(boost::lexical_cast<string>(boost::format(
+    "(%0.3f +- %0.3f) x + (%0.3f +- %0.3f)")
+    % ms[0] % mes[0] % bs[0] % bes[0])),
+   "L");
+
+  leg4->AddEntry( gr_points1,"sideband Up: y = "
+   +TString(boost::lexical_cast<string>(boost::format(
+    "(%0.3f +- %0.3f) x + (%0.3f +- %0.3f)")
+    % ms[1] % mes[1] % bs[1] % bes[1])),
+   "L");
+
+  leg4->AddEntry( gr_points2,"sideband Down: y = "
+   +TString(boost::lexical_cast<string>(boost::format(
+    "(%0.3f +- %0.3f) x + (%0.3f +- %0.3f)")
+    % ms[2] % mes[2] % bs[2] % bes[2])),
+   "L");
+
+  leg4->AddEntry( gr_points3,"MET Up: y = "
+   +TString(boost::lexical_cast<string>(boost::format(
+    "(%0.3f +- %0.3f) x + (%0.3f +- %0.3f)")
+    % ms[3] % mes[3] % bs[3] % bes[3])),
+   "L");
+
+  leg4->AddEntry( gr_points4,"MET Down: y = "
+   +TString(boost::lexical_cast<string>(boost::format(
+    "(%0.3f +- %0.3f) x + (%0.3f +- %0.3f)")
+    % ms[4] % mes[4] % bs[4] % bes[4])),
+   "L");
+
+  leg4->AddEntry( gr_points5,"binning Up: y = "
+   +TString(boost::lexical_cast<string>(boost::format(
+    "(%0.3f +- %0.3f) x + (%0.3f +- %0.3f)")
+    % ms[5] % mes[5] % bs[5] % bes[5])),
+   "L");
+
+  leg4->AddEntry( gr_points6,"binning Down: y = "
+   +TString(boost::lexical_cast<string>(boost::format(
+    "(%0.3f +- %0.3f) x + (%0.3f +- %0.3f)")
+    % ms[6] % mes[6] % bs[6] % bes[6])),
+   "L");
+
+  leg4->AddEntry( gr_points7,"no #gamma iso: y = "
+   +TString(boost::lexical_cast<string>(boost::format(
+    "(%0.3f +- %0.3f) x + (%0.3f +- %0.3f)")
+    % ms[7] % mes[7] % bs[7] % bes[7])),
+   "L");
+
+  leg4->Draw("same");
+
+  Double_t xlow = 175.;
+  Double_t xhi = 1000.;
+
+  TLine *line0 = new TLine(xlow,xlow*ms[0]+bs[0],xhi,xhi*ms[0]+bs[0]);
+  TLine *line1 = new TLine(xlow,xlow*ms[1]+bs[1],xhi,xhi*ms[1]+bs[1]);
+  TLine *line2 = new TLine(xlow,xlow*ms[2]+bs[2],xhi,xhi*ms[2]+bs[2]);
+  TLine *line3 = new TLine(xlow,xlow*ms[3]+bs[3],xhi,xhi*ms[3]+bs[3]);
+  TLine *line4 = new TLine(xlow,xlow*ms[4]+bs[4],xhi,xhi*ms[4]+bs[4]);
+  TLine *line5 = new TLine(xlow,xlow*ms[5]+bs[5],xhi,xhi*ms[5]+bs[5]);
+  TLine *line6 = new TLine(xlow,xlow*ms[6]+bs[6],xhi,xhi*ms[6]+bs[6]);
+  TLine *line7 = new TLine(xlow,xlow*ms[7]+bs[7],xhi,xhi*ms[7]+bs[7]);
+
+  line0->SetLineColor(kBlack);   
+  line1->SetLineColor(kRed+1);   
+  line2->SetLineColor(kYellow-3);
+  line3->SetLineColor(kGreen+1); 
+  line4->SetLineColor(kGreen-9); 
+  line5->SetLineColor(kAzure+10);
+  line6->SetLineColor(kBlue-9);  
+  line7->SetLineColor(51);       
+
+  line1->Draw();
+  line2->Draw();
+  line3->Draw();
+  line4->Draw();
+  line5->Draw();
+  line6->Draw();
+  line7->Draw();
+  line0->Draw();
+
+  c3->Update();
+  
+  //gr_ratio->Draw("sames,A*");
+
+  c3->SaveAs(outpath+"/Graph_FakeRatios.pdf");
+  //c2->SaveAs(outpath+"/Graph_FakeRatio.C");
+  //c2->SaveAs(outpath+"/Graph_FakeRatio.eps");
+  //c2->SaveAs(wwwpath+"/Graph_FakeRatio.png");
+
+  c3->Clear();
+
+ return;
+
+}
