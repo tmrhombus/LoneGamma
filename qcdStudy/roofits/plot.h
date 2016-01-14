@@ -109,6 +109,8 @@ public :
    int nptbins;
    std::vector<TString> ptbinnames;
 
+   Double_t lower[5];
+
    plot();
    virtual ~plot();
    virtual void Loop();

@@ -29,6 +29,12 @@ void plot::Loop()
  ptbinbounds.push_back(400);
  ptbinbounds.push_back(1000);
 
+ lower[0]=175.0;
+ lower[1]=190.0;
+ lower[2]=250.0;
+ lower[3]=400.0;
+ lower[4]=1000.0;
+
  nptbins = ptbinbounds.size() - 1;
  //std::cout<<"nptbins:  "<<nptbins<<std::endl;
  
@@ -134,44 +140,21 @@ void plot::getFraction(
   TH1D* hqcdfractionSam;
   TH1D* hqcdfraction;
 
-  Double_t lower[5];   
-  //Double_t lower[4];   
-  string shistname;
-  TString histname;
 
   TString datahistname; //data histo
   TString qcdhistname;  //trkflip - > histos will go here
   TString fullhistname; //phojet
 
- for(unsigned int ptb=0; ptb<ptbinnames.size(); ++ptb){
-   histname = ptbinnames[ptb];
-   std::cout<<" histname: "<<histname<<std::endl;
-   log<<boost::format(" %s \n") % histname;
-  //}
-  //ptbinnames.push_back(TString(boost::lexical_cast<string>( boost::format("%ito%i") % ptbinbounds[i] % ptbinbounds[i+1] )));
+  TString binrange;
+  for(unsigned int ptb=0; ptb<ptbinnames.size(); ++ptb){
+   binrange = ptbinnames[ptb];
+   std::cout<<" binrange: "<<binrange<<std::endl;
+   log<<boost::format(" %s \n") % binrange;
   
-//  //read variables from .txt file  
-//  char cxvariable[200];
-//  ifstream infile_xvar;
-//  infile_xvar.open("xvariables.list", ifstream::in );
-//
-//
-////--------Loop over all the histos------------
-//  while(!infile_xvar.eof())
-// {
-//    infile_xvar >>cxvariable;
-//    string xvariable(cxvariable);
-//
-//    if(strncmp(cxvariable,"#",1)==0) // ignore lines starting with #
-//      {	continue; }
-//
-//    shistname = xvariable;
-//    histname  = shistname; 
-
     //set template histo names
-    datahistname = "h_sig_sieieF5x5_"+histname+sysname; //data histos with tigh ID and without sigIetaIeta cut
-    fullhistname = "h_sig_sieieF5x5_"+histname+sysname; //phojet histos with tight ID cut but without sigIetaIeta
-    qcdhistname  = "h_bkg_sieieF5x5_"+histname+sysname; //data histos with very loose id and  sideband of track iso
+    datahistname = "h_sig_sieieF5x5_"+binrange+sysname; //data histos with tigh ID and without sigIetaIeta cut
+    fullhistname = "h_sig_sieieF5x5_"+binrange+sysname; //phojet histos with tight ID cut but without sigIetaIeta
+    qcdhistname  = "h_bkg_sieieF5x5_"+binrange+sysname; //data histos with very loose id and  sideband of track iso
 
 
     //// for closure test
@@ -206,7 +189,6 @@ void plot::getFraction(
     //canvas->Print("hqcd.png");
 
 
-  
   //------Lets try to get with method-2 without MC
   cout<<"-----------------------------------------------------"<<endl;                       
   cout<<"                    Running Sam's Method              "<<endl;
@@ -303,7 +285,7 @@ void plot::getFraction(
   // model.fitTo(data,RooFit::Hesse());
 
   // Do some calculations
-  cout<<histname<<endl;
+  cout<<binrange<<endl;
  
   //get estimates and their errors
   float fakevalue = fakenum.getValV();
@@ -427,7 +409,7 @@ void plot::getFraction(
    ptrange->SetTextColor(kBlack);
    ptrange->SetTextAlign(11);
    ptrange->SetTextFont(42);
-   ptrange->DrawTextNDC(0.13,0.73,"pT Range [GeV]: "+histname);
+   ptrange->DrawTextNDC(0.13,0.73,"pT Range [GeV]: "+binrange);
    xframe->addObject(ptrange);
 
    TText* sflabel = new TText(1,1,"") ;
@@ -449,29 +431,18 @@ void plot::getFraction(
 } //+++++++++ Loop over xvariable.list lines +++++++++++++++++++++++++++
 
 
- // 
-
- //-----another histo with several bins added up
-    lower[0]=175.0;
-    lower[1]=190.0;
-    lower[2]=250.0;
-    //lower[3]=1000.0;
-    lower[3]=400.0;
-    lower[4]=1000.0;
-
-   //int nqfbins=3;
-   int nqfbins=4;
   //PLOT RooFit fractions
-    hqcdfraction = new TH1D("hqcdfraction"," QCD Fraction in Num. (RooFit)",(nqfbins),lower);
-   for(int ibin=1; ibin<=nqfbins+1; ibin++)
+    //hqcdfraction = new TH1D("hqcdfraction"," QCD Fraction in Num. (RooFit)",(nptbins),ptbinbounds);
+    hqcdfraction = new TH1D("hqcdfraction"," QCD Fraction in Num. (RooFit)",(nptbins),lower);
+   for(int ibin=1; ibin<=nptbins+1; ibin++)
     {           
         hqcdfraction->SetBinContent(ibin,fractionQCD[ibin-1]);
         hqcdfraction->SetBinError(ibin,fractionQCDErr[ibin-1]);
     } 
 
   //PLOT Sam fractions   
-    hqcdfractionSam = new TH1D("hqcdfractionSam"," QCD Fraction in Num. (Sam) ",(nqfbins),lower);
-    for(int ibin=1; ibin<=nqfbins+1; ibin++)
+    hqcdfractionSam = new TH1D("hqcdfractionSam"," QCD Fraction in Num. (Sam) ",(nptbins),lower);
+    for(int ibin=1; ibin<=nptbins+1; ibin++)
     {           
         hqcdfractionSam->SetBinContent(ibin,fractionQCDSam[ibin-1]);
         hqcdfractionSam->SetBinError(ibin,fractionQCDErrSam[ibin-1]);
@@ -483,8 +454,6 @@ void plot::getFraction(
   return;
  
 }
-
-
 
 
 //----------------------------------------------
@@ -522,19 +491,19 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
  // TH1D  *hzjetratio;
 
   string shistname;
-  TString histname;
+  TString binrange;
   TString denhistname;
   TString numhistname;
 
   //bins 
-  Double_t lower[4];
-  lower[0]=175.0;
-  lower[1]=190.0;
-  lower[2]=250.0;
-  //lower[3]=1000.0;
-  lower[3]=400.0;
-  lower[4]=1000.0;
-
+//  //Double_t lower[4];
+//  lower[0]=175.0;
+//  lower[1]=190.0;
+//  lower[2]=250.0;
+//  //lower[3]=1000.0;
+//  lower[3]=400.0;
+//  lower[4]=1000.0;
+//
   //Double_t size_num_uncor[3];
   //Double_t err_num_uncor[3];
   //Double_t size_num_corr[3];
@@ -552,27 +521,33 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
   // temp variables to to in vectors above
   double snu,enu,snc,enc,sd,ed;
 
-  //get the variable to be plotted
-  char cxvariable[200];
-  ifstream infile_xvar;
-  infile_xvar.open("xvariables.list", ifstream::in );
-
-//--------Loop over all the histos------------
-  int varcounter = 0;
-  while(!infile_xvar.eof())
- {
-  infile_xvar >>cxvariable;
-  string xvariable(cxvariable);
-
-  if(strncmp(cxvariable,"#",1)==0) // ignore lines starting with #
-    {	continue; }
+  //TString binrange;
+  for(unsigned int ptb=0; ptb<ptbinnames.size(); ++ptb){
+   binrange = ptbinnames[ptb];
+   std::cout<<" binrange: "<<binrange<<std::endl;
+   //log<<boost::format(" %s \n") % binrange;
   
-  shistname = xvariable;
-  histname  = shistname; 
+    //  //get the variable to be plotted
+    //  char cxvariable[200];
+    //  ifstream infile_xvar;
+    //  infile_xvar.open("xvariables.list", ifstream::in );
+    //
+    ////--------Loop over all the histos------------
+    //  int varcounter = 0;
+    //  while(!infile_xvar.eof())
+    // {
+    //  infile_xvar >>cxvariable;
+    //  string xvariable(cxvariable);
+    //
+    //  if(strncmp(cxvariable,"#",1)==0) // ignore lines starting with #
+    //    {	continue; }
+    //  
+    //  shistname = xvariable;
+    //  histname  = shistname; 
 
   //set template histo names
-  numhistname = "h_sig_sieieF5x5_"+histname+sysname; //data histos with tight ID cut but without sigIetaIeta
-  denhistname = "h_den_sieieF5x5_"+histname+sysname; //data histos fail loose ID and pass Vloose ID + || inv iso
+  numhistname = "h_sig_sieieF5x5_"+binrange+sysname; //data histos with tight ID cut but without sigIetaIeta
+  denhistname = "h_den_sieieF5x5_"+binrange+sysname; //data histos fail loose ID and pass Vloose ID + || inv iso
 
   //get the numerator and denominator
   datafile->cd();
@@ -580,33 +555,22 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
   hdatanum = (TH1D*)datafile->Get(numhistname)->Clone();    
   //deno
   hdataden = (TH1D*)datafile->Get(denhistname)->Clone();
-
-  // // check we have the right number of scale factors
-  // cout<<""<<endl;
-  // cout<<" There are "<<corrFactor.size()<<" bins for corrfactors (and should be 3)"<<endl;
-  // cout<<""<<endl;            
-  // 
-  //for(int i=0;i<corrFactor.size(); i++){           
-  // cout<<"  "<<lower[i]<<"-"<<lower[i+1]<<"(GeV): "<<corrFactor[i]<<" +/- "<<corrErr[i]<<endl;
-  //}
-  // cout<<"  "<<lower[varcounter]<<"-"<<lower[varcounter+1]<<
-  //       "(GeV): "<<corrFactor[varcounter]<<" +/- "<<corrErr[varcounter]<<endl;
-
-
+   
   // bin corresponding to medium wp sieie cut
   double sieiebin;
   sieiebin = hdatanum->FindBin(0.0102);
-  size_num_uncor[varcounter] = double(hdatanum->Integral(1,sieiebin));
-  size_num_corr[varcounter] = double((corrFactor[varcounter])) * double(hdatanum->Integral(1,sieiebin));
-  size_den[varcounter] = double(hdataden->Integral(1,sieiebin));
+  size_num_uncor[ptb] = double(hdatanum->Integral(1,sieiebin));
+  //size_num_uncor[varcounter] = double(hdatanum->Integral(1,sieiebin));
+  size_num_corr[ptb] = double((corrFactor[ptb])) * double(hdatanum->Integral(1,sieiebin));
+  size_den[ptb] = double(hdataden->Integral(1,sieiebin));
 
   double tmp_err_num_corr;
-  hdatanum->IntegralAndError(1, sieiebin, err_num_uncor[varcounter]);
+  hdatanum->IntegralAndError(1, sieiebin, err_num_uncor[ptb]);
   hdatanum->IntegralAndError(1, sieiebin, tmp_err_num_corr);
   //err_num_corr[varcounter] = sqrt( err_num_corr[varcounter]*err_num_corr[varcounter] + 
-  err_num_corr[varcounter] = sqrt( tmp_err_num_corr*tmp_err_num_corr + 
-                              corrErr[varcounter]*corrErr[varcounter] );
-  hdataden->IntegralAndError(1, sieiebin, err_den[varcounter]);
+  err_num_corr[ptb] = sqrt( tmp_err_num_corr*tmp_err_num_corr + 
+                              corrErr[ptb]*corrErr[ptb] );
+  hdataden->IntegralAndError(1, sieiebin, err_den[ptb]);
 
 
   //err_num_uncor[varcounter] = double(hdatanum->Integral(1,sieiebin));
@@ -615,8 +579,8 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
 
 
   //  //also add the entries for denonoweight 
-  //  TH1D *hdatanumnw = (TH1D*)datafile->Get(("data_"+shistname+"noweight_num").c_str())->Clone();
-  //  TH1D *hdatadenonw = (TH1D*)datafile->Get(("data_"+shistname+"noweight_deno").c_str())->Clone();
+  //  TH1D *hdatanumnw = (TH1D*)datafile->Get(("data_"+sbinrange+"noweight_num").c_str())->Clone();
+  //  TH1D *hdatadenonw = (TH1D*)datafile->Get(("data_"+sbinrange+"noweight_deno").c_str())->Clone();
   //  
   //  TH1D *hdataratio;
   //  hdataratio = new TH1D("hdataratio","ratio : data",(nbins),lower);
@@ -740,7 +704,7 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
   // hdataratio->Write();
   // hdataratioUncorrected->Write();
   // hdatanumCorrected->Write();  
-  varcounter++;
+  //varcounter++;
   }
   //cout<<size_num_uncor[0]<<" "<<size_num_uncor[1]<<" "<<size_num_uncor[2]<<" "<<size_num_uncor[3]<<endl;
   //cout<<size_num_corr[0]<<" "<<size_num_corr[2]<<" "<<size_num_corr[2]<<" "<<size_num_corr[3]<<endl;
