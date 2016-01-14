@@ -102,6 +102,14 @@ public :
    std::vector<std::vector<Double_t>> qcd_frac;
    std::vector<std::vector<Double_t>> qcd_frac_err;
 
+   std::vector<std::vector<Double_t>> bincenterss;
+   std::vector<std::vector<Double_t>> binerrorss;
+
+   std::vector<Double_t> ms;
+   std::vector<Double_t> bs;
+   std::vector<Double_t> mes;
+   std::vector<Double_t> bes;
+
    ofstream log;
 
    std::vector<TString> sysnames;
@@ -127,11 +135,17 @@ public :
                      TString extraname
                     );
 
+   void  getBinCenters(TFile* datafile, 
+                     std::vector<Double_t>& bcenters,
+                     std::vector<Double_t>& berrors,
+                     TString sysname
+                    );
+
    void  getCorrectedFakeRatio(TFile* datafile,
                                TFile* outfile,
                                std::vector<double> qcdfraction,
                                std::vector<double> qcderr,
-                               TString sysname);
+                               int sn);
 
 };
 #endif

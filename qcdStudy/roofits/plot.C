@@ -62,6 +62,9 @@ void plot::Loop()
  //second method without phojet MC
  std::vector<double> qcdFracSam;
  std::vector<double> qcdFracErrSam;
+
+ std::vector<Double_t> bincenters;
+ std::vector<Double_t> binerrors;
  
  // Do fitting (fill qcdFrac* vectors)
  for(unsigned int sn=0; sn<sysnames.size(); ++sn){
@@ -69,11 +72,13 @@ void plot::Loop()
   qcdFracErr.clear();
   qcdFracSam.clear();
   qcdFracErrSam.clear();
+  bincenters.clear();
+  binerrors.clear();
 
   sysname = sysnames[sn];
 
   std::cout<<endl<<endl<<endl<<"Starting Systematic:   "<<sysname<<std::endl;
-  log<<boost::format("\n\nStarting Systematic:  %s \n") % sysname;
+  //log<<boost::format("\n\nStarting Systematic:  %s \n") % sysname;
 
   getFraction(
    datafile,
@@ -88,8 +93,13 @@ void plot::Loop()
    extraname
   );
 
- qcd_frac.push_back(qcdFrac);
- qcd_frac_err.push_back(qcdFracErr);
+  qcd_frac.push_back(qcdFrac);
+  qcd_frac_err.push_back(qcdFracErr);
+
+  getBinCenters(datafile, bincenters, binerrors, sysname);
+
+  bincenterss.push_back(bincenters);
+  binerrorss.push_back(binerrors);
   
   //Using RooFit result
   getCorrectedFakeRatio(
@@ -97,18 +107,23 @@ void plot::Loop()
    outfile,
    qcdFrac,
    qcdFracErr,
-   sysname
+   sn
+   //sysname
   );
  }
-
 
  for(unsigned int sn=0; sn<sysnames.size(); ++sn){
    log<<boost::format("\nSysname: %s \n") % sysnames[sn];
   for(unsigned int j=0; j<nptbins; ++j){
-    log<<boost::format(" %s") % ptbinnames[j];
-    log<<boost::format(" %0.3d +- %0.3d \n") % qcd_frac[sn][j] % qcd_frac_err[sn][j];
+    log<<boost::format(" %s\n") % ptbinnames[j];
+    log<<boost::format("  QCD Fraction: %0.3d +- %0.3d \n") % qcd_frac[sn][j] % qcd_frac_err[sn][j];
+    log<<boost::format("  Bin Centers: %0.3d +- %0.3d \n") % bincenterss[sn][j] % binerrorss[sn][j];
   }
+    log<<boost::format(" y = (%0.3d +- %0.3d)x + (%0.3d +- %0.3d) \n") % ms[sn] % mes[sn] % bs[sn] % bes[sn] ;
  }
+
+ drawAllRates();
+
  log.close();
 
 }
@@ -140,7 +155,6 @@ void plot::getFraction(
   TH1D* hqcdfractionSam;
   TH1D* hqcdfraction;
 
-
   TString datahistname; //data histo
   TString qcdhistname;  //trkflip - > histos will go here
   TString fullhistname; //phojet
@@ -148,8 +162,7 @@ void plot::getFraction(
   TString binrange;
   for(unsigned int ptb=0; ptb<ptbinnames.size(); ++ptb){
    binrange = ptbinnames[ptb];
-   std::cout<<" binrange: "<<binrange<<std::endl;
-   log<<boost::format(" %s \n") % binrange;
+   //log<<boost::format(" %s \n") % binrange;
   
     //set template histo names
     datahistname = "h_sig_sieieF5x5_"+binrange+sysname; //data histos with tigh ID and without sigIetaIeta cut
@@ -193,7 +206,7 @@ void plot::getFraction(
   cout<<"-----------------------------------------------------"<<endl;                       
   cout<<"                    Running Sam's Method              "<<endl;
   cout<<"-----------------------------------------------------"<<endl;
-  log<<boost::format(" Sam's Method \n");
+  //log<<boost::format(" Sam's Method \n");
 
   cout<<"bin corresponding ot 0.0102 : "<<hdata->FindBin(0.0102)<<endl;
   int myreqbin = (hphojet->FindBin(0.0102))-1;  ////should be 44 for 0.011; 52 if 0.013 not anymore
@@ -210,19 +223,19 @@ void plot::getFraction(
   
   double corr_scfac = ( data_gt - phojet_gt*data_tot  )/( uqcd_gt - phojet_gt*uqcd_tot  ); 
   cout<<" corr_scfac = "<<corr_scfac<<endl;
-  log<<boost::format("  corr_scfac:  %.3f \n") % corr_scfac;
+  //log<<boost::format("  corr_scfac:  %.3f \n") % corr_scfac;
   
   ///scaled QCD
   double sqcd_lt = corr_scfac*uqcd_lt;
   cout<<" sqcd_lt = "<<sqcd_lt<<endl;
-  log<<boost::format("  sqcd_lt:  %.3f \n") % sqcd_lt;
+  //log<<boost::format("  sqcd_lt:  %.3f \n") % sqcd_lt;
 
   double sigperc_lt = (data_lt-sqcd_lt)/data_lt;
   cout<<" sigperc_lt = "<<sigperc_lt<<endl;
-  log<<boost::format("  sigperc_lt:  %.3f \n") % sigperc_lt;
+  //log<<boost::format("  sigperc_lt:  %.3f \n") % sigperc_lt;
   double qcdperc_lt = (sqcd_lt)/data_lt;
   cout<<" qcdperc_lt = "<<qcdperc_lt<<endl;
-  log<<boost::format("  qcdperc_lt:  %.3f \n") % qcdperc_lt;
+  //log<<boost::format("  qcdperc_lt:  %.3f \n") % qcdperc_lt;
 
   //push results into vector
   if(data_lt >0.0){
@@ -428,12 +441,10 @@ void plot::getFraction(
 
   delete xframe;
   
-} //+++++++++ Loop over xvariable.list lines +++++++++++++++++++++++++++
-
+} // Loop over pt bins
 
   //PLOT RooFit fractions
-    //hqcdfraction = new TH1D("hqcdfraction"," QCD Fraction in Num. (RooFit)",(nptbins),ptbinbounds);
-    hqcdfraction = new TH1D("hqcdfraction"," QCD Fraction in Num. (RooFit)",(nptbins),lower);
+   hqcdfraction = new TH1D("hqcdfraction"," QCD Fraction in Num. (RooFit)",(nptbins),lower);
    for(int ibin=1; ibin<=nptbins+1; ibin++)
     {           
         hqcdfraction->SetBinContent(ibin,fractionQCD[ibin-1]);
@@ -456,6 +467,40 @@ void plot::getFraction(
 }
 
 
+void plot::getBinCenters(
+ TFile* datafile,  
+ std::vector<double>& bcenters, //<<---This gets filled here
+ std::vector<double>& berrors,  //<<---This gets filled here
+ TString sysname
+ )
+{
+
+  TH1D* hdata;
+  TString datahistname; //data histo
+  TString binrange;
+  for(unsigned int ptb=0; ptb<ptbinnames.size(); ++ptb){
+   binrange = ptbinnames[ptb];
+ 
+   //set template histo names
+   datahistname = "h_sig_et_"+binrange+sysname; //data histos with tigh ID and without sigIetaIeta cut
+
+   //// for closure test
+   ////get "Data" template = MC (GJ + QCD) 
+   //hdata = (TH1D*)mcfile->Get(datahistname)->Clone();
+   //htemp = (TH1D*)qcdfile->Get(qcdhistname)->Clone();
+   //hdata->Add(htemp);
+
+   //  used and good
+   //get Data template and QCD template from data
+   datafile->cd();
+   hdata = (TH1D*)datafile->Get(datahistname)->Clone();
+
+   bcenters.push_back(hdata->GetMean());
+   //berrors.push_back(hdata->GetMeanError());
+   berrors.push_back(hdata->GetRMS());
+  }
+}
+
 //----------------------------------------------
 //   Get the Corrected Fake Ratio
 //--------------------------------------------
@@ -463,10 +508,13 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
                                  TFile* outfile,   //<---output file
                                  vector<double> corrFactor, //<--input corr. factor = QCD fraction
                                  vector<double> corrErr,    //<--input error
-                                 TString sysname
+                                 int sn
+                                 //TString sysname
                                 ){
 
 
+
+  sysname = sysnames[sn];
 
   //define histo and root files  
   TH1D  *hdataden;
@@ -511,12 +559,12 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
   //Double_t size_den[3];
   //Double_t err_den[3];
   
-  Double_t size_num_uncor[4];
-  Double_t err_num_uncor[4];
-  Double_t size_num_corr[4];
-  Double_t err_num_corr[4];
-  Double_t size_den[4];
-  Double_t err_den[4];
+  Double_t size_num_uncor[nptbins];
+  Double_t err_num_uncor[nptbins];
+  Double_t size_num_corr[nptbins];
+  Double_t err_num_corr[nptbins];
+  Double_t size_den[nptbins];
+  Double_t err_den[nptbins];
   
   // temp variables to to in vectors above
   double snu,enu,snc,enc,sd,ed;
@@ -524,26 +572,6 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
   //TString binrange;
   for(unsigned int ptb=0; ptb<ptbinnames.size(); ++ptb){
    binrange = ptbinnames[ptb];
-   std::cout<<" binrange: "<<binrange<<std::endl;
-   //log<<boost::format(" %s \n") % binrange;
-  
-    //  //get the variable to be plotted
-    //  char cxvariable[200];
-    //  ifstream infile_xvar;
-    //  infile_xvar.open("xvariables.list", ifstream::in );
-    //
-    ////--------Loop over all the histos------------
-    //  int varcounter = 0;
-    //  while(!infile_xvar.eof())
-    // {
-    //  infile_xvar >>cxvariable;
-    //  string xvariable(cxvariable);
-    //
-    //  if(strncmp(cxvariable,"#",1)==0) // ignore lines starting with #
-    //    {	continue; }
-    //  
-    //  shistname = xvariable;
-    //  histname  = shistname; 
 
   //set template histo names
   numhistname = "h_sig_sieieF5x5_"+binrange+sysname; //data histos with tight ID cut but without sigIetaIeta
@@ -560,189 +588,39 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
   double sieiebin;
   sieiebin = hdatanum->FindBin(0.0102);
   size_num_uncor[ptb] = double(hdatanum->Integral(1,sieiebin));
-  //size_num_uncor[varcounter] = double(hdatanum->Integral(1,sieiebin));
   size_num_corr[ptb] = double((corrFactor[ptb])) * double(hdatanum->Integral(1,sieiebin));
   size_den[ptb] = double(hdataden->Integral(1,sieiebin));
 
   double tmp_err_num_corr;
-  hdatanum->IntegralAndError(1, sieiebin, err_num_uncor[ptb]);
+  //hdatanum->IntegralAndError(1, sieiebin, err_num_uncor[ptb]);
   hdatanum->IntegralAndError(1, sieiebin, tmp_err_num_corr);
   //err_num_corr[varcounter] = sqrt( err_num_corr[varcounter]*err_num_corr[varcounter] + 
   err_num_corr[ptb] = sqrt( tmp_err_num_corr*tmp_err_num_corr + 
                               corrErr[ptb]*corrErr[ptb] );
   hdataden->IntegralAndError(1, sieiebin, err_den[ptb]);
 
-
-  //err_num_uncor[varcounter] = double(hdatanum->Integral(1,sieiebin));
-  //err_num_corr[varcounter] = double(corrFactor[varcounter]) * double(hdatanum->Integral(1,sieiebin));
-  //err_den[varcounter] = double(hdataden->Integral(1,sieiebin));
-
-
-  //  //also add the entries for denonoweight 
-  //  TH1D *hdatanumnw = (TH1D*)datafile->Get(("data_"+sbinrange+"noweight_num").c_str())->Clone();
-  //  TH1D *hdatadenonw = (TH1D*)datafile->Get(("data_"+sbinrange+"noweight_deno").c_str())->Clone();
-  //  
-  //  TH1D *hdataratio;
-  //  hdataratio = new TH1D("hdataratio","ratio : data",(nbins),lower);
-
-  //  TH1D *hdataratioUncorrected;
-  //  hdataratioUncorrected = new TH1D("hdataratioUncorrected","ratio : data uncorrected",(nbins),lower);
-
-  //  TH1D *hdatanumCorrected;
-  //  hdatanumCorrected = new TH1D("hdatanumCorrected","Numerator corrected",(nbins),lower);
-
-  //  //initialize the two histo
-  //  for(int ibin=1; ibin<=5; ibin++)
-  //     {   hdataratio->SetBinContent(ibin,0.);
-  //         hdatanumCorrected->SetBinContent(ibin,0.);
-  //      }
-
-
-  // cout<<" "<<endl;
-  // cout<<"corrected fake rate"<<endl;
-  // cout<<" "<<endl;
-
-  //  //Get the final error and fill histo
-  //  for(int ibin=1; ibin<=5; ibin++)
-  //    {
-  //      //cout<<"Numerator without correction = "<<(hdatanum->GetBinContent(ibin))<<" , fraction = "<<corrFactor[ibin-1]<<endl;
-  //      double iinteg_num = hdatanum->GetBinContent(ibin)*(corrFactor[ibin-1]);
-  //      double iinteg_deno = hdatadeno->GetBinContent(ibin);
-  //      
-  //      double eff;
-  //      if(iinteg_deno!=0)eff = iinteg_num/(iinteg_deno);
-  //      if(iinteg_deno==0)eff = 0;
-  //      
-  //      double binerror = 0;
-  //      double integdeno = 0;
-  //      integdeno   = hdatadenonw->GetBinContent(ibin);//for error calcualtion
-  //      double integnum = hdatanumnw->GetBinContent(ibin);
-
-  //      /////NOT BINOMIAL BUT BY PROPAGATION OF ERRORS////////
-  //      double firstterm ;
-  //      double secterm;
-  //      double thterm  ;
-  //      
-  //      if(iinteg_deno!=0)
-  //        {  //when template is there
-  //          firstterm = ( pow(corrFactor[ibin-1],2)/pow(integdeno,2) )*integnum;
-  //          secterm = pow((integnum*corrFactor[ibin-1]),2)/pow(integdeno,3);
-  //          thterm = ( pow(integnum,2)/pow(integdeno,2) )*(pow(corrErr[ibin-1],2));
-  //          binerror = pow(( firstterm + secterm + thterm ),0.5);
-  //         }
-  //      
-  //      if(iinteg_deno==0)binerror = 0;
-  //        //fake ratio
-  //        hdataratio->SetBinContent(ibin,eff);
-  //        hdataratio->SetBinError(ibin,(eff*binerror));
-  //        //Fill corrrected fake ratio	
-  //        hdatanumCorrected->SetBinContent(ibin, iinteg_num);
-  //        hdatanumCorrected->SetBinContent(ibin, (hdatanum->GetBinError(ibin)) ); 
-  //      
-  //        cout<<lower[ibin-1]<<"-"<<lower[ibin]<<" (GeV): Fake Rate = "<<iinteg_num/(hdatadeno->GetBinContent(ibin))<<"+/-"<<binerror<<endl;
-  //      }//get final error and fill histo
-
-
-
-  // cout<<" "<<endl;
-  // cout<<"Uncorrected fake rate:"<<endl;
-  // cout<<" "<<endl;
-
-  //  //Get the final error and fill histo  
-  //  for(int ibin=1; ibin<=5; ibin++)
-  //    {  
-  //      //JUST SET THE correction factor 1.0 so no correction
-  //       corrFactor[ibin-1]=1.0;
-  //       corrErr[ibin-1]=0.0;
-  //      //cout<<"Numerator without correction = "<<(hdatanum->GetBinContent(ibin))<<" , fraction = "<<corrFactor[ibin-1]<<endl;
-  //      double iinteg_num = hdatanum->GetBinContent(ibin)*(corrFactor[ibin-1]);
-  //      double iinteg_deno = hdatadeno->GetBinContent(ibin);                   
-  //       
-  //      double eff;
-  //      if(iinteg_deno!=0)eff = iinteg_num/(iinteg_deno);                      
-  //      if(iinteg_deno==0)eff = 0;
-  //       
-  //      double binerror = 0;
-  //      double integdeno = 0;
-  //      integdeno   = hdatadenonw->GetBinContent(ibin);//for error calcualtion 
-  //      double integnum = hdatanumnw->GetBinContent(ibin);                     
-  //       
-  //      /////NOT BINOMIAL BUT BY PROPAGATION OF ERRORS////////                 
-  //      double firstterm ;
-  //      double secterm;
-  //      double thterm;
-  //       
-  //      if(iinteg_deno!=0)
-  //          {  //when template is there
-  //            firstterm = ( pow(corrFactor[ibin-1],2)/pow(integdeno,2) )*integnum;
-  //            secterm = pow((integnum*corrFactor[ibin-1]),2)/pow(integdeno,3);   
-  //            thterm = ( pow(integnum,2)/pow(integdeno,2) )*(pow(corrErr[ibin-1],2));
-  //            binerror = pow(( firstterm + secterm + thterm ),0.5);              
-  //          }
-  //       
-  //         if(iinteg_deno==0)binerror = 0;
-
-  //        //fake ratio
-  //        hdataratioUncorrected->SetBinContent(ibin,eff);                                 
-  //        hdataratioUncorrected->SetBinError(ibin,binerror);                              
-  //        cout<<lower[ibin-1]<<"-"<<lower[ibin]<<" (GeV): Fake Rate = "<<iinteg_num/(hdatadeno->GetBinContent(ibin))<<"+/-"<<binerror<<endl;    
-  //   
-  //      }//get final error and fill histo           
-
-
-  //  hdataratio->SetLineColor(2);
-  //  hdataratio->SetMarkerStyle(20);
-  //  hdataratio->Draw("E0");
-
-
-  //  hdataratioUncorrected->SetLineColor(2);
-  //  hdataratioUncorrected->SetMarkerStyle(20);
-  //  hdataratioUncorrected->Draw("E0");
-
-
-  // outfile->cd();
-  // hdataratio->Write();
-  // hdataratioUncorrected->Write();
-  // hdatanumCorrected->Write();  
-  //varcounter++;
   }
-  //cout<<size_num_uncor[0]<<" "<<size_num_uncor[1]<<" "<<size_num_uncor[2]<<" "<<size_num_uncor[3]<<endl;
-  //cout<<size_num_corr[0]<<" "<<size_num_corr[2]<<" "<<size_num_corr[2]<<" "<<size_num_corr[3]<<endl;
-  //cout<<size_den[0]<<" "<<size_den[1]<<" "<<size_den[2]<<" "<<size_den[3]<<endl;
-
-  //cout<<err_num_uncor[0]<<" "<<err_num_uncor[1]<<" "<<err_num_uncor[2]<<endl;
-  //cout<<err_num_corr[0]<<" "<<err_num_corr[1]<<" "<<err_num_corr[2]<<endl;
-  //cout<<err_den[0]<<" "<<err_den[1]<<" "<<err_den[2]<<" "<<endl;
 
   TCanvas* canvas = new TCanvas("canvas","canvas",900,100,500,500);   
 
-  //Double_t mid[3];
+  Double_t *mid = new Double_t[nptbins]; //{182.5, 220., 325., 700. };
+  Double_t *miderr = new Double_t[nptbins];
+
+  for(unsigned int k=0; k<nptbins; ++k){
+   mid[k]=bincenterss[sn][k];
+   miderr[k]=binerrorss[sn][k];
+   //std::cout<<bincenterss[sn][k]<<std::endl;
+  }
+
+  ////std::vector<double> mid;
   //mid[0]=182.5;
   //mid[1]=220.;
-  //mid[2]=625.;
-
-  //Double_t miderr[3];
+  //mid[2]=325.;
+  //mid[3]=700.;
   //miderr[0]=mid[0]-lower[0];
   //miderr[1]=mid[1]-lower[1];
   //miderr[2]=mid[2]-lower[2];
-
-  Double_t *mid = new Double_t[4]; //{182.5, 220., 325., 700. };
-  //std::vector<double> mid;
-  mid[0]=182.5;
-  mid[1]=220.;
-  mid[2]=325.;
-  mid[3]=700.;
-
-//  for(int i=0; i<9; i++){std::cout<<"mid:  "<<mid[i]<<std::endl;}
-//  for(int i=0; i<4; i++){std::cout<<"ratio:  "<<ratio[i]<<std::endl;}
-//  for(int i=0; i<4; i++){std::cout<<"miderr:  "<<miderr[i]<<std::endl;}
-//  for(int i=0; i<4; i++){std::cout<<"ratioerr:  "<<ratioerr[i]<<std::endl;}
-
-  Double_t *miderr = new Double_t[4];
-  miderr[0]=mid[0]-lower[0];
-  miderr[1]=mid[1]-lower[1];
-  miderr[2]=mid[2]-lower[2];
-  miderr[3]=mid[3]-lower[3];
+  //miderr[3]=mid[3]-lower[3];
 
   TGraphErrors *gr_num_uncor = new TGraphErrors(4,mid,size_num_uncor,miderr,err_num_uncor);
   TGraphErrors *gr_num_corr  = new TGraphErrors(4,mid,size_num_corr,miderr,err_num_corr);
@@ -816,6 +694,8 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
   //canvas->SaveAs(wwwpath+"/Graph_NuNcD.png");
 
   canvas->Clear();
+
+  // Ratio Plot
   //////////////////////////////////////////////////////////////////////////////
   TCanvas* c2 = new TCanvas("c2","c2",900,100,500,500);   
 
@@ -833,11 +713,12 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
   ratio[3] = size_num_corr[3]/size_den[3];
 
   Double_t *ratioerr = new Double_t[4];
-  ratioerr[0]=0.005;
-  ratioerr[1]=0.005;
-  ratioerr[2]=0.005;
-  ratioerr[3]=0.005;
+  ratioerr[0]= ratio[0] * pow( pow(err_num_corr[0]/size_num_corr[0] + pow(err_den[0]/size_den[0] ,2) ,2) ,0.5); //0.005;
+  ratioerr[1]= ratio[1] * pow( pow(err_num_corr[1]/size_num_corr[1] + pow(err_den[1]/size_den[1] ,2) ,2) ,0.5); //0.005;
+  ratioerr[2]= ratio[2] * pow( pow(err_num_corr[2]/size_num_corr[2] + pow(err_den[2]/size_den[2] ,2) ,2) ,0.5); //0.005;
+  ratioerr[3]= ratio[3] * pow( pow(err_num_corr[3]/size_num_corr[3] + pow(err_den[3]/size_den[3] ,2) ,2) ,0.5); //0.005;
 
+  TGraph *gr_ratio_noe = new TGraph(4,mid,ratio);
   TGraphErrors *gr_ratio = new TGraphErrors(4,mid,ratio,miderr,ratioerr);
 
   //for(int i=0; i<9; i++){std::cout<<"mid:  "<<mid[i]<<std::endl;}
@@ -857,6 +738,7 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
   gr_ratio->SetLineColor(2);
   gr_ratio->SetMarkerStyle(22);
 
+  //TH1F *hs = c2->DrawFrame(0.,0.,1000.,0.5,"");
   TH1F *hs = c2->DrawFrame(175.,0.,1000.,0.5,"");
   hs->SetXTitle("photon pT [GeV]");
   hs->SetYTitle("Fake Ratio"); 
@@ -871,18 +753,54 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
   leg3->Draw("same");
 
   gr_ratio->Draw("P");
-  gr_ratio->Fit("pol1");
+  gr_ratio_noe->Draw("P,sames");
+  gr_ratio_noe->Fit("pol1");
   //gr_ratio->Fit("pol0");
-  TF1 *fit_ratio = gr_ratio->GetFunction("pol1");
-  fit_ratio->SetLineColor(3);
+  TF1 *fit_ratio = gr_ratio_noe->GetFunction("pol1");
+  fit_ratio->SetLineColor(1);
+  fit_ratio->SetLineWidth(3);
   Double_t chi2 = fit_ratio->GetChisquare();
   Double_t p0 = fit_ratio->GetParameter(0);
   Double_t p1 = fit_ratio->GetParameter(1);
   Double_t e0 = fit_ratio->GetParError(0);
   Double_t e1 = fit_ratio->GetParError(1);
+
+  ms.push_back(p1); mes.push_back(e1);
+  bs.push_back(p0); bes.push_back(e0);
+
   fit_ratio->Draw("sames");
 
-  std::cout<<"Fit : "<<chi2<<" "<<p0<<" "<<p1<<std::endl;
+  TLatex tex;
+  tex.SetTextSize(0.07);
+  tex.SetTextColor(kBlack);
+  tex.SetTextAlign(11);
+  tex.SetTextFont(42);
+  tex.DrawLatexNDC(0.45,0.47,"y = m x + b");
+  tex.SetTextSize(0.05);
+  tex.DrawLatexNDC(0.45,0.40,TString(boost::lexical_cast<string>(boost::format("m = %0.3f +- %0.3f") % p1 % e1))); 
+  tex.DrawLatexNDC(0.45,0.35,TString(boost::lexical_cast<string>(boost::format("b = %0.3f +- %0.3f") % p0 % e0))); 
+  tex.DrawLatexNDC(0.45,0.30,"#chi^{2}"+TString(boost::lexical_cast<string>(boost::format(" = %0.5f") % chi2))); 
+
+  //TText* eqlabel = new TText(1,1,"") ;
+  //eqlabel->SetTextSize(0.07);
+  //eqlabel->SetTextColor(kBlack);
+  //eqlabel->SetTextAlign(11);
+  //eqlabel->SetTextFont(42);
+  //eqlabel->DrawTextNDC(0.45,0.47,"y = m x + b");
+  //eqlabel->SetTextSize(0.05);
+  //eqlabel->DrawTextNDC(0.45,0.40,TString(boost::lexical_cast<string>(boost::format("m = %0.3f +- %0.3f") % p1 % e1))); 
+  //eqlabel->DrawTextNDC(0.45,0.35,TString(boost::lexical_cast<string>(boost::format("b = %0.3f +- %0.3f") % p0 % e0))); 
+  //eqlabel->DrawTextNDC(0.45,0.30,"#chi^{2}"+TString(boost::lexical_cast<string>(boost::format(" = %0.3f") % chi2))); 
+  //log<<boost::format("\n\nStarting Systematic:  %s \n") % sysname;
+
+  //std::cout<<"Npoints: "<<gr_ratio->GetN()<<std::endl;
+  //Double_t thex;
+  //Double_t they;
+  //for(unsigned int b=0; b<gr_ratio->GetN(); ++b){
+  // gr_ratio->GetPoint(b,thex,they);
+  // std::cout<<"Point "<<b<<": "<<thex<<" "<<they<<std::endl;
+  //}
+  //std::cout<<"Fit : "<<chi2<<" "<<p0<<" "<<p1<<std::endl;
 
   c2->Update();
   
