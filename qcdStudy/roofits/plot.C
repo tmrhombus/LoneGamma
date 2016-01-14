@@ -4,57 +4,76 @@
 void plot::Loop()
 {
 
-char* submitbase;
-submitbase = getenv ("submitbase");
-char* version;
-version = getenv("version");
-Tsubmitbase = TString(submitbase);
-Tversion = TString(version);
+ char* submitbase;
+ submitbase = getenv ("submitbase");
+ char* version;
+ version = getenv("version");
+ Tsubmitbase = TString(submitbase);
+ Tversion = TString(version);
+ 
+ TString extraname="";
+ //TString extraname="_clossure";
+ 
+ std::vector<TString> sysnames;
+ sysnames.push_back("");
+ sysnames.push_back("_sbUp");
+ sysnames.push_back("_sbDown");
+ sysnames.push_back("_metUp");
+ sysnames.push_back("_metDown");
+ sysnames.push_back("_binUp");
+ sysnames.push_back("_binDown");
+ sysnames.push_back("_noPiso");
+ 
+ inpath = TString(Tsubmitbase+"/"+Tversion+"/analyzed");
+ outpath = TString(Tsubmitbase+"/"+Tversion+"/plots");
+ wwwpath = TString("/afs/hep.wisc.edu/user/tperry/www/MonoPhoton/qcdPlots/"+Tversion);
+ 
+ datafile = new TFile(inpath+"/mrg4bins_DataSP2015D.root","READ");
+ mcfile   = new TFile(inpath+"/mrg4bins_GJets.root","READ");
+ qcdfile  = new TFile(inpath+"/mrg4bins_QCD.root","READ");
+ outfile  = new TFile(outpath+"/Fitted.root","RECREATE");
+ 
+ //Vector with QCD fractions
+ std::vector<double> qcdFrac;
+ std::vector<double> qcdFracErr;
+ 
+ //second method without phojet MC
+ std::vector<double> qcdFracSam;
+ std::vector<double> qcdFracErrSam;
+ 
+ // Do fitting (fill qcdFrac* vectors)
+ for(unsigned int sn=0; sn<sysnames.size(); ++sn){
+  qcdFrac.clear();
+  qcdFracErr.clear();
+  qcdFracSam.clear();
+  qcdFracErrSam.clear();
 
-//TString extraname="";
-TString extraname="_clossure";
+  sysname = sysnames[sn];
 
-inpath = TString(Tsubmitbase+"/"+Tversion+"/analyzed");
-outpath = TString(Tsubmitbase+"/"+Tversion+"/plots");
-wwwpath = TString("/afs/hep.wisc.edu/user/tperry/www/MonoPhoton/qcdPlots/"+Tversion);
+  std::cout<<endl<<endl<<endl<<"xxxx  "<<sysname<<std::endl;
 
-datafile = new TFile(inpath+"/mrg4bins_DataSP2015D.root","READ");
-mcfile   = new TFile(inpath+"/mrg4bins_GJets.root","READ");
-qcdfile   = new TFile(inpath+"/mrg4bins_QCD.root","READ");
-outfile  = new TFile(outpath+"/Fitted.root","RECREATE");
-
-//Vector with QCD fractions
-std::vector<double> qcdFrac;
- qcdFrac.clear();
-std:: vector<double> qcdFracErr;
- qcdFracErr.clear();
-
-//second method without phojet MC
-std::vector<double> qcdFracSam;
- qcdFracSam.clear();
-std:: vector<double> qcdFracErrSam;
- qcdFracErrSam.clear();
-
-// Do fitting (fill qcdFrac* vectors)
-getFraction(
- datafile,
- mcfile,
- qcdfile,
- outfile,
- qcdFrac,
- qcdFracErr,
- qcdFracSam,
- qcdFracErrSam,
- extraname
-);
-
-//Using RooFit result
-getCorrectedFakeRatio(
- datafile,
- outfile,
- qcdFrac,
- qcdFracErr
-);
+  getFraction(
+   datafile,
+   mcfile,
+   qcdfile,
+   outfile,
+   qcdFrac,
+   qcdFracErr,
+   qcdFracSam,
+   qcdFracErrSam,
+   sysname,
+   extraname
+  );
+  
+  //Using RooFit result
+  getCorrectedFakeRatio(
+   datafile,
+   outfile,
+   qcdFrac,
+   qcdFracErr,
+   sysname
+  );
+ }
 
 }
 
@@ -71,6 +90,7 @@ void plot::getFraction(
  std::vector<double>& fractionQCDErr,   //<<---This gets filled here
  std::vector<double>& fractionQCDSam,   //<<---This gets filled here
  std::vector<double>& fractionQCDErrSam,//<<---This gets filled here
+ TString sysname,
  TString extraname
  )
 {
@@ -112,26 +132,25 @@ void plot::getFraction(
     histname  = shistname; 
 
     //set template histo names
-    datahistname = "h_sig_sieieF5x5_"+histname; //data histos with tigh ID and without sigIetaIeta cut
-    fullhistname = "h_sig_sieieF5x5_"+histname; //phojet histos with tight ID cut but without sigIetaIeta
-    qcdhistname  = "h_bkg_sieieF5x5_"+histname; //data histos with very loose id and  sideband of track iso
+    datahistname = "h_sig_sieieF5x5_"+histname+sysname; //data histos with tigh ID and without sigIetaIeta cut
+    fullhistname = "h_sig_sieieF5x5_"+histname+sysname; //phojet histos with tight ID cut but without sigIetaIeta
+    qcdhistname  = "h_bkg_sieieF5x5_"+histname+sysname; //data histos with very loose id and  sideband of track iso
 
 
-    // for closure test
-    //get "Data" template = MC (GJ + QCD) 
-    hdata = (TH1D*)mcfile->Get(datahistname)->Clone();
-    htemp = (TH1D*)qcdfile->Get(qcdhistname)->Clone();
-    hdata->Add(htemp);
-    //QCD histo
-    hqcd  = (TH1D*)qcdfile->Get(qcdhistname)->Clone();
+    //// for closure test
+    ////get "Data" template = MC (GJ + QCD) 
+    //hdata = (TH1D*)mcfile->Get(datahistname)->Clone();
+    //htemp = (TH1D*)qcdfile->Get(qcdhistname)->Clone();
+    //hdata->Add(htemp);
+    ////QCD histo
+    //hqcd  = (TH1D*)qcdfile->Get(qcdhistname)->Clone();
 
     //  used and good
-    ////get Data template and QCD template from data
-    //datafile->cd();
-    //hdata = (TH1D*)datafile->Get(datahistname)->Clone();
-    ////QCD histo
-    //hqcd  = (TH1D*)datafile->Get(qcdhistname)->Clone();
-
+    //get Data template and QCD template from data
+    datafile->cd();
+    hdata = (TH1D*)datafile->Get(datahistname)->Clone();
+    //QCD histo
+    hqcd  = (TH1D*)datafile->Get(qcdhistname)->Clone();
 
     double integ_data = hdata->Integral();
     double integ_qcd = hqcd->Integral();
@@ -140,6 +159,15 @@ void plot::getFraction(
     hphojet  = (TH1D*)mcfile->Get(fullhistname)->Clone();
     double integ_phojet = hphojet->Integral();
     int nbins = hphojet->GetNbinsX();
+
+    //canvas->cd();
+    //hphojet->Draw();
+    //canvas->Print("hphojet.png");
+    //hdata->Draw();
+    //canvas->Print("hdata.png");
+    //hqcd->Draw();
+    //canvas->Print("hqcd.png");
+
 
   
   //------Lets try to get with method-2 without MC
@@ -187,7 +215,7 @@ void plot::getFraction(
   cout<<"                    Running ROOFIT                   "<<endl;
   cout<<"-----------------------------------------------------"<<endl;
 
-  int ndataentries = hdata->GetEntries();
+  int ndataentries = hdata->Integral(); //hdata->GetEntries();
   float sininmin = 0.000; 
   float sininmax = 0.025;
   float sdataentries = hdata->Integral();
@@ -272,7 +300,7 @@ void plot::getFraction(
   fractionQCDErr.push_back(frQCDerr);
 
   TString sndataentries = TString(boost::lexical_cast<string>( boost::format("%.1f") % ndataentries ));
-  TString sdata_lt = TString(boost::lexical_cast<string>( boost::format("%.1f") % sdata_lt ));
+  TString sdata_lt      = TString(boost::lexical_cast<string>( boost::format("%.1f") % sdata_lt ));
   TString sfakevalue    = TString(boost::lexical_cast<string>( boost::format("%.1f") % fakevalue    )); 
   TString sfakeerrormax = TString(boost::lexical_cast<string>( boost::format("%.1f") % fakeerrormax )); 
   TString ssigvalue     = TString(boost::lexical_cast<string>( boost::format("%.1f") % sigvalue     )); 
@@ -369,10 +397,10 @@ void plot::getFraction(
    sflabel->DrawTextNDC(0.450,0.30,sfrQCD+" +- "+sfrQCDerr);
    xframe->addObject(sflabel);
 
-   canvas->SaveAs(outpath+"/Fitted_"+datahistname+extraname+".C");
-   canvas->SaveAs(outpath+"/Fitted_"+datahistname+extraname+".pdf");
-   canvas->SaveAs(outpath+"/Fitted_"+datahistname+extraname+".eps");
-   canvas->SaveAs(wwwpath+"/Fitted_"+datahistname+extraname+".png");
+   canvas->SaveAs(outpath+"/Fitted_"+datahistname+sysname+extraname+".pdf");
+   //canvas->SaveAs(outpath+"/Fitted_"+datahistname+sysname+extraname+".C");
+   //canvas->SaveAs(outpath+"/Fitted_"+datahistname+sysname+extraname+".eps");
+   //canvas->SaveAs(wwwpath+"/Fitted_"+datahistname+extraname+".png");
 
   delete xframe;
   
@@ -423,7 +451,8 @@ void plot::getFraction(
 void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
                                  TFile* outfile,   //<---output file
                                  vector<double> corrFactor, //<--input corr. factor = QCD fraction
-                                 vector<double> corrErr     //<--input error
+                                 vector<double> corrErr,    //<--input error
+                                 TString sysname
                                 ){
 
 
@@ -500,8 +529,8 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
   histname  = shistname; 
 
   //set template histo names
-  numhistname = "h_sig_sieieF5x5_"+histname; //data histos with tight ID cut but without sigIetaIeta
-  denhistname = "h_den_sieieF5x5_"+histname; //data histos fail loose ID and pass Vloose ID + || inv iso
+  numhistname = "h_sig_sieieF5x5_"+histname+sysname; //data histos with tight ID cut but without sigIetaIeta
+  denhistname = "h_den_sieieF5x5_"+histname+sysname; //data histos fail loose ID and pass Vloose ID + || inv iso
 
   //get the numerator and denominator
   datafile->cd();
@@ -671,13 +700,13 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
   // hdatanumCorrected->Write();  
   varcounter++;
   }
-  cout<<size_num_uncor[0]<<" "<<size_num_uncor[1]<<" "<<size_num_uncor[2]<<" "<<size_num_uncor[3]<<endl;
-  cout<<size_num_corr[0]<<" "<<size_num_corr[2]<<" "<<size_num_corr[2]<<" "<<size_num_corr[3]<<endl;
-  cout<<size_den[0]<<" "<<size_den[1]<<" "<<size_den[2]<<" "<<size_den[3]<<endl;
+  //cout<<size_num_uncor[0]<<" "<<size_num_uncor[1]<<" "<<size_num_uncor[2]<<" "<<size_num_uncor[3]<<endl;
+  //cout<<size_num_corr[0]<<" "<<size_num_corr[2]<<" "<<size_num_corr[2]<<" "<<size_num_corr[3]<<endl;
+  //cout<<size_den[0]<<" "<<size_den[1]<<" "<<size_den[2]<<" "<<size_den[3]<<endl;
 
-  cout<<err_num_uncor[0]<<" "<<err_num_uncor[1]<<" "<<err_num_uncor[2]<<endl;
-  cout<<err_num_corr[0]<<" "<<err_num_corr[1]<<" "<<err_num_corr[2]<<endl;
-  cout<<err_den[0]<<" "<<err_den[1]<<" "<<err_den[2]<<" "<<endl;
+  //cout<<err_num_uncor[0]<<" "<<err_num_uncor[1]<<" "<<err_num_uncor[2]<<endl;
+  //cout<<err_num_corr[0]<<" "<<err_num_corr[1]<<" "<<err_num_corr[2]<<endl;
+  //cout<<err_den[0]<<" "<<err_den[1]<<" "<<err_den[2]<<" "<<endl;
 
   TCanvas* canvas = new TCanvas("canvas","canvas",900,100,500,500);   
 
@@ -775,10 +804,10 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
   //gr_num_corr->Draw("P");
   gr_den->Draw("P");
 
-  canvas->SaveAs(outpath+"/Graph_NuNcD.C");
-  canvas->SaveAs(outpath+"/Graph_NuNcD.pdf");
-  canvas->SaveAs(outpath+"/Graph_NuNcD.eps");
-  canvas->SaveAs(wwwpath+"/Graph_NuNcD.png");
+  canvas->SaveAs(outpath+"/Graph_NuNcD"+sysname+".pdf");
+  //canvas->SaveAs(outpath+"/Graph_NuNcD.C");
+  //canvas->SaveAs(outpath+"/Graph_NuNcD.eps");
+  //canvas->SaveAs(wwwpath+"/Graph_NuNcD.png");
 
   canvas->Clear();
   //////////////////////////////////////////////////////////////////////////////
@@ -798,17 +827,17 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
   ratio[3] = size_num_corr[3]/size_den[3];
 
   Double_t *ratioerr = new Double_t[4];
-  ratioerr[0]=0.5;
-  ratioerr[1]=0.5;
-  ratioerr[2]=0.5;
-  ratioerr[3]=0.5;
+  ratioerr[0]=0.005;
+  ratioerr[1]=0.005;
+  ratioerr[2]=0.005;
+  ratioerr[3]=0.005;
 
   TGraphErrors *gr_ratio = new TGraphErrors(4,mid,ratio,miderr,ratioerr);
 
-  for(int i=0; i<9; i++){std::cout<<"mid:  "<<mid[i]<<std::endl;}
-  for(int i=0; i<4; i++){std::cout<<"ratio:  "<<ratio[i]<<std::endl;}
-  for(int i=0; i<4; i++){std::cout<<"miderr:  "<<miderr[i]<<std::endl;}
-  for(int i=0; i<4; i++){std::cout<<"ratioerr:  "<<ratioerr[i]<<std::endl;}
+  //for(int i=0; i<9; i++){std::cout<<"mid:  "<<mid[i]<<std::endl;}
+  //for(int i=0; i<4; i++){std::cout<<"ratio:  "<<ratio[i]<<std::endl;}
+  //for(int i=0; i<4; i++){std::cout<<"miderr:  "<<miderr[i]<<std::endl;}
+  //for(int i=0; i<4; i++){std::cout<<"ratioerr:  "<<ratioerr[i]<<std::endl;}
 
   //gr_ratio->Set(4);
   //TF1 *fit_ratio = new TF1("fit_ratio","[0]+[1]*x", 175, 1000);
@@ -838,24 +867,25 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
   gr_ratio->Draw("P");
   gr_ratio->Fit("pol1");
   //gr_ratio->Fit("pol0");
-  //TF1 *fit_ratio = gr_ratio->GetFunction("pol1");
-  //fit_ratio->SetLineColor(3);
-  //Double_t chi2 = fit_ratio->GetChisquare();
-  //Double_t p0 = fit_ratio->GetParameter(0);
-  //Double_t p1 = fit_ratio->GetParameter(1);
-  //Double_t e0 = fit_ratio->GetParError(0);
-  //Double_t e1 = fit_ratio->GetParError(1);
+  TF1 *fit_ratio = gr_ratio->GetFunction("pol1");
+  fit_ratio->SetLineColor(3);
+  Double_t chi2 = fit_ratio->GetChisquare();
+  Double_t p0 = fit_ratio->GetParameter(0);
+  Double_t p1 = fit_ratio->GetParameter(1);
+  Double_t e0 = fit_ratio->GetParError(0);
+  Double_t e1 = fit_ratio->GetParError(1);
+  fit_ratio->Draw("sames");
 
-  //std::cout<<"Fit : "<<chi2<<" "<<p0<<" "<<p1<<std::endl;
+  std::cout<<"Fit : "<<chi2<<" "<<p0<<" "<<p1<<std::endl;
 
   c2->Update();
   
   //gr_ratio->Draw("sames,A*");
 
-  c2->SaveAs(outpath+"/Graph_FakeRatio.C");
-  c2->SaveAs(outpath+"/Graph_FakeRatio.pdf");
-  c2->SaveAs(outpath+"/Graph_FakeRatio.eps");
-  c2->SaveAs(wwwpath+"/Graph_FakeRatio.png");
+  c2->SaveAs(outpath+"/Graph_FakeRatio"+sysname+".pdf");
+  //c2->SaveAs(outpath+"/Graph_FakeRatio.C");
+  //c2->SaveAs(outpath+"/Graph_FakeRatio.eps");
+  //c2->SaveAs(wwwpath+"/Graph_FakeRatio.png");
 
   c2->Clear();
 

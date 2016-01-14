@@ -92,6 +92,7 @@ public :
    TString wwwpath;
    TString Tsubmitbase;
    TString Tversion;
+   TString sysname;
 
    TFile* datafile;
    TFile* mcfile;
@@ -110,13 +111,15 @@ public :
                      std::vector<double>& fractionQCDErr,
                      std::vector<double>& fractionQCDSam,
                      std::vector<double>& fractionQCDErrSam,
+                     TString sysname,
                      TString extraname
                     );
 
    void  getCorrectedFakeRatio(TFile* datafile,
                                TFile* outfile,
                                std::vector<double> qcdfraction,
-                               std::vector<double> qcderr);
+                               std::vector<double> qcderr,
+                               TString sysname);
 
 };
 #endif
