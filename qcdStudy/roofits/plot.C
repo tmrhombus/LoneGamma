@@ -159,6 +159,14 @@ void plot::getFraction(
 {
 
   TCanvas* canvas = new TCanvas("canvas","canvas",900,100,500,500);   
+  gStyle->SetOptStat(0);
+  //gStyle->SetPadGridX(3);
+  //gStyle->SetPadGridY(3);
+  //gStyle->SetGridStyle(3);
+  gPad->SetLogy();
+  gPad->SetTickx();
+  gPad->SetTicky();
+  gStyle->SetLineWidth(3);
 
   TH1D* hdata;
   TH1D* htemp;
@@ -182,20 +190,20 @@ void plot::getFraction(
     qcdhistname  = "h_bkg_sieieF5x5_"+binrange+sysname; //data histos with very loose id and  sideband of track iso
 
 
-    //// for closure test
-    ////get "Data" template = MC (GJ + QCD) 
-    //hdata = (TH1D*)mcfile->Get(datahistname)->Clone();
-    //htemp = (TH1D*)qcdfile->Get(qcdhistname)->Clone();
-    //hdata->Add(htemp);
-    ////QCD histo
-    //hqcd  = (TH1D*)qcdfile->Get(qcdhistname)->Clone();
-
-    //  used and good
-    //get Data template and QCD template from data
-    datafile->cd();
-    hdata = (TH1D*)datafile->Get(datahistname)->Clone();
+    // for closure test
+    //get "Data" template = MC (GJ + QCD) 
+    hdata = (TH1D*)mcfile->Get(datahistname)->Clone();
+    htemp = (TH1D*)qcdfile->Get(qcdhistname)->Clone();
+    hdata->Add(htemp);
     //QCD histo
-    hqcd  = (TH1D*)datafile->Get(qcdhistname)->Clone();
+    hqcd  = (TH1D*)qcdfile->Get(qcdhistname)->Clone();
+
+    // //  used and good
+    // //get Data template and QCD template from data
+    // datafile->cd();
+    // hdata = (TH1D*)datafile->Get(datahistname)->Clone();
+    // //QCD histo
+    // hqcd  = (TH1D*)datafile->Get(qcdhistname)->Clone();
 
     double integ_data = hdata->Integral();
     double integ_qcd = hqcd->Integral();
@@ -205,13 +213,13 @@ void plot::getFraction(
     double integ_phojet = hphojet->Integral();
     int nbins = hphojet->GetNbinsX();
 
-    //canvas->cd();
-    //hphojet->Draw();
-    //canvas->Print("hphojet.png");
-    //hdata->Draw();
-    //canvas->Print("hdata.png");
-    //hqcd->Draw();
-    //canvas->Print("hqcd.png");
+    canvas->cd();
+    hphojet->Draw();
+    canvas->Print(outpath+"/hphojet"+binrange+sysname+".png");
+    hdata->Draw();
+    canvas->Print(outpath+"/hdata"+binrange+sysname+".png");
+    hqcd->Draw();
+    canvas->Print(outpath+"/hqcd"+binrange+sysname+".png");
 
 
   //------Lets try to get with method-2 without MC
@@ -443,7 +451,7 @@ void plot::getFraction(
    sflabel->SetTextAlign(11);
    sflabel->SetTextFont(42);
    sflabel->DrawTextNDC(0.450,0.45,"B/(S+B)= ");
-   sflabel->DrawTextNDC(0.450,0.30,sfrQCD+" +- "+sfrQCDerr);
+   sflabel->DrawTextNDC(0.450,0.38,sfrQCD+" +- "+sfrQCDerr);
    xframe->addObject(sflabel);
 
    canvas->SaveAs(outpath+"/Fitted_"+datahistname+sysname+extraname+".pdf");
@@ -692,14 +700,14 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
 
   TLegend *leg2 = new TLegend(0.55,0.6,0.88,0.88 );
   leg2->SetFillColor(kWhite);
-  leg2->AddEntry( gr_num_uncor,"Numerator", "L");
-  //leg2->AddEntry( gr_num_uncor,"Numerator (uncorrected)", "L");
-  //leg2->AddEntry( gr_num_corr,"Numerator (corrected)", "L");
+  //leg2->AddEntry( gr_num_uncor,"Numerator", "L");
+  leg2->AddEntry( gr_num_uncor,"Numerator (uncorrected)", "L");
+  leg2->AddEntry( gr_num_corr,"Numerator (corrected)", "L");
   leg2->AddEntry( gr_den,"Denominator", "L");
   leg2->Draw("same");
 
   gr_num_uncor->Draw("P");
-  //gr_num_corr->Draw("P");
+  gr_num_corr->Draw("P"); //
   gr_den->Draw("P");
 
   canvas->SaveAs(outpath+"/Graph_NuNcD"+sysname+".pdf");
@@ -801,7 +809,7 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
   tex.SetTextFont(42);
   tex.DrawLatexNDC(0.45,0.47,"y = m x + b");
   tex.SetTextSize(0.05);
-  tex.DrawLatexNDC(0.45,0.40,TString(boost::lexical_cast<string>(boost::format("m = %0.3f +- %0.3f") % p1 % e1))); 
+  tex.DrawLatexNDC(0.35,0.40,TString(boost::lexical_cast<string>(boost::format("m = %0.5f +- %0.5f") % p1 % e1))); 
   tex.DrawLatexNDC(0.45,0.35,TString(boost::lexical_cast<string>(boost::format("b = %0.3f +- %0.3f") % p0 % e0))); 
   tex.DrawLatexNDC(0.45,0.30,"#chi^{2}"+TString(boost::lexical_cast<string>(boost::format(" = %0.5f") % chi2))); 
 
@@ -857,8 +865,14 @@ void plot::drawAllRates(){
   //gr_ratio->SetLineColor(2);
   //gr_ratio->SetMarkerStyle(22);
 
+  double xmax;
+  xmax = 600.;
+
+  Double_t xlow = 175.;
+  Double_t xhi = 600.;
   //TH1F *hs = c2->DrawFrame(0.,0.,1000.,0.5,"");
-  TH1F *hs = c3->DrawFrame(175.,0.,1000.,0.5,"");
+  //TH1F *hs = c3->DrawFrame(175.,0.,1000.,0.5,"");
+  TH1F *hs = c3->DrawFrame(xlow,0.,xhi,0.5,"");
   hs->SetXTitle("photon pT [GeV]");
   hs->SetYTitle("Fake Ratio"); 
 
@@ -1042,56 +1056,53 @@ void plot::drawAllRates(){
   leg4->SetFillColor(kWhite);
   leg4->AddEntry( gr_points0,"standard: y = "
    +TString(boost::lexical_cast<string>(boost::format(
-    "(%0.3f +- %0.3f) x + (%0.3f +- %0.3f)")
+    "(%0.5f +- %0.5f) x + (%0.3f +- %0.3f)")
     % ms[0] % mes[0] % bs[0] % bes[0])),
    "L");
 
   leg4->AddEntry( gr_points1,"sideband Up: y = "
    +TString(boost::lexical_cast<string>(boost::format(
-    "(%0.3f +- %0.3f) x + (%0.3f +- %0.3f)")
+    "(%0.5f +- %0.5f) x + (%0.3f +- %0.3f)")
     % ms[1] % mes[1] % bs[1] % bes[1])),
    "L");
 
   leg4->AddEntry( gr_points2,"sideband Down: y = "
    +TString(boost::lexical_cast<string>(boost::format(
-    "(%0.3f +- %0.3f) x + (%0.3f +- %0.3f)")
+    "(%0.5f +- %0.5f) x + (%0.3f +- %0.3f)")
     % ms[2] % mes[2] % bs[2] % bes[2])),
    "L");
 
   leg4->AddEntry( gr_points3,"MET Up: y = "
    +TString(boost::lexical_cast<string>(boost::format(
-    "(%0.3f +- %0.3f) x + (%0.3f +- %0.3f)")
+    "(%0.5f +- %0.5f) x + (%0.3f +- %0.3f)")
     % ms[3] % mes[3] % bs[3] % bes[3])),
    "L");
 
   leg4->AddEntry( gr_points4,"MET Down: y = "
    +TString(boost::lexical_cast<string>(boost::format(
-    "(%0.3f +- %0.3f) x + (%0.3f +- %0.3f)")
+    "(%0.5f +- %0.5f) x + (%0.3f +- %0.3f)")
     % ms[4] % mes[4] % bs[4] % bes[4])),
    "L");
 
   leg4->AddEntry( gr_points5,"binning Up: y = "
    +TString(boost::lexical_cast<string>(boost::format(
-    "(%0.3f +- %0.3f) x + (%0.3f +- %0.3f)")
+    "(%0.5f +- %0.5f) x + (%0.3f +- %0.3f)")
     % ms[5] % mes[5] % bs[5] % bes[5])),
    "L");
 
   leg4->AddEntry( gr_points6,"binning Down: y = "
    +TString(boost::lexical_cast<string>(boost::format(
-    "(%0.3f +- %0.3f) x + (%0.3f +- %0.3f)")
+    "(%0.5f +- %0.5f) x + (%0.3f +- %0.3f)")
     % ms[6] % mes[6] % bs[6] % bes[6])),
    "L");
 
   leg4->AddEntry( gr_points7,"no #gamma iso: y = "
    +TString(boost::lexical_cast<string>(boost::format(
-    "(%0.3f +- %0.3f) x + (%0.3f +- %0.3f)")
+    "(%0.5f +- %0.5f) x + (%0.3f +- %0.3f)")
     % ms[7] % mes[7] % bs[7] % bes[7])),
    "L");
 
   leg4->Draw("same");
-
-  Double_t xlow = 175.;
-  Double_t xhi = 1000.;
 
   TLine *line0 = new TLine(xlow,xlow*ms[0]+bs[0],xhi,xhi*ms[0]+bs[0]);
   TLine *line1 = new TLine(xlow,xlow*ms[1]+bs[1],xhi,xhi*ms[1]+bs[1]);
