@@ -146,6 +146,7 @@ void postAnalyzer_QCD::Loop(TString outfilename, Bool_t isMC, Double_t weight)
 std::vector<int> postAnalyzer_QCD::pcPassSel(int sel, int sys, double phoPtLo, double phoPtHi, double phoEtaMax){
   std::vector<int> tmpCand;
   tmpCand.clear();
+  bool noncoll;
   bool passKinematics;
   bool passMET;
 
@@ -167,6 +168,10 @@ std::vector<int> postAnalyzer_QCD::pcPassSel(int sel, int sys, double phoPtLo, d
     {
      // from https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedPhotonIdentificationRun2#SPRING15_selections_25_ns
      //passCutSieie = ((*phoSigmaIEtaIEtaFull5x5)[p]  <  0.0102 );  // don't need for us
+
+     // non collision backgrounds
+     //bool noncoll = fabs((*phoseedTimeFull5x5)[p]) < 3. && (*phomipTotEnergy)[p] < 6.3 && (*phoSigmaIEtaIEtaFull5x5)[p] > 0.001 && (*phoSigmaIPhiIPhiFull5x5)[p] > 0.001;
+     noncoll = (*phoSigmaIEtaIEtaFull5x5)[p] > 0.001 && (*phoSigmaIPhiIPhiFull5x5)[p] > 0.001;
 
      passKinematics = (
                        ( (*phoEt)[p] > phoPtLo  ) &&
@@ -236,7 +241,7 @@ std::vector<int> postAnalyzer_QCD::pcPassSel(int sel, int sys, double phoPtLo, d
      else if(sel==2){ // denominator
       passPhotonID = passMET && passHoEPSeed && !passLooseIso && passVLooseIso;
      }
-     if(passPhotonID && passKinematics){
+     if(noncoll && passPhotonID && passKinematics){
       // std::cout<<" Found a photon, pfMET="<<pfMET<<" pT="<<phoEt->at(p)<<" sel: "<<sel<<" sys: "<<sys<<std::endl;
       // std::cout<<"  CHiso:  "<<TMath::Max( ( (*phoPFChIso)[p] - rho*EAcharged((*phoSCEta)[p]) ), 0.0)<<std::endl;
        tmpCand.push_back(p);
