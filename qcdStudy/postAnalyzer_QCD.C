@@ -52,9 +52,9 @@ void postAnalyzer_QCD::Loop(TString outfilename, Bool_t isMC, Double_t weight)
    int lastptbin = ptbinnames.size()-1;
    int lastsysbin = sysbinnames.size();
    for(unsigned int sysb=0; sysb<lastsysbin; ++sysb){
-    sigPCvint[lastptbin][sysb] = pcPassSel(0,sysb); // passes signal selection (no sieie cut)
-    bkgPCvint[lastptbin][sysb] = pcPassSel(1,sysb); // passes background selection (no sieie cut)
-    denPCvint[lastptbin][sysb] = pcPassSel(2,sysb); // passes denominator selection (no sieie cut)
+    sigPCvint[lastptbin][sysb] = pcPassSel(0,sysb,isMC); // passes signal selection (no sieie cut)
+    bkgPCvint[lastptbin][sysb] = pcPassSel(1,sysb,isMC); // passes background selection (no sieie cut)
+    denPCvint[lastptbin][sysb] = pcPassSel(2,sysb,isMC); // passes denominator selection (no sieie cut)
    }
 
 // fill histograms
@@ -143,7 +143,7 @@ void postAnalyzer_QCD::Loop(TString outfilename, Bool_t isMC, Double_t weight)
 
 //   pcPassSel photons passing selections: ( num_sig(0), num_bkg(1), den(2) )
  // systnames   "" "_sbUP" "_sbDown" "_metUP" "_metDown" "_binUP" "_binDown" "_noPiso"
-std::vector<int> postAnalyzer_QCD::pcPassSel(int sel, int sys, double phoPtLo, double phoPtHi, double phoEtaMax){
+std::vector<int> postAnalyzer_QCD::pcPassSel(int sel, int sys, double phoPtLo, double phoPtHi, double phoEtaMax, Bool_t isMC){
   std::vector<int> tmpCand;
   tmpCand.clear();
   bool noncoll;
@@ -171,7 +171,8 @@ std::vector<int> postAnalyzer_QCD::pcPassSel(int sel, int sys, double phoPtLo, d
 
      // non collision backgrounds
      //bool noncoll = fabs((*phoseedTimeFull5x5)[p]) < 3. && (*phomipTotEnergy)[p] < 6.3 && (*phoSigmaIEtaIEtaFull5x5)[p] > 0.001 && (*phoSigmaIPhiIPhiFull5x5)[p] > 0.001;
-     noncoll = (*phoSigmaIEtaIEtaFull5x5)[p] > 0.001 && (*phoSigmaIPhiIPhiFull5x5)[p] > 0.001;
+     noncoll = kTRUE;
+     if(!isMC){noncoll = fabs((*phoseedTimeFull5x5)[p]) < 3. && (*phomipTotEnergy)[p] < 6.3 && (*phoSigmaIEtaIEtaFull5x5)[p] > 0.001 && (*phoSigmaIPhiIPhiFull5x5)[p] > 0.001;}
 
      passKinematics = (
                        ( (*phoEt)[p] > phoPtLo  ) &&

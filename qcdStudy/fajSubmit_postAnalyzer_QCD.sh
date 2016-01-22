@@ -2,8 +2,8 @@
 
 #voms-proxy-init --voms cms --valid 100:00
 
-domc=true
-dodata=false
+domc=false
+dodata=true
 dosubmit=true
 
 START=$(date +%s);
@@ -118,16 +118,18 @@ then
   
   printf " making list of files\n"
 
-  find /hdfs/store/user/jjbuch/SinglePhoton/crab_ggNtuplizer_spring15_SinglePhoton_Run2015D_PromptReco_v3_try5/151212_080518/0000/*root > \
-   ${submitbase}/${version}/lists/hdfslist_${data_samplename}.txt
-  find /hdfs/store/user/jjbuch/SinglePhoton/crab_ggNtuplizer_spring15_SinglePhoton_Run2015D_PromptReco_v4_try5/151212_080439/0000/*root >> \
-   ${submitbase}/${version}/lists/hdfslist_${data_samplename}.txt
-
-  # format as xrootd
-  cp ${submitbase}/${version}/lists/hdfslist_${data_samplename}.txt \
-     ${submitbase}/${version}/lists/xrdlist_${data_samplename}.txt 
-  xrdlist="${submitbase}/${version}/lists/xrdlist_${data_samplename}.txt"
-  sed -i 's@/hdfs/@root://cmsxrootd.hep.wisc.edu//@g' $xrdlist #
+#  #find /hdfs/store/user/jjbuch/SinglePhoton/crab_ggNtuplizer_spring15_SinglePhoton_Run2015D_PromptReco_v3_try5/151212_080518/0000/*root > \
+#  find /hdfs/store/user/gomber/SinglePhoton_Crab_2015D_v3_226fb/SinglePhoton/crab_job_single_photon_13TeV_v3_226fb/160109_082344/0000/*root > \
+#   ${submitbase}/${version}/lists/hdfslist_${data_samplename}.txt
+#  #find /hdfs/store/user/jjbuch/SinglePhoton/crab_ggNtuplizer_spring15_SinglePhoton_Run2015D_PromptReco_v4_try5/151212_080439/0000/*root >> \
+#  find /hdfs/store/user/gomber/SinglePhoton_Crab_2015D_v4_226fb/SinglePhoton/crab_job_single_photon_13TeV_v4_226fb/160109_082133//000*/*root >> \
+#   ${submitbase}/${version}/lists/hdfslist_${data_samplename}.txt
+#
+#  # format as xrootd
+#  cp ${submitbase}/${version}/lists/hdfslist_${data_samplename}.txt \
+#     ${submitbase}/${version}/lists/xrdlist_${data_samplename}.txt 
+#  xrdlist="${submitbase}/${version}/lists/xrdlist_${data_samplename}.txt"
+#  sed -i 's@/hdfs/@root://cmsxrootd.hep.wisc.edu//@g' $xrdlist #
 
   printf "  done making list of files\n"
   printf " making submit template\n"

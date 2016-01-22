@@ -1,2 +1,2 @@
-export version="CPow"
+export version="Ucil"
 export submitbase="${CMSSW_BASE}/src/LoneGamma/qcdStudy"

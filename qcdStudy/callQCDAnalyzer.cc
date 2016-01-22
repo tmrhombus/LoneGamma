@@ -37,12 +37,12 @@ void callQCDAnalyzer(void)
  
  Bool_t isMC=kTRUE;
  TString path = "./test";
- TString outfilename=path+"/QCDs_MC_QCD.root";
+ TString outfilename=path+"/QCDs_MC.root";
  //TString outfilename=path+"/QCDs_Data.root";
  std::cout << "Output File Name: " << outfilename << std::endl;
  
  // get each filename from list and add it to TChain
- TString inputListName=path+"/filenames_MC_QCD_5.txt";
+ TString inputListName=path+"/filenames_MC_5.txt";
  //TString inputListName=path+"/filenames_MC_20.txt";
  //TString inputListName=path+"/filenames_Data2015D_20.txt";
  //TString inputListName=path+"/filenames_Data2015D_short.txt";
