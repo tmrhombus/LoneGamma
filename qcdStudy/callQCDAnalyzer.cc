@@ -15,36 +15,19 @@ void callQCDAnalyzer(void)
  TChain *theChain = new TChain("ggNtuplizer/EventTree"); ;
  theChain->Reset();
  
-// TString infilename="/hdfs/store/user/gomber/SinglePhoton_2015D_1p2fb1_condor/run_data_2015D_74X-005D4D5A-9871-E511-9942-02163E014303.root";
-// theChain->Add(infilename);
-
- // From https://twiki.cern.ch/twiki/bin/viewauth/CMS/SummaryTable1G25ns
- //GJets_HT-40To100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM
- //hdfs/store/user/jjbuch/GJets_HT-40To100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/
- Double_t weight = 20730.; // +- 66 
-// //GJets_HT-100To200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM
-// //hdfs/store/user/jjbuch/GJets_HT-100To200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/
-// Double_t weight = 9226.; // +- 36 
-// //GJets_HT-200To400_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM
-// //hdfs/store/user/jjbuch/GJets_HT-200To400_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/
-// Double_t weight = 2300.; // +- 11
-// //GJets_HT-400To600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM
-// //hdfs/store/user/jjbuch/GJets_HT-400To600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/
-// Double_t weight = 277.4; // +- 1.3
-// //GJets_HT-600ToInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM
-// //hdfs/store/user/jjbuch/GJets_HT-600ToInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/
-// Double_t weight = 93.38; // +- 0.46
+ Double_t lumi=2.26;
+ Double_t nrEvents=10000;
+ Double_t crossSec=40000;
  
  Bool_t isMC=kTRUE;
  TString path = "./test";
- TString outfilename=path+"/QCDs_MC.root";
+ TString outfilename=path+"/QCDs_GJMC.root";
  //TString outfilename=path+"/QCDs_Data.root";
  std::cout << "Output File Name: " << outfilename << std::endl;
  
  // get each filename from list and add it to TChain
- TString inputListName=path+"/filenames_MC_5.txt";
- //TString inputListName=path+"/filenames_MC_20.txt";
- //TString inputListName=path+"/filenames_Data2015D_20.txt";
+ //TString inputListName=path+"/filenames_MC_5.txt";
+ TString inputListName=path+"/filenames_GJMC_10.txt";
  //TString inputListName=path+"/filenames_Data2015D_short.txt";
  //TString inputListName=path+"/filenames_Data2015D_JJBv5.txt";
  std::vector<TString> infilename_dump;
@@ -72,7 +55,7 @@ void callQCDAnalyzer(void)
 
  postAnalyzer_QCD m;
  m.Init(theChain,isMC);
- m.Loop(outfilename,isMC,weight);
+ m.Loop(outfilename,isMC,lumi,nrEvents,crossSec);
 }
 
 #if !defined(__CINT__) && !defined(__ACLIC__)

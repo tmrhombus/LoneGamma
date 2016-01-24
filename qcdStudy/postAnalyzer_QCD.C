@@ -4,7 +4,7 @@
 #include <TStyle.h>
 #include <TCanvas.h>
 
-void postAnalyzer_QCD::Loop(TString outfilename, Bool_t isMC, Double_t weight)
+void postAnalyzer_QCD::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double_t nrEvents, Double_t crossSec)
 {
 
  TStopwatch sw; 
@@ -27,7 +27,7 @@ void postAnalyzer_QCD::Loop(TString outfilename, Bool_t isMC, Double_t weight)
 
   //=1.0 for real data
   event_weight=1.0;
-  if(isMC){ event_weight=weight; }
+  if(isMC){ event_weight=lumi*crossSec/nrEvents; }
   
   // if event passes MonoPhoton triggers
   if( 
@@ -170,9 +170,9 @@ std::vector<int> postAnalyzer_QCD::pcPassSel(int sel, int sys, double phoPtLo, d
      //passCutSieie = ((*phoSigmaIEtaIEtaFull5x5)[p]  <  0.0102 );  // don't need for us
 
      // non collision backgrounds
-     //bool noncoll = fabs((*phoseedTimeFull5x5)[p]) < 3. && (*phomipTotEnergy)[p] < 6.3 && (*phoSigmaIEtaIEtaFull5x5)[p] > 0.001 && (*phoSigmaIPhiIPhiFull5x5)[p] > 0.001;
-     noncoll = kTRUE;
-     if(!isMC){noncoll = fabs((*phoseedTimeFull5x5)[p]) < 3. && (*phomipTotEnergy)[p] < 6.3 && (*phoSigmaIEtaIEtaFull5x5)[p] > 0.001 && (*phoSigmaIPhiIPhiFull5x5)[p] > 0.001;}
+     //noncoll = kTRUE;
+     noncoll = (*phoSigmaIEtaIEtaFull5x5)[p] > 0.001 && (*phoSigmaIPhiIPhiFull5x5)[p] > 0.001; // isMC
+     //if(!isMC){noncoll = fabs((*phoseedTimeFull5x5)[p]) < 3. && (*phomipTotEnergy)[p] < 6.3 && (*phoSigmaIEtaIEtaFull5x5)[p] > 0.001 && (*phoSigmaIPhiIPhiFull5x5)[p] > 0.001;}
 
      passKinematics = (
                        ( (*phoEt)[p] > phoPtLo  ) &&

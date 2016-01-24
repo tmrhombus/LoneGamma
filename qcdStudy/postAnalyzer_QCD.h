@@ -49,6 +49,7 @@ public :
    std::vector<int> denPCvint[7][8];
 
 
+   // For MC
    // Declaration of leaf types
    Int_t           run;
    Long64_t        event;
@@ -197,6 +198,7 @@ public :
    vector<int>     *phoFiredDoubleTrgs;
    vector<float>   *phoIEta;
    vector<float>   *phoIPhi;
+   vector<bool>    *phomipIsHalo;
    vector<unsigned short> *phoIDbit;
    Int_t           nEle;
    vector<int>     *eleCharge;
@@ -853,7 +855,7 @@ public :
 
 
 
-// For Data
+// //For Data
 //   Int_t           run;
 //   Long64_t        event;
 //   Int_t           lumis;
@@ -964,8 +966,18 @@ public :
 //   vector<float>   *phoIDMVA;
 //   vector<int>     *phoFiredSingleTrgs;
 //   vector<int>     *phoFiredDoubleTrgs;
-//   vector<float>   *phoIEta;
-//   vector<float>   *phoIPhi;
+//   vector<int>     *phoIEta;
+//   vector<int>     *phoIPhi;
+//   vector<float>   *phomaxXtalenergyFull5x5;
+//   vector<float>   *phoseedTimeFull5x5;
+//   vector<float>   *phomaxXtalenergy;
+//   vector<float>   *phoseedTime;
+//   vector<float>   *phomipChi2;
+//   vector<float>   *phomipTotEnergy;
+//   vector<float>   *phomipSlope;
+//   vector<float>   *phomipIntercept;
+//   vector<int>     *phomipNhitCone;
+//   vector<bool>    *phomipIsHalo;
 //   vector<unsigned short> *phoIDbit;
 //   Int_t           nEle;
 //   vector<int>     *eleCharge;
@@ -1308,6 +1320,16 @@ public :
 //   TBranch        *b_phoFiredDoubleTrgs;   //!
 //   TBranch        *b_phoIEta;   //!
 //   TBranch        *b_phoIPhi;   //!
+//   TBranch        *b_phomaxXtalenergyFull5x5;   //!
+//   TBranch        *b_phoseedTimeFull5x5;   //!
+//   TBranch        *b_phomaxXtalenergy;   //!
+//   TBranch        *b_phoseedTime;   //!
+//   TBranch        *b_phomipChi2;   //!
+//   TBranch        *b_phomipTotEnergy;   //!
+//   TBranch        *b_phomipSlope;   //!
+//   TBranch        *b_phomipIntercept;   //!
+//   TBranch        *b_phomipNhitCone;   //!
+//   TBranch        *b_phomipIsHalo;   //!
 //   TBranch        *b_phoIDbit;   //!
 //   TBranch        *b_nEle;   //!
 //   TBranch        *b_eleCharge;   //!
@@ -1549,7 +1571,9 @@ public :
    virtual Int_t    GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
    virtual void     Init(TTree *tree, Bool_t isMC);
-   virtual void     Loop(TString outfilename, Bool_t isMC, Double_t weight);
+   virtual void     Loop(TString outfilename, Bool_t isMC,
+                         Double_t lumi, Double_t nrEvents,
+                         Double_t crossSec);
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
    virtual vector<int> pcPassSel(int sel=0, int sys=0, double phoPtLo=75., double phoPtHi=1000., double phoEtaMax=1.442, Bool_t isMC=kTRUE);
@@ -1719,6 +1743,7 @@ void postAnalyzer_QCD::Init(TTree *tree, Bool_t isMC)
     }
    }
 
+   // For MC
    // Set object pointer
    pdf = 0;
    nPU = 0;
@@ -2474,6 +2499,8 @@ void postAnalyzer_QCD::Init(TTree *tree, Bool_t isMC)
    fChain->SetBranchAddress("AK8softdropSubjetFlavour", &AK8softdropSubjetFlavour, &b_AK8softdropSubjetFlavour);
    fChain->SetBranchAddress("AK8softdropSubjetCSV", &AK8softdropSubjetCSV, &b_AK8softdropSubjetCSV);
    Notify();
+
+//     // For Data
 //   // Set object pointer
 //   phoE = 0;
 //   phoEt = 0;
@@ -2549,6 +2576,16 @@ void postAnalyzer_QCD::Init(TTree *tree, Bool_t isMC)
 //   phoFiredDoubleTrgs = 0;
 //   phoIEta = 0;
 //   phoIPhi = 0;
+//   phomaxXtalenergyFull5x5 = 0;
+//   phoseedTimeFull5x5 = 0;
+//   phomaxXtalenergy = 0;
+//   phoseedTime = 0;
+//   phomipChi2 = 0;
+//   phomipTotEnergy = 0;
+//   phomipSlope = 0;
+//   phomipIntercept = 0;
+//   phomipNhitCone = 0;
+//   phomipIsHalo = 0;
 //   phoIDbit = 0;
 //   eleCharge = 0;
 //   eleChargeConsistent = 0;
@@ -2890,6 +2927,16 @@ void postAnalyzer_QCD::Init(TTree *tree, Bool_t isMC)
 //   fChain->SetBranchAddress("phoFiredDoubleTrgs", &phoFiredDoubleTrgs, &b_phoFiredDoubleTrgs);
 //   fChain->SetBranchAddress("phoIEta", &phoIEta, &b_phoIEta);
 //   fChain->SetBranchAddress("phoIPhi", &phoIPhi, &b_phoIPhi);
+//   fChain->SetBranchAddress("phomaxXtalenergyFull5x5", &phomaxXtalenergyFull5x5, &b_phomaxXtalenergyFull5x5);
+//   fChain->SetBranchAddress("phoseedTimeFull5x5", &phoseedTimeFull5x5, &b_phoseedTimeFull5x5);
+//   fChain->SetBranchAddress("phomaxXtalenergy", &phomaxXtalenergy, &b_phomaxXtalenergy);
+//   fChain->SetBranchAddress("phoseedTime", &phoseedTime, &b_phoseedTime);
+//   fChain->SetBranchAddress("phomipChi2", &phomipChi2, &b_phomipChi2);
+//   fChain->SetBranchAddress("phomipTotEnergy", &phomipTotEnergy, &b_phomipTotEnergy);
+//   fChain->SetBranchAddress("phomipSlope", &phomipSlope, &b_phomipSlope);
+//   fChain->SetBranchAddress("phomipIntercept", &phomipIntercept, &b_phomipIntercept);
+//   fChain->SetBranchAddress("phomipNhitCone", &phomipNhitCone, &b_phomipNhitCone);
+//   fChain->SetBranchAddress("phomipIsHalo", &phomipIsHalo, &b_phomipIsHalo);
 //   fChain->SetBranchAddress("phoIDbit", &phoIDbit, &b_phoIDbit);
 //   fChain->SetBranchAddress("nEle", &nEle, &b_nEle);
 //   fChain->SetBranchAddress("eleCharge", &eleCharge, &b_eleCharge);

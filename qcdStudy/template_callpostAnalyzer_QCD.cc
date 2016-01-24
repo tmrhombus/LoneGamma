@@ -8,7 +8,9 @@ void SAMPLENAME_callpostAnalyzer_QCD(void)
  theChain->Reset();
 
  Bool_t isMC = ISMC ;
- Double_t weight = XC;
+ Double_t lumi = LUMI ;
+ Double_t nrEvents = NREVENTS ;
+ Double_t crossSec = CROSSSEC ;
  
  TString outfilename = getenv("OUTPUT");
  std::cout << "Output File Name: " << outfilename << std::endl;
@@ -40,7 +42,7 @@ void SAMPLENAME_callpostAnalyzer_QCD(void)
 
  postAnalyzer_QCD m;
  m.Init(theChain, isMC);
- m.Loop(outfilename,isMC,weight);
+ m.Loop(outfilename,isMC,lumi,nrEvents,crossSec);
 }
 
 #if !defined(__CINT__) && !defined(__ACLIC__)

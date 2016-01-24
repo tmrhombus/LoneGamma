@@ -15,12 +15,20 @@ printf "%s " " -----------------------------------------"
 printf "%s \n" "-----------------------------------------"
 
 for samplename in \
+ "QCD_Pt15to20" \
+ "QCD_Pt20to30" \
+ "QCD_Pt30to50" \
+ "QCD_Pt50to80" \
+ "QCD_Pt80to120" \
+ "QCD_Pt120to170" \
+ "QCD_Pt170to300" \
+ "QCD_Pt300toInf" \
  "GJets_HT40To100" \
  "GJets_HT100To200" \
  "GJets_HT200To400" \
  "GJets_HT400To600" \
  "GJets_HT600ToInf" \
- "SinglePhoton_2015D"
+ "SinglePhoton"
 do
 
  # analyzed
