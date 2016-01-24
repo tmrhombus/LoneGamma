@@ -33,3 +33,7 @@ hadd \
  ${submitbase}/${version}/analyzed/analyzed_GJets_Merged.root \
  ${submitbase}/${version}/analyzed/analyzed_GJets_HT*root
 
+hadd \
+ ${submitbase}/${version}/analyzed/analyzed_QCD_Merged.root \
+ ${submitbase}/${version}/analyzed/analyzed_QCD_Pt*root
+
