@@ -30,10 +30,10 @@ do
 
   python ${submitbase}/scripts/plotqcd.py \
    --version "${version}" \
-   --inpdir "${submitbase}/${version}/analyzed" \
+   --inpdir "${analyzed}" \
    --mc_filename   "mrg4bins_GJets.root" \
-   --data_filename "mrg4bins_DataSP2015D.root" \
-   --outdir "${submitbase}/${version}/plots" \
+   --data_filename "mrg4bins_SinglePhoton.root" \
+   --outdir "${plots}" \
    --out_filename "plotqcd4bins_${var}_${ptrange}" \
    --variable "${var}" \
    --ptrange "${ptrange}" \
