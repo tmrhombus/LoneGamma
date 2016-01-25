@@ -275,6 +275,7 @@ void plot::getFraction(
   int ndataentries = hdata->Integral(); //hdata->GetEntries();
   float sininmin = 0.000; 
   float sininmax = 0.025;
+  float sinincut = 0.0102;
   float sdataentries = hdata->Integral();
     
  //Set some value not zero for roofit 
@@ -290,7 +291,8 @@ void plot::getFraction(
   RooRealVar sinin("sinin","sigieie Title",sininmin,sininmax);
     // why have two ranges here? - one for plotting, one for fitting?
     // does sininmax need to match the range of the input histogram?
-  sinin.setRange("sigrange",0.005,0.0102);
+  sinin.setRange("sigrange",0.0,0.025);
+  //sinin.setRange("sigrange",0.005,0.0102);
                        
   //set histograms pdfs
   RooDataHist faketemplate("faketemplate","fake template",sinin,hqcd);

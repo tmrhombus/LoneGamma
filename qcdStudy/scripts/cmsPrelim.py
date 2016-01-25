@@ -30,7 +30,7 @@ def prelim_noLumi(tsize=0.07):
 def prelim_tdr(lumi=1200,hor=0.17):
  title = 'CMS'
  extra = 'Preliminary'
- lumi  = '%.1f fb^{-1} (13 TeV)' %(lumi/1000.)
+ lumi  = '%.2f fb^{-1} (13 TeV)' %(lumi/1000.)
  tex.SetTextSize(0.07)
  tex.SetTextAlign(13) #left, top 
  tex.DrawLatex(hor,0.89,'#font[61]{%s}'%(title))
