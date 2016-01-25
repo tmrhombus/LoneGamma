@@ -47,12 +47,12 @@ void plot::Loop()
  outpath = TString(Tsubmitbase+"/"+Tversion+"/plots");
  wwwpath = TString("/afs/hep.wisc.edu/user/tperry/www/MonoPhoton/qcdPlots/"+Tversion);
  
- datafile = new TFile(inpath+"/mrg4bins_DataSP2015D.root","READ");
+ datafile = new TFile(inpath+"/mrg4bins_SinglePhoton.root","READ");
  mcfile   = new TFile(inpath+"/mrg4bins_GJets.root","READ");
  qcdfile  = new TFile(inpath+"/mrg4bins_QCD.root","READ");
  outfile  = new TFile(outpath+"/Fitted.root","RECREATE");
 
- //ofstream log;
+ ofstream log;
  log.open (outpath+"/log.txt");
  
  //Vector with QCD fractions
@@ -168,6 +168,9 @@ void plot::getFraction(
   gPad->SetTicky();
   gStyle->SetLineWidth(3);
 
+  ofstream logg;
+  logg.open (outpath+"/logs"+sysname+extraname+".txt");
+
   TH1D* hdata;
   TH1D* htemp;
   TH1D* hqcd;
@@ -182,7 +185,7 @@ void plot::getFraction(
   TString binrange;
   for(unsigned int ptb=0; ptb<ptbinnames.size(); ++ptb){
    binrange = ptbinnames[ptb];
-   //log<<boost::format(" %s \n") % binrange;
+   logg<<boost::format("pT Range:  %s \n\n") % binrange;
   
     //set template histo names
     datahistname = "h_sig_sieieF5x5_"+binrange+sysname; //data histos with tigh ID and without sigIetaIeta cut
@@ -190,20 +193,20 @@ void plot::getFraction(
     qcdhistname  = "h_bkg_sieieF5x5_"+binrange+sysname; //data histos with very loose id and  sideband of track iso
 
 
-    // for closure test
-    //get "Data" template = MC (GJ + QCD) 
-    hdata = (TH1D*)mcfile->Get(datahistname)->Clone();
-    htemp = (TH1D*)qcdfile->Get(qcdhistname)->Clone();
-    hdata->Add(htemp);
-    //QCD histo
-    hqcd  = (TH1D*)qcdfile->Get(qcdhistname)->Clone();
+    //// for closure test
+    ////get "Data" template = MC (GJ + QCD) 
+    //hdata = (TH1D*)mcfile->Get(datahistname)->Clone();
+    //htemp = (TH1D*)qcdfile->Get(qcdhistname)->Clone();
+    //hdata->Add(htemp);
+    ////QCD histo
+    //hqcd  = (TH1D*)qcdfile->Get(qcdhistname)->Clone();
 
-    // //  used and good
-    // //get Data template and QCD template from data
-    // datafile->cd();
-    // hdata = (TH1D*)datafile->Get(datahistname)->Clone();
-    // //QCD histo
-    // hqcd  = (TH1D*)datafile->Get(qcdhistname)->Clone();
+    //  used and good
+    //get Data template and QCD template from data
+    datafile->cd();
+    hdata = (TH1D*)datafile->Get(datahistname)->Clone();
+    //QCD histo
+    hqcd  = (TH1D*)datafile->Get(qcdhistname)->Clone();
 
     double integ_data = hdata->Integral();
     double integ_qcd = hqcd->Integral();
@@ -213,13 +216,13 @@ void plot::getFraction(
     double integ_phojet = hphojet->Integral();
     int nbins = hphojet->GetNbinsX();
 
-    canvas->cd();
-    hphojet->Draw();
-    canvas->Print(outpath+"/hphojet"+binrange+sysname+".png");
-    hdata->Draw();
-    canvas->Print(outpath+"/hdata"+binrange+sysname+".png");
-    hqcd->Draw();
-    canvas->Print(outpath+"/hqcd"+binrange+sysname+".png");
+    //canvas->cd();
+    //hphojet->Draw();
+    //canvas->Print(outpath+"/hphojet"+binrange+sysname+".pdf");
+    //hdata->Draw();
+    //canvas->Print(outpath+"/hdata"+binrange+sysname+".pdf");
+    //hqcd->Draw();
+    //canvas->Print(outpath+"/hqcd"+binrange+sysname+".pdf");
 
 
   //------Lets try to get with method-2 without MC
@@ -240,6 +243,10 @@ void plot::getFraction(
   double uqcd_gt     = hqcd->Integral(myreqbin+1, nbins);
   double uqcd_lt     = hqcd->Integral(1,myreqbin);
   double uqcd_tot    = hqcd->Integral();
+  
+  double usig_gt     = hphojet->Integral(myreqbin+1, nbins);
+  double usig_lt     = hphojet->Integral(1,myreqbin);
+  double usig_tot    = hphojet->Integral();
   
   double corr_scfac = ( data_gt - phojet_gt*data_tot  )/( uqcd_gt - phojet_gt*uqcd_tot  ); 
   cout<<" corr_scfac = "<<corr_scfac<<endl;
@@ -276,41 +283,59 @@ void plot::getFraction(
   float sininmin = 0.000; 
   float sininmax = 0.025;
   float sinincut = 0.0102;
-  float sdataentries = hdata->Integral();
     
  //Set some value not zero for roofit 
   for(int bincount = 1; bincount <= hqcd->GetNbinsX();bincount++){
-   if(hqcd->GetBinContent(bincount) == 0.) hqcd->SetBinContent(bincount,1.e-04);
+   if(hqcd->GetBinContent(bincount) == 0.) hqcd->SetBinContent(bincount,1.e-06);
   }
 
   for(int bincount = 1; bincount <= hphojet->GetNbinsX();bincount++){
-   if(hphojet->GetBinContent(bincount) == 0.) hphojet->SetBinContent(bincount,1.e-04);
+   if(hphojet->GetBinContent(bincount) == 0.) hphojet->SetBinContent(bincount,1.e-06);
   }
-                  
-  //set variable       
+
+  // Variable Being Fit - fit over full range of sinin
   RooRealVar sinin("sinin","sigieie Title",sininmin,sininmax);
-    // why have two ranges here? - one for plotting, one for fitting?
-    // does sininmax need to match the range of the input histogram?
-  sinin.setRange("sigrange",0.0,0.025);
-  //sinin.setRange("sigrange",0.005,0.0102);
-                       
-  //set histograms pdfs
+  sinin.setRange("fullrange",0.0,0.025);
+
+  //set histograms pdfs - to be fit - Signal,QCD
   RooDataHist faketemplate("faketemplate","fake template",sinin,hqcd);
   RooHistPdf fakepdf("fakepdf","test hist fake pdf",sinin,faketemplate);
-                       
+
   RooDataHist realtemplate("realtemplate","real template",sinin,hphojet);
   RooHistPdf realpdf("realpdf","test hist real pdf",sinin,realtemplate);
-                       
-  //set data distribution to be fitted to
-  RooDataHist data("data","data to be fitted to",sinin,hdata);
-                       
-  //variables that will contain real and fake estimates
+
+   //variables that will contain real and fake estimates - can vary between 0-ndataentries
   RooRealVar signum("signum","signum",0,ndataentries);
   RooRealVar fakenum("fakenum","fakenum",0,ndataentries);
+
+  // set data distribution to be fitted to
+  RooDataHist data("data","data to be fitted to",sinin,hdata);
                        
   //set extended pdfs  
-  RooExtendPdf extpdfsig("Signal","extpdfsig",realpdf,signum,"sigrange");
-  RooExtendPdf extpdffake("Background","extpdffake",fakepdf,fakenum,"sigrange");
+   //RooExtendPdf (const char *name, const char *title, const RooAbsPdf &pdf, const RooAbsReal &norm, const char *rangeName=0)
+   ///////////////////////////////////////////////////////////////////////////
+   //  RooExtendPdf is a wrappper around an existing PDF that adds a 
+   //  parameteric extended likelihood term to the PDF, optionally divided by a 
+   //  fractional term from a partial normalization of the PDF:
+   //
+   //  nExpected = N   _or Expected = N / frac 
+   //
+   //  where N is supplied as a RooAbsReal to RooExtendPdf.
+   //  The fractional term is defined as
+   //                          _       _ _   _  _
+   //            Int(cutRegion[x]) pdf(x,y) dx dy 
+   //     frac = ---------------_-------_-_---_--_ 
+   //            Int(normRegion[x]) pdf(x,y) dx dy 
+   //
+   //        _                                                               _
+   //  where x is the set of dependents involved in the selection region and y
+   //  is the set of remaining dependents.
+   //            _
+   //  cutRegion[x] is an limited integration range that is contained in
+   //  the nominal integration range normRegion[x[]
+   //
+  RooExtendPdf extpdfsig("Signal","extpdfsig",realpdf,signum,"fullrange");
+  RooExtendPdf extpdffake("Background","extpdffake",fakepdf,fakenum,"fullrange");
                        
   //composite model pdf
   RooAddPdf model("model","sig + background",RooArgList(extpdfsig,extpdffake));
@@ -319,37 +344,75 @@ void plot::getFraction(
    model.fitTo(data,RooFit::Minos());
   // model.fitTo(data,RooFit::Hesse());
 
+
   // Do some calculations
   cout<<binrange<<endl;
- 
-  //get estimates and their errors
-  float fakevalue = fakenum.getValV();
-  float fakeerrorhi = fakenum.getErrorHi();
-  float fakeerrorlo = fakenum.getErrorLo();
-  float fakeerrormax = max(fabs(fakeerrorhi),fabs(fakeerrorlo));
 
-  cout<<" fakevalue   : "<<fakevalue<<endl;    
-  cout<<" fakeerrorhi : "<<fakeerrorhi<<endl; 
-  cout<<" fakeerrorlo : "<<fakeerrorlo<<endl; 
-  cout<<" fakeerrormax: "<<fakeerrormax<<endl;
-
+  //get estimates and their errors (full range)
+  // qcd fraction
+  Double_t fakevalue = fakenum.getValV();
+  Double_t fakeerrorhi = fakenum.getErrorHi();
+  Double_t fakeerrorlo = fakenum.getErrorLo();
+  Double_t fakeerrormax = max(fabs(fakeerrorhi),fabs(fakeerrorlo));
   //signal fraction                    
-  float sigvalue = signum.getValV();
-  float sigerrorhi = signum.getErrorHi();
-  float sigerrorlo = signum.getErrorLo();
-  float sigerrormax = max(fabs(sigerrorhi),fabs(sigerrorlo));
+  Double_t sigvalue = signum.getValV();
+  Double_t sigerrorhi = signum.getErrorHi();
+  Double_t sigerrorlo = signum.getErrorLo();
+  Double_t sigerrormax = max(fabs(sigerrorhi),fabs(sigerrorlo));
 
-  cout<<" sigvalue   : "<<sigvalue<<endl;    
-  cout<<" sigerrorhi : "<<sigerrorhi<<endl; 
-  cout<<" sigerrorlo : "<<sigerrorlo<<endl; 
-  cout<<" sigerrormax: "<<sigerrormax<<endl;
-                      
-  float frQCD = fakevalue/(sigvalue+fakevalue);
-  float frQCDerr = ( fakevalue/(sigvalue+fakevalue)) *
+  // Find fraction of fake/real pdfs in full/partial range (normalized to 1) 
+  // Define a range named "signal" in sieie from 0 - 0.0102
+  sinin.setRange("signal",0.0,0.0102) ;
+  // create object representing integral over fakepdf
+  RooAbsReal* i_full_fakepdf = fakepdf.createIntegral(sinin,NormSet(sinin),Range("fullrange")) ;
+  RooAbsReal* i_sgnl_fakepdf = fakepdf.createIntegral(sinin,NormSet(sinin),Range("signal")) ;
+  RooAbsReal* i_full_realpdf = realpdf.createIntegral(sinin,NormSet(sinin),Range("fullrange")) ;
+  RooAbsReal* i_sgnl_realpdf = realpdf.createIntegral(sinin,NormSet(sinin),Range("signal")) ;
+
+  cout<<boost::format("i_full_fakepdf->getVal()  %0.3d \n") % i_full_fakepdf->getVal()<<endl;
+  cout<<boost::format("i_sgnl_fakepdf->getVal()  %0.3d \n") % i_sgnl_fakepdf->getVal()<<endl;
+  cout<<boost::format("i_full_realpdf->getVal()  %0.3d \n") % i_full_realpdf->getVal()<<endl;
+  cout<<boost::format("i_sgnl_realpdf->getVal()  %0.3d \n") % i_sgnl_realpdf->getVal()<<endl;
+
+  logg<<" Fitted Fraction of pdf in 0<sieie<0.025  |  0<sieie<0.0102 \n";
+  logg<<boost::format("  QCD  %0.3d | %0.3d \n") % i_full_fakepdf->getVal() % i_sgnl_fakepdf->getVal() ;
+  logg<<boost::format("  PHO  %0.3d | %0.3d \n") % i_full_realpdf->getVal() % i_sgnl_realpdf->getVal() ;
+
+  // fraction of fake/real in 0<sieie<0.025
+  Double_t frac_fakeInSig = i_sgnl_fakepdf->getVal();
+  Double_t frac_realInSig = i_sgnl_realpdf->getVal();
+
+  // number of fake/real in 0<sieie<0.0102
+  Double_t fakeInSig = fakevalue*frac_fakeInSig;
+  Double_t realInSig = sigvalue*frac_realInSig;
+  // error on fake/real in 0<sieie<0.0102
+  Double_t fakeInSig_err = fakeerrormax*frac_fakeInSig;
+  Double_t realInSig_err = sigerrormax*frac_realInSig;
+
+  logg<<" Events in 0<sieie<0.025  |  0<sieie<0.0102 \n";
+  //logg<<boost::format("  Prefit QCD:  %0.5d | %0.5d \n") %uqcd_tot % uqcd_lt;
+  //logg<<boost::format("  Prefit PHO:  %0.5d | %0.5d \n") %usig_tot % usig_lt;
+  //logg<<boost::format(" ---------------------------\n");
+  logg<<boost::format("  QCD :  %0.5d | %0.5d \n") %fakevalue % fakeInSig ;
+  logg<<boost::format("  PHO :  %0.5d | %0.5d \n") %sigvalue  % realInSig ;
+  logg<<boost::format(" ---------------------------\n");
+  logg<<boost::format("  TOT :  %0.5d | %0.5d \n") % (fakevalue+sigvalue)  % (fakeInSig+realInSig) ;
+  logg<<boost::format("  Data:  %0.5d | %0.5d \n\n\n") %data_tot % data_lt;
+
+  float frQCD = fakeInSig/(fakeInSig+realInSig);
+  float frQCDerr = ( fakeInSig/(fakeInSig+realInSig) ) *
                    sqrt(
-                    ( (fakeerrormax/fakevalue)*(fakeerrormax/fakevalue) )
-                    + ( (sigerrormax/sigvalue)*(sigerrormax/sigvalue) )
+                    ( (fakeInSig_err/fakeInSig)*(fakeInSig_err/fakeInSig) )
+                    + ( (realInSig_err/realInSig)*(realInSig_err/realInSig) )
                    ) ;
+
+//  float frQCD = fakevalue/(sigvalue+fakevalue);
+//  float frQCDerr = ( fakevalue/(sigvalue+fakevalue)) *
+//                   sqrt(
+//                    ( (fakeerrormax/fakevalue)*(fakeerrormax/fakevalue) )
+//                    + ( (sigerrormax/sigvalue)*(sigerrormax/sigvalue) )
+//                   ) ;
+
 
   cout<<" frQCD    : "<<frQCD<<endl;
   cout<<" frQCDerr : "<<frQCDerr<<endl;
@@ -358,14 +421,17 @@ void plot::getFraction(
   fractionQCD.push_back(frQCD);
   fractionQCDErr.push_back(frQCDerr);
 
-  TString sndataentries = TString(boost::lexical_cast<string>( boost::format("%.1f") % ndataentries ));
-  TString sdata_lt      = TString(boost::lexical_cast<string>( boost::format("%.1f") % sdata_lt ));
-  TString sfakevalue    = TString(boost::lexical_cast<string>( boost::format("%.1f") % fakevalue    )); 
-  TString sfakeerrormax = TString(boost::lexical_cast<string>( boost::format("%.1f") % fakeerrormax )); 
-  TString ssigvalue     = TString(boost::lexical_cast<string>( boost::format("%.1f") % sigvalue     )); 
-  TString ssigerrormax  = TString(boost::lexical_cast<string>( boost::format("%.1f") % sigerrormax  )); 
-  TString sfitvalue     = TString(boost::lexical_cast<string>( boost::format("%.1f") % sqrt(sigvalue   *sigvalue   +fakevalue   *fakevalue   )  )); 
-  TString sfiterrormax  = TString(boost::lexical_cast<string>( boost::format("%.1f") % sqrt(sigerrormax*sigerrormax+fakeerrormax*fakeerrormax)  )); 
+//  cout<<" a"<<endl;
+//
+  //TString sndataentries = TString(boost::lexical_cast<string>( boost::format("%.1f") % ndataentries ));
+  //TString sdata_lt      = TString(boost::lexical_cast<string>( boost::format("%.1f") % sdata_lt ));
+
+  //TString sfakevalue    = TString(boost::lexical_cast<string>( boost::format("%.1f") % fakevalue    )); 
+  //TString sfakeerrormax = TString(boost::lexical_cast<string>( boost::format("%.1f") % fakeerrormax )); 
+  //TString ssigvalue     = TString(boost::lexical_cast<string>( boost::format("%.1f") % sigvalue     )); 
+  //TString ssigerrormax  = TString(boost::lexical_cast<string>( boost::format("%.1f") % sigerrormax  )); 
+  //TString sfitvalue     = TString(boost::lexical_cast<string>( boost::format("%.1f") % sqrt(sigvalue   *sigvalue   +fakevalue   *fakevalue   )  )); 
+  //TString sfiterrormax  = TString(boost::lexical_cast<string>( boost::format("%.1f") % sqrt(sigerrormax*sigerrormax+fakeerrormax*fakeerrormax)  )); 
 
   TString sfrQCD     = TString(boost::lexical_cast<string>( boost::format("%.3f") % frQCD    )); 
   TString sfrQCDerr  = TString(boost::lexical_cast<string>( boost::format("%.3f") % frQCDerr )); 
@@ -401,7 +467,6 @@ void plot::getFraction(
    //leg1->SetHeader("");
    leg1->AddEntry(xframe->findObject("h_data"), "data", "P");
    //leg1->AddEntry(xframe->findObject("h_data"), "data ("+sdata_lt+")", "P");
-   //leg1->AddEntry(xframe->findObject("h_data"), "data ("+sndataentries+")", "P");
    leg1->AddEntry(xframe->findObject("model_Norm[sinin]"), "Fit", "L");
    //leg1->AddEntry(xframe->findObject("model_Norm[sinin]"), 
    // sfitvalue+" +- "+sfiterrormax, "L");
@@ -436,7 +501,7 @@ void plot::getFraction(
    lumi->SetTextColor(kBlack);
    lumi->SetTextAlign(31);
    lumi->SetTextFont(42);
-   lumi->DrawTextNDC(0.9,0.91,"2.1 /fb (13 TeV)");
+   lumi->DrawTextNDC(0.9,0.91,"2.26 /fb (13 TeV)");
    xframe->addObject(lumi);
 
    TText* ptrange = new TText(1,1,"") ;
@@ -459,7 +524,7 @@ void plot::getFraction(
    canvas->SaveAs(outpath+"/Fitted_"+datahistname+sysname+extraname+".pdf");
    //canvas->SaveAs(outpath+"/Fitted_"+datahistname+sysname+extraname+".C");
    //canvas->SaveAs(outpath+"/Fitted_"+datahistname+sysname+extraname+".eps");
-   //canvas->SaveAs(wwwpath+"/Fitted_"+datahistname+extraname+".png");
+   //canvas->SaveAs(wwwpath+"/Fitted_"+datahistname+extraname+".pdf");
 
   delete xframe;
   
@@ -484,6 +549,7 @@ void plot::getFraction(
   outfile->cd(); 
   hqcdfractionSam->Write();
   hqcdfraction->Write();
+  logg.close();
   return;
  
 }
@@ -540,49 +606,19 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
 
   sysname = sysnames[sn];
 
+  ofstream logg;
+  logg.open (outpath+"/logs"+sysname+".txt", ios::out | ios::app );
+
+
   //define histo and root files  
   TH1D  *hdataden;
- // TH1D  *hfulldeno;
- // TH1D  *hdijetdeno;
- // TH1D  *hphojetdeno;
- // TH1D  *hdiphodeno;
- // TH1D  *hzjetdeno;
-
   TH1D  *hdatanum;
- // TH1D  *hfullnum;
- // TH1D  *hdijetnum;
- // TH1D  *hphojetnum;
- // TH1D  *hdiphonum;
- // TH1D  *hzjetnum;
-
- // TH1D  *hdataratio;
- // TH1D  *hfullratio;
- // TH1D  *hdijetratio;
- // TH1D  *hphojetratio;
- // TH1D  *hdiphoratio;
- // TH1D  *hzjetratio;
 
   string shistname;
   TString binrange;
   TString denhistname;
   TString numhistname;
 
-  //bins 
-//  //Double_t lower[4];
-//  lower[0]=175.0;
-//  lower[1]=190.0;
-//  lower[2]=250.0;
-//  //lower[3]=1000.0;
-//  lower[3]=400.0;
-//  lower[4]=1000.0;
-//
-  //Double_t size_num_uncor[3];
-  //Double_t err_num_uncor[3];
-  //Double_t size_num_corr[3];
-  //Double_t err_num_corr[3];
-  //Double_t size_den[3];
-  //Double_t err_den[3];
-  
   Double_t size_num_uncor[nptbins];
   Double_t err_num_uncor[nptbins];
   Double_t size_num_corr[nptbins];
@@ -596,10 +632,11 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
   //TString binrange;
   for(unsigned int ptb=0; ptb<ptbinnames.size(); ++ptb){
    binrange = ptbinnames[ptb];
+   logg<<boost::format("pT Range:  %s \n\n") % binrange;
 
   //set template histo names
   numhistname = "h_sig_sieieF5x5_"+binrange+sysname; //data histos with tight ID cut but without sigIetaIeta
-  denhistname = "h_den_sieieF5x5_"+binrange+sysname; //data histos fail loose ID and pass Vloose ID + || inv iso
+  denhistname = "h_den_sieieF5x5_"+binrange+sysname; //data histos fail loose ID and pass Vloose ID
 
   //get the numerator and denominator
   datafile->cd();
@@ -610,10 +647,13 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
    
   // bin corresponding to medium wp sieie cut
   double sieiebin;
+  //sieiebin = hdatanum->FindBin(0.025);
   sieiebin = hdatanum->FindBin(0.0102);
   size_num_uncor[ptb] = double(hdatanum->Integral(1,sieiebin));
   size_num_corr[ptb] = double((corrFactor[ptb])) * double(hdatanum->Integral(1,sieiebin));
   size_den[ptb] = double(hdataden->Integral(1,sieiebin));
+  logg<<boost::format(" Sizes:   Num(uncorr): %0.1f  Num(corr): %0.1f  Den: %0.1f \n\n")
+    % size_num_uncor[ptb] % size_num_corr[ptb] % size_den[ptb] ;
 
   double tmp_err_num_corr;
   //hdatanum->IntegralAndError(1, sieiebin, err_num_uncor[ptb]);
@@ -624,6 +664,8 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
   hdataden->IntegralAndError(1, sieiebin, err_den[ptb]);
 
   }
+
+  logg.close();
 
   TCanvas* canvas = new TCanvas("canvas","canvas",900,100,500,500);   
 
@@ -697,7 +739,7 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
   lumi->SetTextColor(kBlack);
   lumi->SetTextAlign(31);
   lumi->SetTextFont(42);
-  lumi->DrawTextNDC(0.9,0.91,"2.1 /fb (13 TeV)");
+  lumi->DrawTextNDC(0.9,0.91,"2.26 /fb (13 TeV)");
   //xframe->addObject(lumi);
 
   TLegend *leg2 = new TLegend(0.55,0.6,0.88,0.88 );
@@ -715,7 +757,7 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
   canvas->SaveAs(outpath+"/Graph_NuNcD"+sysname+".pdf");
   //canvas->SaveAs(outpath+"/Graph_NuNcD.C");
   //canvas->SaveAs(outpath+"/Graph_NuNcD.eps");
-  //canvas->SaveAs(wwwpath+"/Graph_NuNcD.png");
+  //canvas->SaveAs(wwwpath+"/Graph_NuNcD.pdf");
 
   canvas->Clear();
 
@@ -779,7 +821,7 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
 
   title->DrawTextNDC(0.17,0.87,"CMS");
   extra->DrawTextNDC(0.17,0.81,"Preliminary");
-  lumi->DrawTextNDC(0.9,0.91,"2.1 /fb (13 TeV)");
+  lumi->DrawTextNDC(0.9,0.91,"2.26 /fb (13 TeV)");
 
   TLegend *leg3 = new TLegend(0.55,0.6,0.88,0.88 );
   leg3->SetFillColor(kWhite);
@@ -843,7 +885,7 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
   c2->SaveAs(outpath+"/Graph_FakeRatio"+sysname+".pdf");
   //c2->SaveAs(outpath+"/Graph_FakeRatio.C");
   //c2->SaveAs(outpath+"/Graph_FakeRatio.eps");
-  //c2->SaveAs(wwwpath+"/Graph_FakeRatio.png");
+  //c2->SaveAs(wwwpath+"/Graph_FakeRatio.pdf");
 
   c2->Clear();
 
@@ -898,12 +940,12 @@ void plot::drawAllRates(){
   lumi->SetTextColor(kBlack);
   lumi->SetTextAlign(31);
   lumi->SetTextFont(42);
-  lumi->DrawTextNDC(0.9,0.91,"2.1 /fb (13 TeV)");
+  lumi->DrawTextNDC(0.9,0.91,"2.26 /fb (13 TeV)");
   //xframe->addObject(lumi);
 
   title->DrawTextNDC(0.17,0.87,"CMS");
   extra->DrawTextNDC(0.17,0.81,"Preliminary");
-  lumi->DrawTextNDC(0.9,0.91,"2.1 /fb (13 TeV)");
+  lumi->DrawTextNDC(0.9,0.91,"2.26 /fb (13 TeV)");
 
   ////////// Draw points first, then lines
 
@@ -1140,7 +1182,7 @@ void plot::drawAllRates(){
   c3->SaveAs(outpath+"/Graph_FakeRatios.pdf");
   //c2->SaveAs(outpath+"/Graph_FakeRatio.C");
   //c2->SaveAs(outpath+"/Graph_FakeRatio.eps");
-  //c2->SaveAs(wwwpath+"/Graph_FakeRatio.png");
+  //c2->SaveAs(wwwpath+"/Graph_FakeRatio.pdf");
 
   c3->Clear();
 
