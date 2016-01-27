@@ -31,13 +31,13 @@ void postAnalyzer_QCD::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Dou
   
   // if event passes MonoPhoton triggers
   if( 
-   (HLTPho>>7&1 == 1) ||
-   (HLTPho>>8&1 == 1) ||
-   (HLTPho>>9&1 == 1) ||
-   (HLTPho>>10&1 == 1) ||
-   (HLTPho>>11&1 == 1) ||
-   (HLTPho>>12&1 == 1) ||
-   (HLTPho>>22&1 == 1) )
+   ((HLTPho>>7&1) == 1) ||
+   ((HLTPho>>8&1) == 1) ||
+   ((HLTPho>>9&1) == 1) ||
+   ((HLTPho>>10&1) == 1) ||
+   ((HLTPho>>11&1) == 1) ||
+   ((HLTPho>>12&1) == 1) ||
+   ((HLTPho>>22&1) == 1) )
   {   
 
    // sysbinnames = "" "_sbUP" "_sbDown" "_metUP" "_metDown" "_binUP" "_binDown" "_noPiso"
@@ -52,72 +52,79 @@ void postAnalyzer_QCD::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Dou
    int lastptbin = ptbinnames.size()-1;
    int lastsysbin = sysbinnames.size();
    for(unsigned int sysb=0; sysb<lastsysbin; ++sysb){
-    sigPCvint[lastptbin][sysb] = pcPassSel(0,sysb,isMC); // passes signal selection (no sieie cut)
-    bkgPCvint[lastptbin][sysb] = pcPassSel(1,sysb,isMC); // passes background selection (no sieie cut)
-    denPCvint[lastptbin][sysb] = pcPassSel(2,sysb,isMC); // passes denominator selection (no sieie cut)
+    sigPCvint[sysb] = pcPassSel(0,sysb,isMC); // passes signal selection (no sieie cut)
+    bkgPCvint[sysb] = pcPassSel(1,sysb,isMC); // passes background selection (no sieie cut)
+    denPCvint[sysb] = pcPassSel(2,sysb,isMC); // passes denominator selection (no sieie cut)
    }
 
 // fill histograms
    for(unsigned int sysb=0; sysb<lastsysbin; ++sysb){
     // Fill Numerator Signal Histograms
-    if( sigPCvint[lastptbin][sysb].size()>0 ){ // if any photon indexes passed sig selection
-     for(unsigned int ptb=0; ptb<lastptbin-2; ++ptb){ // break into pT bins
-      if(
-         (phoEt->at(sigPCvint[lastptbin][sysb].at(0)) > ptbins[ptb]) &&
-         (phoEt->at(sigPCvint[lastptbin][sysb].at(0)) < ptbins[ptb+1])
-        ){
-       FillSigHistograms(ptb, sysb, sigPCvint[lastptbin][sysb].at(0), event_weight);
+    if( sigPCvint[sysb].size()>0 ){ // if any photon indexes passed sig selection
+     for(unsigned int k=0; k<sigPCvint[sysb].size(); ++k){ // go through each photon passing sel
+      for(unsigned int ptb=0; ptb<lastptbin-2; ++ptb){ // break into pT bins
+       if(
+          (phoEt->at(sigPCvint[sysb].at(k)) > ptbins[ptb]) &&
+          (phoEt->at(sigPCvint[sysb].at(k)) < ptbins[ptb+1])
+         ){
+        FillSigHistograms(ptb, sysb, sigPCvint[sysb].at(k), event_weight);
+       }
       }
+      if(  // do an inclusive pT plot from bins
+         (phoEt->at(sigPCvint[sysb].at(k)) > ptbins[0]) &&
+         (phoEt->at(sigPCvint[sysb].at(k)) < ptbins[inclptbin])
+        ){
+       FillSigHistograms(lastptbin-1, sysb, sigPCvint[sysb].at(k), event_weight);
+      }
+      // and one fully inclusive in pT
+      FillSigHistograms(lastptbin, sysb, sigPCvint[sysb].at(k), event_weight);
      }
-     if(  // do an inclusive pT plot from bins
-        (phoEt->at(sigPCvint[lastptbin][sysb].at(0)) > ptbins[0]) &&
-        (phoEt->at(sigPCvint[lastptbin][sysb].at(0)) < ptbins[inclptbin])
-       ){
-      FillSigHistograms(lastptbin-1, sysb, sigPCvint[lastptbin][sysb].at(0), event_weight);
-     }
-     // and one fully inclusive in pT
-     FillSigHistograms(lastptbin, sysb, sigPCvint[lastptbin][sysb].at(0), event_weight);
     }
 
     // Fill Numerator Background Histograms
-    if( bkgPCvint[lastptbin][sysb].size()>0 ){ // if any photon indexes passed sig selection
-     for(unsigned int ptb=0; ptb<lastptbin-2; ++ptb){ // break into pT bins
-      if(
-         (phoEt->at(bkgPCvint[lastptbin][sysb].at(0)) > ptbins[ptb]) &&
-         (phoEt->at(bkgPCvint[lastptbin][sysb].at(0)) < ptbins[ptb+1])
-        ){
-       FillBkgHistograms(ptb, sysb, bkgPCvint[lastptbin][sysb].at(0), event_weight);
+    if( bkgPCvint[sysb].size()>0 ){ // if any photon indexes passed sig selection
+     for(unsigned int k=0; k<bkgPCvint[sysb].size(); ++k){ // go through each photon passing sel
+      for(unsigned int ptb=0; ptb<lastptbin-2; ++ptb){ // break into pT bins
+       if(
+          (phoEt->at(bkgPCvint[sysb].at(k)) > ptbins[ptb]) &&
+          (phoEt->at(bkgPCvint[sysb].at(k)) < ptbins[ptb+1])
+         ){
+        FillBkgHistograms(ptb, sysb, bkgPCvint[sysb].at(k), event_weight);
+       }
       }
+      if(  // do an inclusive pT plot from bins
+         (phoEt->at(bkgPCvint[sysb].at(k)) > ptbins[0]) &&
+         (phoEt->at(bkgPCvint[sysb].at(k)) < ptbins[inclptbin])
+        ){
+       FillBkgHistograms(lastptbin-1, sysb, bkgPCvint[sysb].at(k), event_weight);
+      }
+      // and one fully inclusive in pT
+      FillBkgHistograms(lastptbin, sysb, bkgPCvint[sysb].at(k), event_weight);
      }
-     if(  // do an inclusive pT plot from bins
-        (phoEt->at(bkgPCvint[lastptbin][sysb].at(0)) > ptbins[0]) &&
-        (phoEt->at(bkgPCvint[lastptbin][sysb].at(0)) < ptbins[inclptbin])
-       ){
-      FillBkgHistograms(lastptbin-1, sysb, bkgPCvint[lastptbin][sysb].at(0), event_weight);
-     }
-     // and one fully inclusive in pT
-     FillBkgHistograms(lastptbin, sysb, bkgPCvint[lastptbin][sysb].at(0), event_weight);
     }
 
     // Fill Denominator Histograms
-    if( denPCvint[lastptbin][sysb].size()>0 ){ // if any photon indexes passed sig selection
-     for(unsigned int ptb=0; ptb<lastptbin-2; ++ptb){ // break into pT bins
-      if(
-         (phoEt->at(denPCvint[lastptbin][sysb].at(0)) > ptbins[ptb]) &&
-         (phoEt->at(denPCvint[lastptbin][sysb].at(0)) < ptbins[ptb+1])
-        ){
-       FillDenHistograms(ptb, sysb, denPCvint[lastptbin][sysb].at(0), event_weight);
+    if( denPCvint[sysb].size()>0 ){ // if any photon indexes passed sig selection
+     for(unsigned int k=0; k<denPCvint[sysb].size(); ++k){ // go through each photon passing sel
+      for(unsigned int ptb=0; ptb<lastptbin-2; ++ptb){ // break into pT bins
+       if(
+          (phoEt->at(denPCvint[sysb].at(k)) > ptbins[ptb]) &&
+          (phoEt->at(denPCvint[sysb].at(k)) < ptbins[ptb+1])
+         ){
+        FillDenHistograms(ptb, sysb, denPCvint[sysb].at(k), event_weight);
+       }
       }
+      if(  // do an inclusive pT plot from bins
+         (phoEt->at(denPCvint[sysb].at(k)) > ptbins[0]) &&
+         (phoEt->at(denPCvint[sysb].at(k)) < ptbins[inclptbin])
+        ){
+       FillDenHistograms(lastptbin-1, sysb, denPCvint[sysb].at(k), event_weight);
+      }
+      // and one fully inclusive in pT
+      FillDenHistograms(lastptbin, sysb, denPCvint[sysb].at(k), event_weight);
      }
-     if(  // do an inclusive pT plot from bins
-        (phoEt->at(denPCvint[lastptbin][sysb].at(0)) > ptbins[0]) &&
-        (phoEt->at(denPCvint[lastptbin][sysb].at(0)) < ptbins[inclptbin])
-       ){
-      FillDenHistograms(lastptbin-1, sysb, denPCvint[lastptbin][sysb].at(0), event_weight);
-     }
-     // and one fully inclusive in pT
-     FillDenHistograms(lastptbin, sysb, denPCvint[lastptbin][sysb].at(0), event_weight);
     }
+
    } // for each sysb in sysbins
 // end fill histograms
 

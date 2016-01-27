@@ -44,9 +44,13 @@ public :
    // std::vector<int> for each ( pt / systemtaic bin )
     //  each int is number of entry in vector of photon in
     //  vector<float> *phoEt for example
-   std::vector<int> sigPCvint[7][8]; // [pt bin name][sys bin name] 
-   std::vector<int> bkgPCvint[7][8];
-   std::vector<int> denPCvint[7][8];
+   //std::vector<int> sigPCvint[7][8]; // [pt bin name][sys bin name] 
+   //std::vector<int> bkgPCvint[7][8];
+   //std::vector<int> denPCvint[7][8];
+
+   std::vector<int> sigPCvint[8]; // [pt bin name][sys bin name] 
+   std::vector<int> bkgPCvint[8];
+   std::vector<int> denPCvint[8];
 
 
    // For MC
