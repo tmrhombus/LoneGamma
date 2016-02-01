@@ -10,12 +10,17 @@ void postAnalyzer_QCD::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Dou
  TStopwatch sw; 
  sw.Start();
 
+ Int_t nc = 0;
+ Int_t dc = 0;
+
  if (fChain == 0) return;
+ std::cout<<"Numerator/Denominator : run : lumis : event : photonindex "<<std::endl;
 
  Long64_t nentries = fChain->GetEntriesFast();
 
  Long64_t nbytes = 0, nb = 0;
  for (Long64_t jentry=0; jentry<nentries;jentry++) {
+ //for (Long64_t jentry=0; jentry<1000;jentry++) {
   if (jentry%20000 == 0)
     {
       std::cout<<"Starting entry "<<jentry<<"/"<<(nentries)<<" at "<<sw.RealTime()<<" RealTime, "<<sw.CpuTime()<<" CpuTime"<<std::endl;
@@ -29,6 +34,161 @@ void postAnalyzer_QCD::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Dou
   event_weight=1.0;
   if(isMC){ event_weight=lumi*crossSec/nrEvents; }
   
+           if (
+              ( run==258446 && event==121132593 && lumis==97  )  
+           || ( run==258702 && event==280995575 && lumis==180 ) 
+           || ( run==258712 && event==494069084 && lumis==312 ) 
+           || ( run==258712 && event==22840508  && lumis==15  )
+           || ( run==258712 && event==64168685  && lumis==40  )
+           || ( run==258712 && event==88413644  && lumis==55  )
+           || ( run==259809 && event==177969654 && lumis==138 ) 
+           || ( run==259862 && event==90465340  && lumis==53  )
+           || ( run==259862 && event==89817711  && lumis==53  )
+             ) {
+            std::cout<<"A : "<<run<<" : "<<event<<" : "<<lumis<<std::endl;
+       //     std::cout<<"Ashim Event  oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"<<std::endl;
+       //     std::cout<<" run           "<<   run            <<std::endl;
+       //     std::cout<<" lumis          "<<   lumis           <<std::endl;
+       //     std::cout<<" event         "<<   event          <<std::endl;
+       //     std::cout<<" (HLTPho>>7&1)  "<< (HLTPho>>7&1) <<std::endl; 
+       //     std::cout<<" (HLTPho>>8&1)  "<< (HLTPho>>8&1) <<std::endl; 
+       //     std::cout<<" (HLTPho>>9&1)  "<< (HLTPho>>9&1) <<std::endl; 
+       //     std::cout<<" (HLTPho>>10&1) "<< (HLTPho>>10&1)<<std::endl; 
+       //     std::cout<<" (HLTPho>>11&1) "<< (HLTPho>>11&1)<<std::endl; 
+       //     std::cout<<" (HLTPho>>12&1) "<< (HLTPho>>12&1)<<std::endl; 
+       //     std::cout<<" (HLTPho>>22&1) "<< (HLTPho>>22&1)<<std::endl; 
+       //  for(int p=0;p<nPho;p++)  // nPho from ntuple (should = phoE->length() )
+       //    {
+       //     std::cout<<"..................................................................."<<std::endl;
+       //     std::cout<<" photon index  "<<   p     <<std::endl;
+
+       //     std::cout<<" phoEt          "<<   (*phoEt)[p]          <<std::endl; 
+       //     std::cout<<" phoSCEta       "<<   (*phoSCEta)[p]       <<std::endl;
+       //     std::cout<<" pfMET          "<<   pfMET          <<std::endl;
+       //     std::cout<<" phoPFNeuIso    "<<   (*phoPFNeuIso)[p]    <<std::endl;
+       //     std::cout<<" phoPFPhoIso    "<<   (*phoPFPhoIso)[p]    <<std::endl;
+       //     std::cout<<" phoPFChIso     "<<   (*phoPFChIso) [p]     <<std::endl;
+       //     std::cout<<" rho            "<<   rho            <<std::endl;
+       //     std::cout<<" EAneutral      "<<   EAneutral((*phoSCEta)[p]) <<std::endl;
+       //     std::cout<<" EAphoton       "<<   EAphoton((*phoSCEta)[p])       <<std::endl<<std::endl;   
+
+       //     std::cout<<"  To Pass Denominator Cut  sssssssssssssssssssssssssssssss"<<std::endl;
+       //     std::cout<<"xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"<<std::endl;
+       //     std::cout<<" (V)Loose ID Variables"<<std::endl;
+       //     std::cout<<"Neutral Iso     NeuIso - rho*EA = "<<
+       //      (*phoPFNeuIso)[p] - ( rho * EAneutral((*phoSCEta)[p]) )<<std::endl;
+       //     std::cout<<"  1.92 + 0.014pT + 0.000019pT^2 = "<<  
+       //      (1.92 + (0.014 * (*phoEt)[p]) + (0.000019 * pow((*phoEt)[p], 2.0)))<<std::endl;
+       //     std::cout<<"5(1.92 + 0.014pT + 0.000019pT^2)= "<<  
+       //      (5 * (1.92 + (0.014 * (*phoEt)[p]) + (0.000019 * pow((*phoEt)[p], 2.0))))<<std::endl;
+       //     std::cout<<"                        0.2(pT) = "<<(0.2 * ((*phoEt)[p]))<<std::endl;
+       //     std::cout<<"xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"<<std::endl;
+       //     std::cout<<"Photon Iso      PhoIso - rho*EA = "<<
+       //      (*phoPFPhoIso)[p] - ( rho * EAphoton((*phoSCEta)[p]) )<<std::endl;
+       //     std::cout<<"                 0.81 + 0.053pT = "<<  
+       //      (0.81 + (0.053 * (*phoEt)[p]) )<<std::endl;
+       //     std::cout<<"              5(0.81 + 0.053pT) = "<<  
+       //      (5 * (0.81 + (0.053 * (*phoEt)[p]) ))<<std::endl;
+       //     std::cout<<"                        0.2(pT) = "<<(0.2 * ((*phoEt)[p]))<<std::endl;
+       //     std::cout<<"xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"<<std::endl;
+       //     std::cout<<"CHad Iso                        = "<< (*phoPFChIso)[p] <<std::endl;
+       //     std::cout<<"                        0.2(pT) = "<<(0.2 * ((*phoEt)[p]))<<std::endl;
+       //     std::cout<<"---------------------------------------"<<std::endl;
+       //     std::cout<<" Cuts are:"<<std::endl;
+       //     std::cout<<"  pT:             175 < "<<(*phoEt)[p]<<" < 190"<<std::endl;
+       //     std::cout<<"  eta:            | "<<(*phoSCEta)[p]<<" | < 1.442"<<std::endl;
+       //     std::cout<<"  met:            "<<pfMET<<" < 30"<<std::endl;
+       //     std::cout<<"  h/e:            "<<(*phoHoverE)[p]<<" < 0.05"<<std::endl;
+       //     std::cout<<"  pixel seed:     "<<(*phohasPixelSeed)[p]<<" == 0"<<std::endl;
+       //     std::cout<<"  |seed time|     3 > "<<    fabs((*phoseedTimeFull5x5)[p])<<std::endl;
+       //     std::cout<<"  MIP             6.3 > "<<    fabs((*phomipTotEnergy)[p])<<std::endl;
+       //     std::cout<<"  sieie           0.001 < "<<    fabs((*phoSigmaIEtaIEtaFull5x5)[p])<<std::endl;
+       //     std::cout<<"  sipip           0.001 < "<<    fabs((*phoSigmaIPhiIPhiFull5x5)[p])<<std::endl;
+       //     std::cout<<"  pass vloose:    must pass all"<<std::endl;
+
+       //      std::cout<<"    PFchIso:        max( 0, "<<
+       //      (*phoPFChIso)[p]<< " ) < min( 16.6, "<<
+       //      (0.2 * ((*phoEt)[p]))<<" )"<<std::endl;
+
+       //      std::cout<<"    PFphoIso:       max( 0, "<<
+       //      (*phoPFPhoIso)[p] - ( rho * EAphoton((*phoSCEta)[p]) )
+       //      << " ) < min( "<<
+       //      (5 * (0.81 + (0.053 * (*phoEt)[p]) ))
+       //      <<", "<<
+       //      (0.2 * ((*phoEt)[p]))<<" )"<<std::endl;
+
+       //      std::cout<<"    PFneuIso:       max( 0, "<<
+       //      (*phoPFNeuIso)[p] - ( rho * EAneutral((*phoSCEta)[p]) )
+       //      << " ) < min( "<<
+       //      (5 * (1.92 + (0.014 * (*phoEt)[p]) + (0.000019 * pow((*phoEt)[p], 2.0))))
+       //      <<", "<<
+       //      (0.2 * ((*phoEt)[p]))<<" )"<<std::endl;
+
+       //     std::cout<<"  fail loose:    must fail one of"<<std::endl;
+
+       //      std::cout<<"    PFchIso:        max( 0, "<<
+       //      (*phoPFChIso)[p]<< " ) < min( 3.32, "<<
+       //      (0.2 * ((*phoEt)[p]))<<" )"<<std::endl;
+
+       //      std::cout<<"    PFphoIso:       max( 0, "<<
+       //      (*phoPFPhoIso)[p] - ( rho * EAphoton((*phoSCEta)[p]) )
+       //      << " ) < min( "<<
+       //      (0.81 + (0.053 * (*phoEt)[p]) )
+       //      <<", "<<
+       //      (0.2 * ((*phoEt)[p]))<<" )"<<std::endl;
+
+       //      std::cout<<"    PFneuIso:       max( 0, "<<
+       //      (*phoPFNeuIso)[p] - ( rho * EAneutral((*phoSCEta)[p]) )
+       //      << " ) < min( "<<
+       //      (1.92 + (0.014 * (*phoEt)[p]) + (0.000019 * pow((*phoEt)[p], 2.0)))
+       //      <<", "<<
+       //      (0.2 * ((*phoEt)[p]))<<" )"<<std::endl<<std::endl;
+
+
+       //     std::cout<<"  To Pass Numerator Cut  sssssssssssssssssssssssssssssss"<<std::endl;
+       //     std::cout<<"xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"<<std::endl;
+       //     std::cout<<"Neutral Iso     NeuIso - rho*EA = "<<
+       //      (*phoPFNeuIso)[p] - ( rho * EAneutral((*phoSCEta)[p]) )<<std::endl;
+       //     std::cout<<"  1.06 + 0.014pT + 0.000019pT^2 = "<<  
+       //      (1.06 + (0.014 * (*phoEt)[p]) + (0.000019 * pow((*phoEt)[p], 2.0)))<<std::endl;
+       //     std::cout<<"xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"<<std::endl;
+       //     std::cout<<"Photon Iso      PhoIso - rho*EA = "<<
+       //      (*phoPFPhoIso)[p] - ( rho * EAphoton((*phoSCEta)[p]) )<<std::endl;
+       //     std::cout<<"                 0.28 + 0.053pT = "<<  
+       //      (0.28 + (0.053 * (*phoEt)[p]) )<<std::endl;
+       //     std::cout<<"xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"<<std::endl;
+       //     std::cout<<"CHad Iso                        = "<< (*phoPFChIso)[p] <<" < 1.37"<<std::endl<<std::endl;
+
+       //     std::cout<<"---------------------------------------"<<std::endl;
+       //     std::cout<<" Cuts are:"<<std::endl;
+       //     std::cout<<"  pT:             175 < "<<(*phoEt)[p]<<" < 190"<<std::endl;
+       //     std::cout<<"  eta:            | "<<(*phoSCEta)[p]<<" | < 1.442"<<std::endl;
+       //     std::cout<<"  met:            "<<pfMET<<" < 30"<<std::endl;
+       //     std::cout<<"  h/e:            "<<(*phoHoverE)[p]<<" < 0.05"<<std::endl;
+       //     std::cout<<"  pixel seed:     "<<(*phohasPixelSeed)[p]<<" == 0"<<std::endl;
+       //     std::cout<<"  |seed time|     3 > "<<    fabs((*phoseedTimeFull5x5)[p])<<std::endl;
+       //     std::cout<<"  MIP             6.3 > "<<    fabs((*phomipTotEnergy)[p])<<std::endl;
+       //     std::cout<<"  sieie           0.001 < "<<    fabs((*phoSigmaIEtaIEtaFull5x5)[p])<<std::endl;
+       //     std::cout<<"  sipip           0.001 < "<<    fabs((*phoSigmaIPhiIPhiFull5x5)[p])<<std::endl;
+       //     std::cout<<"  pass med:         must pass all"<<std::endl;
+
+       //      std::cout<<"    PFchIso:        max( 0, "<<
+       //      (*phoPFChIso)[p]<< " ) < 1.37"<<std::endl;
+
+       //      std::cout<<"    PFphoIso:       max( 0, "<<
+       //      (*phoPFPhoIso)[p] - ( rho * EAphoton((*phoSCEta)[p]) )
+       //      << " ) < "<<
+       //      (0.28 + (0.053 * (*phoEt)[p]) )
+       //      <<std::endl;
+
+       //      std::cout<<"    PFneuIso:       max( 0, "<<
+       //      (*phoPFNeuIso)[p] - ( rho * EAneutral((*phoSCEta)[p]) )
+       //      << " ) < "<<
+       //      (1.06 + (0.014 * (*phoEt)[p]) + (0.000019 * pow((*phoEt)[p], 2.0)))
+       //      <<std::endl<<std::endl;
+       //     }
+            }
+
   // if event passes MonoPhoton triggers
   if( 
    ((HLTPho>>7&1) == 1) ||
@@ -44,13 +204,13 @@ void postAnalyzer_QCD::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Dou
    // ptbins = 175, 190, 250, 400, 700, 1000
    // ptbinnames = "175to190" "190to250" "250to400" "400to700" "700to1000" "175to1000" "allpt"
 
-   // vector of vector of ints, each int corresponds to location in vector of photons of photon passing cut
-   // one such vector for each pt and systematic bin
-   // start by filling inclusive (last) pt bin for systematics, then divvy up
+   // vector of ints, each int corresponds to location in vector of photons of photon passing cut
+   // one such vector for each systematic bin
 
    int inclptbin = ptbins.size()-1;
    int lastptbin = ptbinnames.size()-1;
    int lastsysbin = sysbinnames.size();
+
    for(unsigned int sysb=0; sysb<lastsysbin; ++sysb){
     sigPCvint[sysb] = pcPassSel(0,sysb,isMC); // passes signal selection (no sieie cut)
     bkgPCvint[sysb] = pcPassSel(1,sysb,isMC); // passes background selection (no sieie cut)
@@ -67,6 +227,66 @@ void postAnalyzer_QCD::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Dou
           (phoEt->at(sigPCvint[sysb].at(k)) > ptbins[ptb]) &&
           (phoEt->at(sigPCvint[sysb].at(k)) < ptbins[ptb+1])
          ){
+           if( sysb==0 && ptb==0 ) {
+            nc++;
+            std::cout<<"N : "<<run<<" : "<<event<<" : "<<lumis<<" : "<<sigPCvint[sysb].at(k)<<std::endl;
+            //std::cout<<"Passed Numerator Cut-------------------------------------------------------------"<<std::endl;
+            //std::cout<<" run           "<<   run            <<std::endl;
+            //std::cout<<" lumis          "<<   lumis           <<std::endl;
+            //std::cout<<" event         "<<   event          <<std::endl;
+            //std::cout<<" photon index  "<<   sigPCvint[sysb].at(k)     <<std::endl;
+      
+            //std::cout<<" phoEt         "<<   (*phoEt)[sigPCvint[sysb].at(k)]          <<std::endl; 
+            //std::cout<<" phoSCEta      "<<   (*phoSCEta)[sigPCvint[sysb].at(k)]       <<std::endl;
+            //std::cout<<" pfMET         "<<   pfMET          <<std::endl;
+            //std::cout<<" phoPFNeuIso   "<<   (*phoPFNeuIso)[sigPCvint[sysb].at(k)]    <<std::endl;
+            //std::cout<<" phoPFPhoIso   "<<   (*phoPFPhoIso)[sigPCvint[sysb].at(k)]    <<std::endl;
+            //std::cout<<" phoPFChIso    "<<   (*phoPFChIso) [sigPCvint[sysb].at(k)]     <<std::endl;
+            //std::cout<<" rho           "<<   rho            <<std::endl;
+            //std::cout<<" EAneutral     "<<   EAneutral((*phoSCEta)[sigPCvint[sysb].at(k)]) <<std::endl;
+            //std::cout<<" EAphoton      "<<   EAphoton((*phoSCEta)[sigPCvint[sysb].at(k)])       <<std::endl;   
+            //std::cout<<"xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"<<std::endl;
+            //std::cout<<"Neutral Iso     NeuIso - rho*EA = "<<
+            // (*phoPFNeuIso)[sigPCvint[sysb].at(k)] - ( rho * EAneutral((*phoSCEta)[sigPCvint[sysb].at(k)]) )<<std::endl;
+            //std::cout<<"  1.06 + 0.014pT + 0.000019pT^2 = "<<  
+            // (1.06 + (0.014 * (*phoEt)[sigPCvint[sysb].at(k)]) + (0.000019 * pow((*phoEt)[sigPCvint[sysb].at(k)], 2.0)))<<std::endl;
+            //std::cout<<"xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"<<std::endl;
+            //std::cout<<"Photon Iso      PhoIso - rho*EA = "<<
+            // (*phoPFPhoIso)[sigPCvint[sysb].at(k)] - ( rho * EAphoton((*phoSCEta)[sigPCvint[sysb].at(k)]) )<<std::endl;
+            //std::cout<<"                 0.28 + 0.053pT = "<<  
+            // (0.28 + (0.053 * (*phoEt)[sigPCvint[sysb].at(k)]) )<<std::endl;
+            //std::cout<<"xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"<<std::endl;
+            //std::cout<<"CHad Iso                        = "<< (*phoPFChIso)[sigPCvint[sysb].at(k)] <<" < 1.37"<<std::endl<<std::endl;
+
+            //std::cout<<"---------------------------------------"<<std::endl;
+            //std::cout<<" Cuts are:"<<std::endl;
+            //std::cout<<"  pT:             175 < "<<(*phoEt)[sigPCvint[sysb].at(k)]<<" < 190"<<std::endl;
+            //std::cout<<"  eta:            | "<<(*phoSCEta)[sigPCvint[sysb].at(k)]<<" | < 1.442"<<std::endl;
+            //std::cout<<"  met:            "<<pfMET<<" < 30"<<std::endl;
+            //std::cout<<"  h/e:            "<<(*phoHoverE)[sigPCvint[sysb].at(k)]<<" < 0.05"<<std::endl;
+            //std::cout<<"  pixel seed:     "<<(*phohasPixelSeed)[sigPCvint[sysb].at(k)]<<" == 0"<<std::endl;
+            //std::cout<<"  |seed time|     3 > "<<    fabs((*phoseedTimeFull5x5)[sigPCvint[sysb].at(k)])<<std::endl;
+            //std::cout<<"  MIP             6.3 > "<<    fabs((*phomipTotEnergy)[sigPCvint[sysb].at(k)])<<std::endl;
+            //std::cout<<"  sieie           0.001 < "<<    fabs((*phoSigmaIEtaIEtaFull5x5)[sigPCvint[sysb].at(k)])<<std::endl;
+            //std::cout<<"  sipip           0.001 < "<<    fabs((*phoSigmaIPhiIPhiFull5x5)[sigPCvint[sysb].at(k)])<<std::endl;
+            //std::cout<<"  pass med:         must pass all"<<std::endl;
+
+            // std::cout<<"    PFchIso:        max( 0, "<<
+            // (*phoPFChIso)[sigPCvint[sysb].at(k)]<< " ) < 1.37"<<std::endl;
+
+            // std::cout<<"    PFphoIso:       max( 0, "<<
+            // (*phoPFPhoIso)[sigPCvint[sysb].at(k)] - ( rho * EAphoton((*phoSCEta)[sigPCvint[sysb].at(k)]) )
+            // << " ) < "<<
+            // (0.28 + (0.053 * (*phoEt)[sigPCvint[sysb].at(k)]) )
+            // <<std::endl;
+
+            // std::cout<<"    PFneuIso:       max( 0, "<<
+            // (*phoPFNeuIso)[sigPCvint[sysb].at(k)] - ( rho * EAneutral((*phoSCEta)[sigPCvint[sysb].at(k)]) )
+            // << " ) < "<<
+            // (1.06 + (0.014 * (*phoEt)[sigPCvint[sysb].at(k)]) + (0.000019 * pow((*phoEt)[sigPCvint[sysb].at(k)], 2.0)))
+            // <<std::endl<<std::endl;
+
+           }
         FillSigHistograms(ptb, sysb, sigPCvint[sysb].at(k), event_weight);
        }
       }
@@ -83,6 +303,8 @@ void postAnalyzer_QCD::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Dou
 
     // Fill Numerator Background Histograms
     if( bkgPCvint[sysb].size()>0 ){ // if any photon indexes passed sig selection
+     if( sysb==0 ) {
+     }
      for(unsigned int k=0; k<bkgPCvint[sysb].size(); ++k){ // go through each photon passing sel
       for(unsigned int ptb=0; ptb<lastptbin-2; ++ptb){ // break into pT bins
        if(
@@ -111,6 +333,97 @@ void postAnalyzer_QCD::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Dou
           (phoEt->at(denPCvint[sysb].at(k)) > ptbins[ptb]) &&
           (phoEt->at(denPCvint[sysb].at(k)) < ptbins[ptb+1])
          ){
+           if( sysb==0 && ptb==0 ) {
+            dc++;
+            std::cout<<"D : "<<run<<" : "<<event<<" : "<<lumis<<" : "<<denPCvint[sysb].at(k)<<std::endl;
+            //std::cout<<"Passed Denominator Cut-----------------------------------------------------------"<<std::endl;
+            //std::cout<<" run           "<<   run            <<std::endl;
+            //std::cout<<" lumis          "<<   lumis           <<std::endl;
+            //std::cout<<" event         "<<   event          <<std::endl;
+            //std::cout<<" photon index  "<<   denPCvint[sysb].at(k)     <<std::endl;
+
+            //std::cout<<" phoEt         "<<   (*phoEt)[denPCvint[sysb].at(k)]          <<std::endl; 
+            //std::cout<<" phoSCEta      "<<   (*phoSCEta)[denPCvint[sysb].at(k)]       <<std::endl;
+            //std::cout<<" pfMET         "<<   pfMET          <<std::endl;
+            //std::cout<<" phoPFNeuIso   "<<   (*phoPFNeuIso)[denPCvint[sysb].at(k)]    <<std::endl;
+            //std::cout<<" phoPFPhoIso   "<<   (*phoPFPhoIso)[denPCvint[sysb].at(k)]    <<std::endl;
+            //std::cout<<" phoPFChIso    "<<   (*phoPFChIso) [denPCvint[sysb].at(k)]     <<std::endl;
+            //std::cout<<" rho           "<<   rho            <<std::endl;
+            //std::cout<<" EAneutral     "<<   EAneutral((*phoSCEta)[denPCvint[sysb].at(k)]) <<std::endl;
+            //std::cout<<" EAphoton      "<<   EAphoton((*phoSCEta)[denPCvint[sysb].at(k)])       <<std::endl<<std::endl;   
+
+            //std::cout<<"xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"<<std::endl;
+            //std::cout<<" (V)Loose ID Variables"<<std::endl;
+            //std::cout<<"Neutral Iso     NeuIso - rho*EA = "<<
+            // (*phoPFNeuIso)[denPCvint[sysb].at(k)] - ( rho * EAneutral((*phoSCEta)[denPCvint[sysb].at(k)]) )<<std::endl;
+            //std::cout<<"  1.92 + 0.014pT + 0.000019pT^2 = "<<  
+            // (1.92 + (0.014 * (*phoEt)[denPCvint[sysb].at(k)]) + (0.000019 * pow((*phoEt)[denPCvint[sysb].at(k)], 2.0)))<<std::endl;
+            //std::cout<<"5(1.92 + 0.014pT + 0.000019pT^2)= "<<  
+            // (5 * (1.92 + (0.014 * (*phoEt)[denPCvint[sysb].at(k)]) + (0.000019 * pow((*phoEt)[denPCvint[sysb].at(k)], 2.0))))<<std::endl;
+            //std::cout<<"                        0.2(pT) = "<<(0.2 * ((*phoEt)[denPCvint[sysb].at(k)]))<<std::endl;
+            //std::cout<<"xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"<<std::endl;
+            //std::cout<<"Photon Iso      PhoIso - rho*EA = "<<
+            // (*phoPFPhoIso)[denPCvint[sysb].at(k)] - ( rho * EAphoton((*phoSCEta)[denPCvint[sysb].at(k)]) )<<std::endl;
+            //std::cout<<"                 0.81 + 0.053pT = "<<  
+            // (0.81 + (0.053 * (*phoEt)[denPCvint[sysb].at(k)]) )<<std::endl;
+            //std::cout<<"              5(0.81 + 0.053pT) = "<<  
+            // (5 * (0.81 + (0.053 * (*phoEt)[denPCvint[sysb].at(k)]) ))<<std::endl;
+            //std::cout<<"                        0.2(pT) = "<<(0.2 * ((*phoEt)[denPCvint[sysb].at(k)]))<<std::endl;
+            //std::cout<<"xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"<<std::endl;
+            //std::cout<<"CHad Iso                        = "<< (*phoPFChIso)[denPCvint[sysb].at(k)] <<std::endl;
+            //std::cout<<"                        0.2(pT) = "<<(0.2 * ((*phoEt)[denPCvint[sysb].at(k)]))<<std::endl;
+            //std::cout<<"---------------------------------------"<<std::endl;
+            //std::cout<<" Cuts are:"<<std::endl;
+            //std::cout<<"  pT:             175 < "<<(*phoEt)[denPCvint[sysb].at(k)]<<" < 190"<<std::endl;
+            //std::cout<<"  eta:            | "<<(*phoSCEta)[denPCvint[sysb].at(k)]<<" | < 1.442"<<std::endl;
+            //std::cout<<"  met:            "<<pfMET<<" < 30"<<std::endl;
+            //std::cout<<"  h/e:            "<<(*phoHoverE)[denPCvint[sysb].at(k)]<<" < 0.05"<<std::endl;
+            //std::cout<<"  pixel seed:     "<<(*phohasPixelSeed)[denPCvint[sysb].at(k)]<<" == 0"<<std::endl;
+            //std::cout<<"  |seed time|     3 > "<<    fabs((*phoseedTimeFull5x5)[denPCvint[sysb].at(k)])<<std::endl;
+            //std::cout<<"  MIP             6.3 > "<<    fabs((*phomipTotEnergy)[denPCvint[sysb].at(k)])<<std::endl;
+            //std::cout<<"  sieie           0.001 < "<<    fabs((*phoSigmaIEtaIEtaFull5x5)[denPCvint[sysb].at(k)])<<std::endl;
+            //std::cout<<"  sipip           0.001 < "<<    fabs((*phoSigmaIPhiIPhiFull5x5)[denPCvint[sysb].at(k)])<<std::endl;
+            //std::cout<<"  pass vloose:    must pass all"<<std::endl;
+
+            // std::cout<<"    PFchIso:        max( 0, "<<
+            // (*phoPFChIso)[denPCvint[sysb].at(k)]<< " ) < min( 16.6, "<<
+            // (0.2 * ((*phoEt)[denPCvint[sysb].at(k)]))<<" )"<<std::endl;
+
+            // std::cout<<"    PFphoIso:       max( 0, "<<
+            // (*phoPFPhoIso)[denPCvint[sysb].at(k)] - ( rho * EAphoton((*phoSCEta)[denPCvint[sysb].at(k)]) )
+            // << " ) < min( "<<
+            // (5 * (0.81 + (0.053 * (*phoEt)[denPCvint[sysb].at(k)]) ))
+            // <<", "<<
+            // (0.2 * ((*phoEt)[denPCvint[sysb].at(k)]))<<" )"<<std::endl;
+
+            // std::cout<<"    PFneuIso:       max( 0, "<<
+            // (*phoPFNeuIso)[denPCvint[sysb].at(k)] - ( rho * EAneutral((*phoSCEta)[denPCvint[sysb].at(k)]) )
+            // << " ) < min( "<<
+            // (5 * (1.92 + (0.014 * (*phoEt)[denPCvint[sysb].at(k)]) + (0.000019 * pow((*phoEt)[denPCvint[sysb].at(k)], 2.0))))
+            // <<", "<<
+            // (0.2 * ((*phoEt)[denPCvint[sysb].at(k)]))<<" )"<<std::endl;
+
+            //std::cout<<"  fail loose:    must fail one of"<<std::endl;
+
+            // std::cout<<"    PFchIso:        max( 0, "<<
+            // (*phoPFChIso)[denPCvint[sysb].at(k)]<< " ) < min( 3.32, "<<
+            // (0.2 * ((*phoEt)[denPCvint[sysb].at(k)]))<<" )"<<std::endl;
+
+            // std::cout<<"    PFphoIso:       max( 0, "<<
+            // (*phoPFPhoIso)[denPCvint[sysb].at(k)] - ( rho * EAphoton((*phoSCEta)[denPCvint[sysb].at(k)]) )
+            // << " ) < min( "<<
+            // (0.81 + (0.053 * (*phoEt)[denPCvint[sysb].at(k)]) )
+            // <<", "<<
+            // (0.2 * ((*phoEt)[denPCvint[sysb].at(k)]))<<" )"<<std::endl;
+
+            // std::cout<<"    PFneuIso:       max( 0, "<<
+            // (*phoPFNeuIso)[denPCvint[sysb].at(k)] - ( rho * EAneutral((*phoSCEta)[denPCvint[sysb].at(k)]) )
+            // << " ) < min( "<<
+            // (1.92 + (0.014 * (*phoEt)[denPCvint[sysb].at(k)]) + (0.000019 * pow((*phoEt)[denPCvint[sysb].at(k)], 2.0)))
+            // <<", "<<
+            // (0.2 * ((*phoEt)[denPCvint[sysb].at(k)]))<<" )"<<std::endl<<std::endl;
+
+           }
         FillDenHistograms(ptb, sysb, denPCvint[sysb].at(k), event_weight);
        }
       }
@@ -132,7 +445,35 @@ void postAnalyzer_QCD::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Dou
  } //end loop through entries
 
  // write these histograms to file
+  std::cout<<std::endl;
+  std::cout<<"Total Passing Numerator: "<<nc<<"  Total Passing Denominator: "<<dc<<std::endl;
   std::cout<<"made it through, about to write"<<std::endl;
+
+//  std::ofstream logfile_numsig (outfilename+"_numsig.log", std::ofstream::out);
+//  //logfile_numsig<<"============================="<<std::endl;
+//  //logfile_numsig<<" Numerator Signal Selections"<<std::endl;
+//  //logfile_numsig<<"============================="<<std::endl;
+//  for (unsigned int i=0; i<events_numsig.size(); ++i){ logfile_numsig<<"\t "<<run_numsig[i]<<" : "<<events_numsig[i]<<" : "<<lumi_numsig[i]<<" : 0"<<std::endl; }
+//  //for (unsigned int i=0; i<events_numsig.size(); ++i){ logfile_numsig<<"\t "<<run_numsig[i]<<"\t "<<lumi_numsig[i]<<"\t "<<events_numsig[i]<<std::endl; }
+//  logfile_numsig.close();
+//
+//  std::ofstream logfile_numqcd (outfilename+"_numqcd.log", std::ofstream::out);
+//  //logfile_numqcd<<"============================="<<std::endl;
+//  //logfile_numqcd<<" Numerator QCD Selections"<<std::endl;
+//  //logfile_numqcd<<"============================="<<std::endl;
+//  for (unsigned int i=0; i<events_numqcd.size(); ++i){ logfile_numqcd<<"\t "<<run_numqcd[i]<<" : "<<events_numqcd[i]<<" : "<<lumi_numqcd[i]<<" : 0"<<std::endl; }
+//  //for (unsigned int i=0; i<events_numqcd.size(); ++i){ logfile_numqcd<<"\t "<<run_numqcd[i]<<"\t "<<lumi_numqcd[i]<<"\t "<<events_numqcd[i]<<std::endl; }
+//  logfile_numqcd.close();
+//
+//  std::ofstream logfile_denomi (outfilename+"_denomi.log", std::ofstream::out);
+//  //logfile_denomi<<"============================="<<std::endl;
+//  //logfile_denomi<<" Denominator Selections"<<std::endl;
+//  //logfile_denomi<<"============================="<<std::endl;
+//  for (unsigned int i=0; i<events_denomi.size(); ++i){ logfile_denomi<<"\t "<<run_denomi[i]<<" : "<<events_denomi[i]<<" : "<<lumi_denomi[i]<<" : 0"<<std::endl; }
+//  //for (unsigned int i=0; i<events_denomi.size(); ++i){ logfile_denomi<<"\t "<<run_denomi[i]<<"\t "<<lumi_denomi[i]<<"\t "<<events_denomi[i]<<std::endl; }
+//  logfile_denomi.close();
+  
+
  TFile *outfile = new TFile(outfilename,"RECREATE");
  outfile->cd();
  for(unsigned int i=0; i<ptbinnames.size(); ++i){
@@ -178,8 +519,8 @@ std::vector<int> postAnalyzer_QCD::pcPassSel(int sel, int sys, double phoPtLo, d
 
      // non collision backgrounds
      //noncoll = kTRUE;
-     noncoll = (*phoSigmaIEtaIEtaFull5x5)[p] > 0.001 && (*phoSigmaIPhiIPhiFull5x5)[p] > 0.001; // isMC
-     //if(!isMC){noncoll = fabs((*phoseedTimeFull5x5)[p]) < 3. && (*phomipTotEnergy)[p] < 6.3 && (*phoSigmaIEtaIEtaFull5x5)[p] > 0.001 && (*phoSigmaIPhiIPhiFull5x5)[p] > 0.001;}
+     //noncoll = (*phoSigmaIEtaIEtaFull5x5)[p] > 0.001 && (*phoSigmaIPhiIPhiFull5x5)[p] > 0.001; // isMC
+     noncoll = fabs((*phoseedTimeFull5x5)[p]) < 3. && (*phomipTotEnergy)[p] < 4.9 && (*phoSigmaIEtaIEtaFull5x5)[p] > 0.001 && (*phoSigmaIPhiIPhiFull5x5)[p] > 0.001;
 
      passKinematics = (
                        ( (*phoEt)[p] > phoPtLo  ) &&
@@ -195,7 +536,8 @@ std::vector<int> postAnalyzer_QCD::pcPassSel(int sel, int sys, double phoPtLo, d
      // nsig, nbkg, deno
      passHoEPSeed = (
                      ((*phoHoverE)[p] < 0.05 ) &&
-                     ((*phohasPixelSeed)[p] ==  0 )
+                     ((*phohasPixelSeed)[p] ==  0 ) //&&
+                     //((*phoSigmaIEtaIEtaFull5x5)[p]  <  0.0102 )
                     );
      // nsig, nbkg
      passPhoNHMedIso = (
@@ -263,13 +605,13 @@ std::vector<int> postAnalyzer_QCD::pcPassSel(int sel, int sys, double phoPtLo, d
 // https://indico.cern.ch/event/455258/contribution/0/attachments/1173322/1695132/SP15_253rd.pdf -- slide-5
 Double_t postAnalyzer_QCD::EAcharged(Double_t eta){
   Float_t EffectiveArea = 0.0;
-  if(fabs(eta) >= 0.0   && fabs(eta) < 1.0   ) EffectiveArea = 0.0456;
-  if(fabs(eta) >= 1.0   && fabs(eta) < 1.479 ) EffectiveArea = 0.0500;
-  if(fabs(eta) >= 1.479 && fabs(eta) < 2.0   ) EffectiveArea = 0.0340;
-  if(fabs(eta) >= 2.0   && fabs(eta) < 2.2   ) EffectiveArea = 0.0383;
-  if(fabs(eta) >= 2.2   && fabs(eta) < 2.3   ) EffectiveArea = 0.0339;
-  if(fabs(eta) >= 2.3   && fabs(eta) < 2.4   ) EffectiveArea = 0.0303;
-  if(fabs(eta) >= 2.4                        ) EffectiveArea = 0.0240;
+  if(fabs(eta) >= 0.0   && fabs(eta) < 1.0   ) EffectiveArea = 0.0; // 0.0456;
+  if(fabs(eta) >= 1.0   && fabs(eta) < 1.479 ) EffectiveArea = 0.0; // 0.0500;
+  if(fabs(eta) >= 1.479 && fabs(eta) < 2.0   ) EffectiveArea = 0.0; // 0.0340;
+  if(fabs(eta) >= 2.0   && fabs(eta) < 2.2   ) EffectiveArea = 0.0; // 0.0383;
+  if(fabs(eta) >= 2.2   && fabs(eta) < 2.3   ) EffectiveArea = 0.0; // 0.0339;
+  if(fabs(eta) >= 2.3   && fabs(eta) < 2.4   ) EffectiveArea = 0.0; // 0.0303;
+  if(fabs(eta) >= 2.4                        ) EffectiveArea = 0.0; // 0.0240;
 
   return EffectiveArea;
 }
