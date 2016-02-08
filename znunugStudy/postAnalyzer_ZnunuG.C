@@ -12,6 +12,7 @@ void postAnalyzer_ZnunuG::Loop(TString outfilename, Bool_t isMC, Double_t lumi, 
 
  Int_t nc = 0;
  Int_t dc = 0;
+ gencount = 0;
 
  if (fChain == 0) return;
  //std::cout<<"Numerator/Denominator : run : lumis : event : photonindex "<<std::endl;
@@ -59,7 +60,7 @@ void postAnalyzer_ZnunuG::Loop(TString outfilename, Bool_t isMC, Double_t lumi, 
   phoCand = getPhoCand(175,1.4442);
    if(phoCand.size()>0)
      {
-      printf("\n%llu Event Number\n", event);
+      //printf("\n%llu Event Number\n", event);
       int candphotonindex = phoCand.at(0);
 
       int iphi = 41; 
@@ -74,36 +75,36 @@ void postAnalyzer_ZnunuG::Loop(TString outfilename, Bool_t isMC, Double_t lumi, 
       makeDilep(candphotonindex, &fourVec_l1, &fourVec_l2);
       // make dilepton object and add to met
       fourVec_ll = fourVec_l1 + fourVec_l2;
-      printf("  pt: %.4f  eta: %.4f  phi: %.4f  mass: %.4f \n", fourVec_l1.Pt(), fourVec_l1.Eta(), fourVec_l1.Phi(), fourVec_l1.M() );
-      printf("  pt: %.4f  eta: %.4f  phi: %.4f  mass: %.4f \n", fourVec_l2.Pt(), fourVec_l2.Eta(), fourVec_l2.Phi(), fourVec_l2.M() );
-      printf("  pt: %.4f  eta: %.4f  phi: %.4f  mass: %.4f \n", fourVec_ll.Pt(), fourVec_ll.Eta(), fourVec_ll.Phi(), fourVec_ll.M() );
+      //printf("  pt: %.4f  eta: %.4f  phi: %.4f  mass: %.4f \n", fourVec_l1.Pt(), fourVec_l1.Eta(), fourVec_l1.Phi(), fourVec_l1.M() );
+      //printf("  pt: %.4f  eta: %.4f  phi: %.4f  mass: %.4f \n", fourVec_l2.Pt(), fourVec_l2.Eta(), fourVec_l2.Phi(), fourVec_l2.M() );
+      //printf("  pt: %.4f  eta: %.4f  phi: %.4f  mass: %.4f \n", fourVec_ll.Pt(), fourVec_ll.Eta(), fourVec_ll.Phi(), fourVec_ll.M() );
       dilep_mass = fourVec_ll.M();
 
       //TLorentzVector fourVec_met;
-      fourVec_met.SetPtEtaPhiE(pfMET, 0, pfMETPhi, 0);
+      fourVec_met.SetPtEtaPhiE(pfMET, 0., pfMETPhi, 0.);
 
       fourVec_leptomet = fourVec_met + fourVec_ll;
       leptoMET = fourVec_leptomet.Pt();
       leptoMEPhi = fourVec_leptomet.Phi();
 
       ////// 
-
       ///std::vector<int>  jetindexvector = selectedJets(candphotonindex);
       /////bool passdphiJetMET(&jetindexvector, leptoMEPhi);
 
       bool passMET = (leptoMET > 140.) ;
       bool passdPhiPhoMET = ( DeltaPhi(phoPhi->at(candphotonindex),leptoMEPhi)>2.0 ) ;
-      if(passMET       )  printf(" passMET       \n");
-      if(passdPhiPhoMET)  printf(" passdPhiPhoMET\n");
-      if(passSpike     )  printf(" passSpike     \n");
-      if(passMETfilters)  printf(" passMETfilters\n");
+      //if(passMET       )  printf(" passMET       \n");
+      //if(passdPhiPhoMET)  printf(" passdPhiPhoMET\n");
+      //if(passSpike     )  printf(" passSpike     \n");
+      //if(passMETfilters)  printf(" passMETfilters\n");
 
       // fill histograms
-      if ( passSpike && passMETfilters && passMET && passdPhiPhoMET )
-      printf("passed  ");
-      printf("dilep mass : %f", dilep_mass);
+      if ( passSpike && passMETfilters && passMET && passdPhiPhoMET && dilep_mass>60. && dilep_mass<120.)
+      //printf("passed  ");
+      //printf("dilep mass : %f", dilep_mass);
       //if ( passSpike && passMETfilters && passdPhiJetMET && passMET && passdPhiPhoMET )
          {
+          nc++;
           for(unsigned int ptb=0; ptb<lastptbin-2; ++ptb){ // break into pT bins
            if(
               (phoEt->at(candphotonindex) > ptbins[ptb]) &&
@@ -126,15 +127,64 @@ void postAnalyzer_ZnunuG::Loop(TString outfilename, Bool_t isMC, Double_t lumi, 
   } //end if passes MonoPhoton triggers
 
 
-
-    // now do gen part
-
-
+//  // now do gen part
+//  std::vector<int> genPhotonList = getGenPhotonList(175, 1.4442);
+//  if( genPhotonList.size()>0 ){
+//
+//   int candphotonindex = genPhotonList.at(0)
+//
+//   fourVec_genl1.SetPtEtaPhiE(0,0,0,0);
+//   fourVec_genl2.SetPtEtaPhiE(0,0,0,0);
+//
+//   // get electrons and muons and put into 4vectors
+//   makeGenDilep(candphotonindex, &fourVec_genl1, &fourVec_genl2);
+//   // make dilepton object and add to met
+//   fourVec_genll = fourVec_genl1 + fourVec_genl2;
+//   //printf("  pt: %.4f  eta: %.4f  phi: %.4f  mass: %.4f \n", fourVec_l1.Pt(), fourVec_l1.Eta(), fourVec_l1.Phi(), fourVec_l1.M() );
+//   //printf("  pt: %.4f  eta: %.4f  phi: %.4f  mass: %.4f \n", fourVec_l2.Pt(), fourVec_l2.Eta(), fourVec_l2.Phi(), fourVec_l2.M() );
+//   //printf("  pt: %.4f  eta: %.4f  phi: %.4f  mass: %.4f \n", fourVec_ll.Pt(), fourVec_ll.Eta(), fourVec_ll.Phi(), fourVec_ll.M() );
+//   gen_dilep_mass = fourVec_genll.M();
+//
+//   fourVec_genMET.SetPtEtaPhiE( genMET, 0., genMETPhi, 0. );
+//
+//   fourVec_genLeptoMET = fourVec_genMET + fourVec_genll;
+//   genLeptoMET = fourVec_genLeptoMET.Pt();
+//   genLeptoMEPhi = fourVec_genLeptoMET.Phi();
+//
+//  bool passGenMET = genLeptoMET > 140.;
+//  bool passGendPhiPhoMET = ( DeltaPhi( mcPhi->at(candphotonindex), genLeptoMEPhi ) > 2.0 ) ;
+//
+//  // fill histograms
+//  if ( passGenMET && passGendPhiPhoMET )
+//  //printf("passed  ");
+//  //printf("dilep mass : %f", dilep_mass);
+//  //if ( passSpike && passMETfilters && passdPhiJetMET && passMET && passdPhiPhoMET )
+//     {
+//      gencount++;
+//      for(unsigned int ptb=0; ptb<lastptbin-2; ++ptb){ // break into pT bins
+//       if(
+//          (mcEt->at(candphotonindex) > ptbins[ptb]) &&
+//          (mcEt->at(candphotonindex) < ptbins[ptb+1])
+//         ){
+//        FillGenHistograms(ptb, 0, candphotonindex, event_weight);
+//       } // end if passes pt cuts then fill
+//      } // end pt bin loop
+//      if(  // do an inclusive pT plot from bins
+//         (mcEt->at(candphotonindex) > ptbins[0]) &&
+//         (mcEt->at(candphotonindex) < ptbins[inclptbin])
+//        ){
+//       FillGenHistograms(lastptbin-1, 0, candphotonindex, event_weight);
+//      }
+//      // and one fully inclusive in pT
+//      FillGenHistograms(lastptbin, 0, candphotonindex, event_weight);
+//     }
+//  // end fill histograms
+//  }
  } //end loop through entries
 
  // write these histograms to file
   std::cout<<std::endl;
-  std::cout<<"Total Passing Numerator: "<<nc<<"  Total Passing Denominator: "<<dc<<std::endl;
+  std::cout<<"Total Passing : "<<nc<<std::endl;
   std::cout<<"made it through, about to write"<<std::endl;
 
  TFile *outfile = new TFile(outfilename,"RECREATE");
@@ -273,6 +323,67 @@ double postAnalyzer_ZnunuG::DeltaPhi(double phi1, double phi2)
 //}
 
 
+
+/////-------------------------makeGenDilep
+///void postAnalyzer_ZnunuG::makeGenDilep(int pho_index, TLorentzVector *fv_1, TLorentzVector *fv_2)
+///{
+///
+///  /// Get This GEN list from somewhere
+///  std::vector<int> elelist = electron_passLooseID(pho_index, 10.);
+///  std::vector<int> mulist =  muon_passLooseID(pho_index, 10.);
+///
+///  TLorentzVector e1, e2, ee;
+///  TLorentzVector m1, m2, mm;
+///
+///  // no pairs
+///  if( elelist.size()<2 && mulist.size()<2 ){return;}
+///  // electrons
+///  if( elelist.size()>1 ){
+///   //printf(" --we have electrons ");
+///   e1.SetPtEtaPhiE( elePt->at(elelist[0]), eleEta->at(elelist[0]), elePhi->at(elelist[0]), eleEn->at(elelist[0]) );
+///   //e1.SetPtEtaPhiE( elePt[elelist[0]], eleEta[elelist[0]], elePhi[elelist[0]], eleEn[elelist[0]] );
+///   for(int i=1; i<elelist.size(); ++i)
+///   {
+///     if( eleCharge->at(0)*eleCharge->at(i)==-1 )
+///     //if( eleCharge[0]*eleCharge[i]==-1 )
+///     {
+///      //printf(": charge pass ");
+///      e2.SetPtEtaPhiE( elePt->at(elelist[i]), eleEta->at(elelist[i]), elePhi->at(elelist[i]), eleEn->at(elelist[i]) );
+///      //e2.SetPtEtaPhiE( elePt[elelist[i]], eleEta[elelist[i]], elePhi[elelist[i]], eleEn[elelist[i]] );
+///      break;
+///     }
+///   }
+///   ee = e1 + e2;
+///   //printf(": dilep mass = %f", ee.M());
+///  }
+///  // muons
+///  if( mulist.size()>1 ){
+///   //printf(" --we have muons ");
+///   m1.SetPtEtaPhiE( muPt->at(mulist[0]), muEta->at(mulist[0]), muPhi->at(mulist[0]), muEn->at(mulist[0]) );
+///   for(int i=1; i<mulist.size(); ++i)
+///   {
+///     if( muCharge->at(0)*muCharge->at(i)==-1 )
+///     {
+///      //printf(": charge pass ");
+///      m2.SetPtEtaPhiE( muPt->at(mulist[i]), muEta->at(mulist[i]), muPhi->at(mulist[i]), muEn->at(mulist[i]) );
+///      break;
+///     }
+///   }
+///   mm = m1 + m2;
+///   //printf(": dilep mass = %f", mm.M());
+///  }
+///
+///  // take highest mass dilepton pair
+///  if( ee.M() > mm.M() && ee.M()>60. && ee.M()<120. ){ *fv_1 = e1; *fv_2 = e2; }
+///  else if( ee.M() < mm.M() && mm.M()>60. && mm.M()<120. ){ *fv_1 = m1; *fv_2 = m2; }
+///  //if( ee.M() > mm.M() && ee.M()>60. && ee.M()<120. ){ printf(": using ee\n"); *fv_1 = e1; *fv_2 = e2; }
+///  //else if( ee.M() < mm.M() && mm.M()>60. && mm.M()<120. ){ printf(": using mm\n"); *fv_1 = m1; *fv_2 = m2; }
+///
+///  return;
+///  
+///}
+
+
 //-------------------------makeDilep
 void postAnalyzer_ZnunuG::makeDilep(int pho_index, TLorentzVector *fv_1, TLorentzVector *fv_2)
 {
@@ -287,43 +398,47 @@ void postAnalyzer_ZnunuG::makeDilep(int pho_index, TLorentzVector *fv_1, TLorent
   if( elelist.size()<2 && mulist.size()<2 ){return;}
   // electrons
   if( elelist.size()>1 ){
-   printf(" --we have electrons ");
-   e1.SetPtEtaPhiE( elePt->at(elelist[0]), eleEta->at(elelist[0]), elePhi->at(elelist[0]), eleEn->at(elelist[0]) );
-   //e1.SetPtEtaPhiE( elePt[elelist[0]], eleEta[elelist[0]], elePhi[elelist[0]], eleEn[elelist[0]] );
    for(int i=1; i<elelist.size(); ++i)
    {
      if( eleCharge->at(0)*eleCharge->at(i)==-1 )
      //if( eleCharge[0]*eleCharge[i]==-1 )
      {
-      printf(": charge pass ");
+   //printf(" --we have electrons ");
+   e1.SetPtEtaPhiE( elePt->at(elelist[0]), eleEta->at(elelist[0]), elePhi->at(elelist[0]), eleEn->at(elelist[0]) );
+   //e1.SetPtEtaPhiE( elePt[elelist[0]], eleEta[elelist[0]], elePhi[elelist[0]], eleEn[elelist[0]] );
+      //printf(": charge pass ");
       e2.SetPtEtaPhiE( elePt->at(elelist[i]), eleEta->at(elelist[i]), elePhi->at(elelist[i]), eleEn->at(elelist[i]) );
       //e2.SetPtEtaPhiE( elePt[elelist[i]], eleEta[elelist[i]], elePhi[elelist[i]], eleEn[elelist[i]] );
       break;
      }
    }
    ee = e1 + e2;
-   printf(": dilep mass = %f", ee.M());
+   //printf(": dilep mass = %f", ee.M());
   }
   // muons
   if( mulist.size()>1 ){
-   printf(" --we have muons ");
-   m1.SetPtEtaPhiE( muPt->at(mulist[0]), muEta->at(mulist[0]), muPhi->at(mulist[0]), muEn->at(mulist[0]) );
    for(int i=1; i<mulist.size(); ++i)
    {
      if( muCharge->at(0)*muCharge->at(i)==-1 )
      {
-      printf(": charge pass ");
+   //printf(" --we have muons ");
+   m1.SetPtEtaPhiE( muPt->at(mulist[0]), muEta->at(mulist[0]), muPhi->at(mulist[0]), muEn->at(mulist[0]) );
+      //printf(": charge pass ");
       m2.SetPtEtaPhiE( muPt->at(mulist[i]), muEta->at(mulist[i]), muPhi->at(mulist[i]), muEn->at(mulist[i]) );
       break;
      }
    }
    mm = m1 + m2;
-   printf(": dilep mass = %f", mm.M());
+   //printf(": dilep mass = %f", mm.M());
   }
 
   // take highest mass dilepton pair
-  if( ee.M() > mm.M() && ee.M()>60. && ee.M()<120. ){ printf(": using ee\n"); *fv_1 = e1; *fv_2 = e2; }
-  else if( ee.M() < mm.M() && mm.M()>60. && mm.M()<120. ){ printf(": using mm\n"); *fv_1 = m1; *fv_2 = m2; }
+  if( ee.M()>60. && ee.M()<120. ){ *fv_1 = e1; *fv_2 = e2; }
+  else if( mm.M()>60. && mm.M()<120. ){ *fv_1 = m1; *fv_2 = m2; }
+  ///if( ee.M() > mm.M() && ee.M()>60. && ee.M()<120. ){ *fv_1 = e1; *fv_2 = e2; }
+  ///else if( ee.M() < mm.M() && mm.M()>60. && mm.M()<120. ){ *fv_1 = m1; *fv_2 = m2; }
+  //if( ee.M() > mm.M() && ee.M()>60. && ee.M()<120. ){ printf(": using ee\n"); *fv_1 = e1; *fv_2 = e2; }
+  //else if( ee.M() < mm.M() && mm.M()>60. && mm.M()<120. ){ printf(": using mm\n"); *fv_1 = m1; *fv_2 = m2; }
 
   return;
   
