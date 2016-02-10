@@ -15,11 +15,11 @@ void callZnunuGAnalyzer(void)
  TChain *theChain = new TChain("ggNtuplizer/EventTree"); ;
  theChain->Reset();
  
- Double_t lumi=2.26;
+ Double_t lumi=2.24;
  Double_t nrEvents=10000;
  Double_t crossSec=40000;
  
- Bool_t isMC=kTRUE;
+ Bool_t isMC=kFALSE;
  TString path = "./test";
  TString outfilename=path+"/ZNNG_ZGMC.root";
  //TString outfilename=path+"/ZNNG_DataD.root";

@@ -2,25 +2,34 @@
 
 #voms-proxy-init --voms cms --valid 100:00
 
-domc=false
-dodata=true
+domc=true
+dodata=false
 dosubmit=true
 
 START=$(date +%s);
-printf "Started at `date`"
+printf "Started at `date`\n\n"
 
 mkdir -p "${submitbase}/${version}/lists"
 mkdir -p "${submitbase}/${version}/submit"
 
-lumi=2260. # /pb
+lumi=2240. # /pb
 
+  #"ZLLG"
+  #"ZNuNuG"
 if [ ${domc} = true ]
 then
  for mc_samplename in \
-  "ZLLG"
+  "ZJetsToNuNu"
  do
 
-  submitname="${mc_samplename}"
+  for htbin in \
+   "100To200" \
+   "200To400" \
+   "400To600" \
+   "600ToInf"
+  do 
+
+  submitname="${mc_samplename}${htbin}"
 
   initevents="${submitbase}/${version}/lists/initialEvents.txt"
   touch ${initevents}
@@ -30,7 +39,13 @@ then
  then 
   echo "Need to count events.. making list"
 
-   find /hdfs/store/user/jjbuch/${mc_samplename}*TuneCUETP8M1_13TeV*/crab_ggNtuplizer_spring15_${mc_samplename}*_try5/151212_*/0000/*root > \
+#/hdfs/store/user/jjbuch/ZJetsToNuNu_HT-100To200_13TeV-madgraph/
+#/hdfs/store/user/jjbuch/ZJetsToNuNu_HT-600ToInf_13TeV-madgraph/
+#/hdfs/store/user/jjbuch/ZJetsToNuNu_HT-200To400_13TeV-madgraph/
+#/hdfs/store/user/jjbuch/ZJetsToNuNu_HT-400To600_13TeV-madgraph/
+
+   #find /hdfs/store/user/jjbuch/${mc_samplename}*TuneCUETP8M1_13TeV*/crab_ggNtuplizer_spring15_${mc_samplename}*_try5/151212_*/0000/*root > \
+   find /hdfs/store/user/jjbuch/${mc_samplename}*${htbin}*13TeV*/crab_ggNtuplizer_spring15_${mc_samplename}*_try5/151212_*/0000/*root > \
     ${submitbase}/${version}/lists/hdfslist_${submitname}.txt
 
    # format as xrootd
@@ -82,6 +97,7 @@ then
 
   fi # ${dosubmit} = true
 
+  done # for htbin in ..
  done # for mc_samplename in ..
 fi # ${domc} = true
 
