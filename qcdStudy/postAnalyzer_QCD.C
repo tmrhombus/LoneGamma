@@ -14,7 +14,7 @@ void postAnalyzer_QCD::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Dou
  Int_t dc = 0;
 
  if (fChain == 0) return;
- std::cout<<"Numerator/Denominator : run : lumis : event : photonindex "<<std::endl;
+ //std::cout<<"Numerator/Denominator : run : lumis : event : photonindex "<<std::endl;
 
  Long64_t nentries = fChain->GetEntriesFast();
 
@@ -45,7 +45,7 @@ void postAnalyzer_QCD::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Dou
            || ( run==259862 && event==90465340  && lumis==53  )
            || ( run==259862 && event==89817711  && lumis==53  )
              ) {
-            std::cout<<"A : "<<run<<" : "<<event<<" : "<<lumis<<std::endl;
+            //std::cout<<"A : "<<run<<" : "<<event<<" : "<<lumis<<std::endl;
        //     std::cout<<"Ashim Event  oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"<<std::endl;
        //     std::cout<<" run           "<<   run            <<std::endl;
        //     std::cout<<" lumis          "<<   lumis           <<std::endl;
@@ -229,7 +229,7 @@ void postAnalyzer_QCD::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Dou
          ){
            if( sysb==0 && ptb==0 ) {
             nc++;
-            std::cout<<"N : "<<run<<" : "<<event<<" : "<<lumis<<" : "<<sigPCvint[sysb].at(k)<<std::endl;
+            //std::cout<<"N : "<<run<<" : "<<event<<" : "<<lumis<<" : "<<sigPCvint[sysb].at(k)<<std::endl;
             //std::cout<<"Passed Numerator Cut-------------------------------------------------------------"<<std::endl;
             //std::cout<<" run           "<<   run            <<std::endl;
             //std::cout<<" lumis          "<<   lumis           <<std::endl;
@@ -335,7 +335,7 @@ void postAnalyzer_QCD::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Dou
          ){
            if( sysb==0 && ptb==0 ) {
             dc++;
-            std::cout<<"D : "<<run<<" : "<<event<<" : "<<lumis<<" : "<<denPCvint[sysb].at(k)<<std::endl;
+            //std::cout<<"D : "<<run<<" : "<<event<<" : "<<lumis<<" : "<<denPCvint[sysb].at(k)<<std::endl;
             //std::cout<<"Passed Denominator Cut-----------------------------------------------------------"<<std::endl;
             //std::cout<<" run           "<<   run            <<std::endl;
             //std::cout<<" lumis          "<<   lumis           <<std::endl;

@@ -1580,7 +1580,7 @@ public :
                          Double_t crossSec);
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
-   virtual vector<int> pcPassSel(int sel=0, int sys=0, double phoPtLo=175., double phoPtHi=190., double phoEtaMax=1.4442, Bool_t isMC=kTRUE);
+   virtual vector<int> pcPassSel(int sel=0, int sys=0, double phoPtLo=175., double phoPtHi=1000., double phoEtaMax=1.4442, Bool_t isMC=kTRUE);
     // sel = 0:numerator signal; 1:numerator background; 2:denominator
    Double_t EAcharged(Double_t eta);
    Double_t EAneutral(Double_t eta);

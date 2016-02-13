@@ -17,7 +17,7 @@ lumi=2260. # /pb
 if [ ${domc} = true ]
 then
  for mc_samplename in \
-  "GJets_HT"  \
+  "GJets_HT" \
   "QCD_Pt"
  do
 
@@ -109,7 +109,7 @@ then
    --infer-cmssw-path \
    --fwklite \
    --input-file-list=${xrdlist} \
-   --input-files-per-job=30 \
+   --input-files-per-job=100 \
    --use-hdfs \
    --extra-inputs=${submitbase}/postAnalyzer_QCD.C,${submitbase}/postAnalyzer_QCD.h \
    ${version} \
@@ -154,6 +154,7 @@ then
   treename="ggNtuplizer/EventTree"
   isMC="kFALSE"
   xc="1."
+  nrE="2260."
 
   # make correct executable xx_callpostAnalyzer_QCD
   cp template_callpostAnalyzer_QCD.cc         "${submitbase}/${version}/submit/${data_samplename}_callpostAnalyzer_QCD.cc"
@@ -161,7 +162,8 @@ then
   sed -i "s@TREENAME@${treename}@g"           "${submitbase}/${version}/submit/${data_samplename}_callpostAnalyzer_QCD.cc"
   sed -i "s@ISMC@${isMC}@g"                   "${submitbase}/${version}/submit/${data_samplename}_callpostAnalyzer_QCD.cc"
   sed -i "s@CROSSSEC@${xc}@g"                 "${submitbase}/${version}/submit/${data_samplename}_callpostAnalyzer_QCD.cc"
-  sed -i "s@LUMI@${lumi}@g"                 "${submitbase}/${version}/submit/${data_samplename}_callpostAnalyzer_QCD.cc"
+  sed -i "s@NREVENTS@${nrE}@g"                "${submitbase}/${version}/submit/${data_samplename}_callpostAnalyzer_QCD.cc"
+  sed -i "s@LUMI@${lumi}@g"                   "${submitbase}/${version}/submit/${data_samplename}_callpostAnalyzer_QCD.cc"
 
   printf "  done making submit template\n"
 
