@@ -152,6 +152,8 @@ public :
                                int sn);
 
    void drawAllRates();
+   void drawAllRatesRelative();
+   void drawAllRatesRelativeHist();
 
 };
 #endif
