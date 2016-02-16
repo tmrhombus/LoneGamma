@@ -666,6 +666,7 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
   err_num_corr[ptb] = sqrt( tmp_err_num_corr*tmp_err_num_corr + 
                               corrErr[ptb]*corrErr[ptb] );
   hdataden->IntegralAndError(1, sieiebin, err_den[ptb]);
+  //err_den[ptb]=0;
 
   }
 
@@ -835,7 +836,6 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
   gr_ratio->Draw("P");
   gr_ratio_noe->Draw("P,sames");
   gr_ratio_noe->Fit("pol1");
-  //gr_ratio->Fit("pol0");
   TF1 *fit_ratio = gr_ratio_noe->GetFunction("pol1");
   fit_ratio->SetLineColor(1);
   fit_ratio->SetLineWidth(3);
@@ -861,18 +861,6 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
   tex.DrawLatexNDC(0.45,0.35,TString(boost::lexical_cast<string>(boost::format("b = %0.3f +- %0.3f") % p0 % e0))); 
   tex.DrawLatexNDC(0.45,0.30,"#chi^{2}"+TString(boost::lexical_cast<string>(boost::format(" = %0.5f") % chi2))); 
 
-  //TText* eqlabel = new TText(1,1,"") ;
-  //eqlabel->SetTextSize(0.07);
-  //eqlabel->SetTextColor(kBlack);
-  //eqlabel->SetTextAlign(11);
-  //eqlabel->SetTextFont(42);
-  //eqlabel->DrawTextNDC(0.45,0.47,"y = m x + b");
-  //eqlabel->SetTextSize(0.05);
-  //eqlabel->DrawTextNDC(0.45,0.40,TString(boost::lexical_cast<string>(boost::format("m = %0.3f +- %0.3f") % p1 % e1))); 
-  //eqlabel->DrawTextNDC(0.45,0.35,TString(boost::lexical_cast<string>(boost::format("b = %0.3f +- %0.3f") % p0 % e0))); 
-  //eqlabel->DrawTextNDC(0.45,0.30,"#chi^{2}"+TString(boost::lexical_cast<string>(boost::format(" = %0.3f") % chi2))); 
-  //log<<boost::format("\n\nStarting Systematic:  %s \n") % sysname;
-
   //std::cout<<"Npoints: "<<gr_ratio->GetN()<<std::endl;
   //Double_t thex;
   //Double_t they;
@@ -884,12 +872,10 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
 
   c2->Update();
   
-  //gr_ratio->Draw("sames,A*");
-
   c2->SaveAs(outpath+"/Graph_FakeRatio"+sysname+".pdf");
-  //c2->SaveAs(outpath+"/Graph_FakeRatio.C");
-  //c2->SaveAs(outpath+"/Graph_FakeRatio.eps");
-  //c2->SaveAs(wwwpath+"/Graph_FakeRatio.pdf");
+  //c2->SaveAs(outpath+"/Graph_FakeRatio"+sysname+".C");
+  //c2->SaveAs(outpath+"/Graph_FakeRatio"+sysname+".eps");
+  //c2->SaveAs(wwwpath+"/Graph_FakeRatio"+sysname+".pdf");
 
   c2->Clear();
 
@@ -909,17 +895,11 @@ void plot::drawAllRates(){
   gPad->SetTicky();
   gStyle->SetLineWidth(3);
 
-  //gr_ratio->SetMarkerColor(2);
-  //gr_ratio->SetLineColor(2);
-  //gr_ratio->SetMarkerStyle(22);
-
   double xmax;
   xmax = 600.;
 
   Double_t xlow = 175.;
   Double_t xhi = 600.;
-  //TH1F *hs = c2->DrawFrame(0.,0.,1000.,0.5,"");
-  //TH1F *hs = c3->DrawFrame(175.,0.,1000.,0.5,"");
   TH1F *hs = c3->DrawFrame(xlow,0.,xhi,0.5,"");
   hs->SetXTitle("photon pT [GeV]");
   hs->SetYTitle("Fake Ratio"); 
@@ -1411,7 +1391,8 @@ void plot::drawAllRatesRelativeHist(){
   Double_t xhi = 1000.;
   //TH1F *hs = c2->DrawFrame(0.,0.,1000.,0.5,"");
   //TH1F *hs = c3->DrawFrame(175.,0.,1000.,0.5,"");
-  TH1F *hs = c3->DrawFrame(xlow,-0.3,xhi,0.8,"");
+  TH1F *hs = c3->DrawFrame(xlow,-2.,xhi,2.,"");
+  //TH1F *hs = c3->DrawFrame(xlow,-0.3,xhi,0.8,"");
   hs->SetXTitle("photon pT [GeV]");
   hs->SetYTitle("Relative Fake Ratio"); 
 
@@ -1456,6 +1437,9 @@ void plot::drawAllRatesRelativeHist(){
   TH1* h_sys5 = new TH1D( "h_sys5", "h_sys5", NBINS, edges );
   TH1* h_sys6 = new TH1D( "h_sys6", "h_sys6", NBINS, edges );
   TH1* h_sys7 = new TH1D( "h_sys7", "h_sys7", NBINS, edges );
+  TH1* h_sys8 = new TH1D( "h_sys8", "h_sys8", NBINS, edges );
+  TH1* h_sys9 = new TH1D( "h_sys9", "h_sys9", NBINS, edges );
+ 
 
 
   // y
@@ -1467,6 +1451,8 @@ void plot::drawAllRatesRelativeHist(){
   Double_t *points5 = new Double_t[4];
   Double_t *points6 = new Double_t[4];
   Double_t *points7 = new Double_t[4];
+  Double_t *points8 = new Double_t[4];
+  Double_t *points9 = new Double_t[4];
   for(unsigned int p=0; p<4; ++p){ h_sys0->SetBinContent( p+1, (ratioss[0][p]-ratioss[0][p])/ratioss[0][p] ); }
   for(unsigned int p=0; p<4; ++p){ h_sys1->SetBinContent( p+1, (ratioss[1][p]-ratioss[0][p])/ratioss[0][p] ); }
   for(unsigned int p=0; p<4; ++p){ h_sys2->SetBinContent( p+1, (ratioss[2][p]-ratioss[0][p])/ratioss[0][p] ); }
@@ -1475,6 +1461,8 @@ void plot::drawAllRatesRelativeHist(){
   for(unsigned int p=0; p<4; ++p){ h_sys5->SetBinContent( p+1, (ratioss[5][p]-ratioss[0][p])/ratioss[0][p] ); }
   for(unsigned int p=0; p<4; ++p){ h_sys6->SetBinContent( p+1, (ratioss[6][p]-ratioss[0][p])/ratioss[0][p] ); }
   for(unsigned int p=0; p<4; ++p){ h_sys7->SetBinContent( p+1, (ratioss[7][p]-ratioss[0][p])/ratioss[0][p] ); }
+  for(unsigned int p=0; p<4; ++p){ h_sys8->SetBinContent( p+1, (+ratioerrorss[0][p])/ratioss[0][p] ); std::cout<<ratioerrorss[0][p]<<std::endl;}
+  for(unsigned int p=0; p<4; ++p){ h_sys9->SetBinContent( p+1, (-ratioerrorss[0][p])/ratioss[0][p] ); std::cout<<ratioerrorss[0][p]<<std::endl;}
 
 
   //// set colors
@@ -1486,6 +1474,8 @@ void plot::drawAllRatesRelativeHist(){
   h_sys6->SetMarkerColor(TColor::GetColor("#1f78b4"));
   h_sys5->SetMarkerColor(TColor::GetColor("#a6cee3"));
   h_sys7->SetMarkerColor(TColor::GetColor("#b15928"));
+  h_sys8->SetMarkerColor(TColor::GetColor("#b15928"));
+  h_sys9->SetMarkerColor(TColor::GetColor("#b15928"));
 
   h_sys0->SetLineColor(kBlack                     );                          
   h_sys2->SetLineColor(TColor::GetColor("#33a02c"));
@@ -1495,6 +1485,8 @@ void plot::drawAllRatesRelativeHist(){
   h_sys6->SetLineColor(TColor::GetColor("#1f78b4"));
   h_sys5->SetLineColor(TColor::GetColor("#a6cee3"));
   h_sys7->SetLineColor(TColor::GetColor("#b15928"));
+  h_sys8->SetLineColor(TColor::GetColor("#ff7f00"));
+  h_sys9->SetLineColor(TColor::GetColor("#fdbf6f"));
 
   h_sys0->SetLineWidth(3); 
   h_sys1->SetLineWidth(3); 
@@ -1504,6 +1496,8 @@ void plot::drawAllRatesRelativeHist(){
   h_sys5->SetLineWidth(3); 
   h_sys6->SetLineWidth(3); 
   h_sys7->SetLineWidth(3); 
+  h_sys8->SetLineWidth(3); 
+  h_sys9->SetLineWidth(3); 
 
 // // sideband binning met gamma
 //  TColor *color0 = new TColor( 7430, 0,0,0 ,       "color0" ); 
@@ -1515,6 +1509,7 @@ void plot::drawAllRatesRelativeHist(){
 //  TColor *color6 = new TColor( 7436, 166,206,227 , "color6" ); 
 //  TColor *color7 = new TColor( 7437, 177,89,40 ,   "color7" ); 
 
+  h_sys0->Draw("hist,same");
   h_sys1->Draw("hist,same");
   h_sys2->Draw("hist,same");
   h_sys3->Draw("hist,same");
@@ -1522,7 +1517,8 @@ void plot::drawAllRatesRelativeHist(){
   h_sys5->Draw("hist,same");
   h_sys6->Draw("hist,same");
   h_sys7->Draw("hist,same");
-  h_sys0->Draw("hist,same");
+  h_sys8->Draw("hist,same");
+  h_sys9->Draw("hist,same");
 
   TLegend *leg4 = new TLegend(0.5,0.6,0.88,0.88 );
   leg4->SetFillColor(kWhite);
@@ -1534,6 +1530,8 @@ void plot::drawAllRatesRelativeHist(){
   leg4->AddEntry( h_sys4,"MET Down", "L");
   leg4->AddEntry( h_sys5,"binning Up", "L");
   leg4->AddEntry( h_sys6,"binning Down","L");
+  leg4->AddEntry( h_sys8,"fit Up","L");
+  leg4->AddEntry( h_sys9,"fit Down","L");
   leg4->Draw("same");
 
   //TLine *line0 = new TLine(xlow,xlow*ms[0]+bs[0],xhi,xhi*ms[0]+bs[0]);
@@ -1573,6 +1571,78 @@ void plot::drawAllRatesRelativeHist(){
   //c2->SaveAs(wwwpath+"/Graph_FakeRatio.pdf");
 
   c3->Clear();
+
+//// reduced range
+
+  TCanvas* c4 = new TCanvas("c4","c4",900,100,500,500);   
+
+  gStyle->SetOptStat(0);
+  //gPad->SetLogy();
+  gPad->SetTickx();
+  gPad->SetTicky();
+  gStyle->SetLineWidth(3);
+
+  Double_t xalow = 175.;
+  Double_t xahi = 400.;
+  TH1F *hframe = c4->DrawFrame(xalow,-0.5,xahi,0.8,"");
+  //TH1F *hframe = c4->DrawFrame(xlow,-0.3,xhi,0.8,"");
+  hframe->SetXTitle("photon pT [GeV]");
+  hframe->SetYTitle("Relative Fake Ratio"); 
+
+  title->DrawTextNDC(0.17,0.87,"CMS");
+  extra->DrawTextNDC(0.17,0.81,"Preliminary");
+  lumi->DrawTextNDC(0.9,0.91,"2.24 /fb (13 TeV)");
+
+  h_sys0->Draw("hist,same");
+  h_sys1->Draw("hist,same");
+  h_sys2->Draw("hist,same");
+  h_sys3->Draw("hist,same");
+  h_sys4->Draw("hist,same");
+  h_sys5->Draw("hist,same");
+  h_sys6->Draw("hist,same");
+  h_sys7->Draw("hist,same");
+  h_sys8->Draw("hist,same");
+  h_sys9->Draw("hist,same");
+
+  leg4->Draw("same");
+
+  //TLine *line0 = new TLine(xlow,xlow*ms[0]+bs[0],xhi,xhi*ms[0]+bs[0]);
+  //TLine *line1 = new TLine(xlow,xlow*ms[1]+bs[1],xhi,xhi*ms[1]+bs[1]);
+  //TLine *line2 = new TLine(xlow,xlow*ms[2]+bs[2],xhi,xhi*ms[2]+bs[2]);
+  //TLine *line3 = new TLine(xlow,xlow*ms[3]+bs[3],xhi,xhi*ms[3]+bs[3]);
+  //TLine *line4 = new TLine(xlow,xlow*ms[4]+bs[4],xhi,xhi*ms[4]+bs[4]);
+  //TLine *line5 = new TLine(xlow,xlow*ms[5]+bs[5],xhi,xhi*ms[5]+bs[5]);
+  //TLine *line6 = new TLine(xlow,xlow*ms[6]+bs[6],xhi,xhi*ms[6]+bs[6]);
+  //TLine *line7 = new TLine(xlow,xlow*ms[7]+bs[7],xhi,xhi*ms[7]+bs[7]);
+
+  //line0->SetLineColor(kBlack);   
+  //line1->SetLineColor(kRed+1);   
+  //line2->SetLineColor(kYellow-3);
+  //line3->SetLineColor(kGreen+1); 
+  //line4->SetLineColor(kGreen-9); 
+  //line5->SetLineColor(kAzure+10);
+  //line6->SetLineColor(kBlue-9);  
+  //line7->SetLineColor(51);       
+
+  //line1->Draw();
+  //line2->Draw();
+  //line3->Draw();
+  //line4->Draw();
+  //line5->Draw();
+  //line6->Draw();
+  //line7->Draw();
+  //line0->Draw();
+
+  c4->Update();
+  
+  //gr_ratio->Draw("sames,A*");
+
+  c4->SaveAs(outpath+"/Graph_FakeRatiosRelativeHist_175to400.pdf");
+  //c2->SaveAs(outpath+"/Graph_FakeRatio.C");
+  //c2->SaveAs(outpath+"/Graph_FakeRatio.eps");
+  //c2->SaveAs(wwwpath+"/Graph_FakeRatio.pdf");
+
+  c4->Clear();
 
  return;
 
