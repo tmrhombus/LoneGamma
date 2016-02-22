@@ -87,11 +87,7 @@ void postAnalyzer_ZnunuG::Loop(TString outfilename, Bool_t isMC, Double_t lumi, 
       leptoMET = fourVec_leptomet.Pt();
       leptoMEPhi = fourVec_leptomet.Phi();
 
-      ////// 
-      ///std::vector<int>  jetindexvector = selectedJets(candphotonindex);
-      /////bool passdphiJetMET(&jetindexvector, leptoMEPhi);
-
-      bool passMET = (leptoMET > 140.) ;
+      bool passMET = (leptoMET > 170.) ;
       bool passdPhiPhoMET = ( DeltaPhi(phoPhi->at(candphotonindex),leptoMEPhi)>2.0 ) ;
       //if(passMET       )  printf(" passMET       \n");
       //if(passdPhiPhoMET)  printf(" passdPhiPhoMET\n");
