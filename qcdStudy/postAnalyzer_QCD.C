@@ -34,160 +34,160 @@ void postAnalyzer_QCD::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Dou
   event_weight=1.0;
   if(isMC){ event_weight=lumi*crossSec/nrEvents; }
   
-           if (
-              ( run==258446 && event==121132593 && lumis==97  )  
-           || ( run==258702 && event==280995575 && lumis==180 ) 
-           || ( run==258712 && event==494069084 && lumis==312 ) 
-           || ( run==258712 && event==22840508  && lumis==15  )
-           || ( run==258712 && event==64168685  && lumis==40  )
-           || ( run==258712 && event==88413644  && lumis==55  )
-           || ( run==259809 && event==177969654 && lumis==138 ) 
-           || ( run==259862 && event==90465340  && lumis==53  )
-           || ( run==259862 && event==89817711  && lumis==53  )
-             ) {
-            //std::cout<<"A : "<<run<<" : "<<event<<" : "<<lumis<<std::endl;
-       //     std::cout<<"Ashim Event  oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"<<std::endl;
-       //     std::cout<<" run           "<<   run            <<std::endl;
-       //     std::cout<<" lumis          "<<   lumis           <<std::endl;
-       //     std::cout<<" event         "<<   event          <<std::endl;
-       //     std::cout<<" (HLTPho>>7&1)  "<< (HLTPho>>7&1) <<std::endl; 
-       //     std::cout<<" (HLTPho>>8&1)  "<< (HLTPho>>8&1) <<std::endl; 
-       //     std::cout<<" (HLTPho>>9&1)  "<< (HLTPho>>9&1) <<std::endl; 
-       //     std::cout<<" (HLTPho>>10&1) "<< (HLTPho>>10&1)<<std::endl; 
-       //     std::cout<<" (HLTPho>>11&1) "<< (HLTPho>>11&1)<<std::endl; 
-       //     std::cout<<" (HLTPho>>12&1) "<< (HLTPho>>12&1)<<std::endl; 
-       //     std::cout<<" (HLTPho>>22&1) "<< (HLTPho>>22&1)<<std::endl; 
-       //  for(int p=0;p<nPho;p++)  // nPho from ntuple (should = phoE->length() )
-       //    {
-       //     std::cout<<"..................................................................."<<std::endl;
-       //     std::cout<<" photon index  "<<   p     <<std::endl;
-
-       //     std::cout<<" phoEt          "<<   (*phoEt)[p]          <<std::endl; 
-       //     std::cout<<" phoSCEta       "<<   (*phoSCEta)[p]       <<std::endl;
-       //     std::cout<<" pfMET          "<<   pfMET          <<std::endl;
-       //     std::cout<<" phoPFNeuIso    "<<   (*phoPFNeuIso)[p]    <<std::endl;
-       //     std::cout<<" phoPFPhoIso    "<<   (*phoPFPhoIso)[p]    <<std::endl;
-       //     std::cout<<" phoPFChIso     "<<   (*phoPFChIso) [p]     <<std::endl;
-       //     std::cout<<" rho            "<<   rho            <<std::endl;
-       //     std::cout<<" EAneutral      "<<   EAneutral((*phoSCEta)[p]) <<std::endl;
-       //     std::cout<<" EAphoton       "<<   EAphoton((*phoSCEta)[p])       <<std::endl<<std::endl;   
-
-       //     std::cout<<"  To Pass Denominator Cut  sssssssssssssssssssssssssssssss"<<std::endl;
-       //     std::cout<<"xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"<<std::endl;
-       //     std::cout<<" (V)Loose ID Variables"<<std::endl;
-       //     std::cout<<"Neutral Iso     NeuIso - rho*EA = "<<
-       //      (*phoPFNeuIso)[p] - ( rho * EAneutral((*phoSCEta)[p]) )<<std::endl;
-       //     std::cout<<"  1.92 + 0.014pT + 0.000019pT^2 = "<<  
-       //      (1.92 + (0.014 * (*phoEt)[p]) + (0.000019 * pow((*phoEt)[p], 2.0)))<<std::endl;
-       //     std::cout<<"5(1.92 + 0.014pT + 0.000019pT^2)= "<<  
-       //      (5 * (1.92 + (0.014 * (*phoEt)[p]) + (0.000019 * pow((*phoEt)[p], 2.0))))<<std::endl;
-       //     std::cout<<"                        0.2(pT) = "<<(0.2 * ((*phoEt)[p]))<<std::endl;
-       //     std::cout<<"xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"<<std::endl;
-       //     std::cout<<"Photon Iso      PhoIso - rho*EA = "<<
-       //      (*phoPFPhoIso)[p] - ( rho * EAphoton((*phoSCEta)[p]) )<<std::endl;
-       //     std::cout<<"                 0.81 + 0.053pT = "<<  
-       //      (0.81 + (0.053 * (*phoEt)[p]) )<<std::endl;
-       //     std::cout<<"              5(0.81 + 0.053pT) = "<<  
-       //      (5 * (0.81 + (0.053 * (*phoEt)[p]) ))<<std::endl;
-       //     std::cout<<"                        0.2(pT) = "<<(0.2 * ((*phoEt)[p]))<<std::endl;
-       //     std::cout<<"xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"<<std::endl;
-       //     std::cout<<"CHad Iso                        = "<< (*phoPFChIso)[p] <<std::endl;
-       //     std::cout<<"                        0.2(pT) = "<<(0.2 * ((*phoEt)[p]))<<std::endl;
-       //     std::cout<<"---------------------------------------"<<std::endl;
-       //     std::cout<<" Cuts are:"<<std::endl;
-       //     std::cout<<"  pT:             175 < "<<(*phoEt)[p]<<" < 190"<<std::endl;
-       //     std::cout<<"  eta:            | "<<(*phoSCEta)[p]<<" | < 1.442"<<std::endl;
-       //     std::cout<<"  met:            "<<pfMET<<" < 30"<<std::endl;
-       //     std::cout<<"  h/e:            "<<(*phoHoverE)[p]<<" < 0.05"<<std::endl;
-       //     std::cout<<"  pixel seed:     "<<(*phohasPixelSeed)[p]<<" == 0"<<std::endl;
-       //     std::cout<<"  |seed time|     3 > "<<    fabs((*phoseedTimeFull5x5)[p])<<std::endl;
-       //     std::cout<<"  MIP             6.3 > "<<    fabs((*phomipTotEnergy)[p])<<std::endl;
-       //     std::cout<<"  sieie           0.001 < "<<    fabs((*phoSigmaIEtaIEtaFull5x5)[p])<<std::endl;
-       //     std::cout<<"  sipip           0.001 < "<<    fabs((*phoSigmaIPhiIPhiFull5x5)[p])<<std::endl;
-       //     std::cout<<"  pass vloose:    must pass all"<<std::endl;
-
-       //      std::cout<<"    PFchIso:        max( 0, "<<
-       //      (*phoPFChIso)[p]<< " ) < min( 16.6, "<<
-       //      (0.2 * ((*phoEt)[p]))<<" )"<<std::endl;
-
-       //      std::cout<<"    PFphoIso:       max( 0, "<<
-       //      (*phoPFPhoIso)[p] - ( rho * EAphoton((*phoSCEta)[p]) )
-       //      << " ) < min( "<<
-       //      (5 * (0.81 + (0.053 * (*phoEt)[p]) ))
-       //      <<", "<<
-       //      (0.2 * ((*phoEt)[p]))<<" )"<<std::endl;
-
-       //      std::cout<<"    PFneuIso:       max( 0, "<<
-       //      (*phoPFNeuIso)[p] - ( rho * EAneutral((*phoSCEta)[p]) )
-       //      << " ) < min( "<<
-       //      (5 * (1.92 + (0.014 * (*phoEt)[p]) + (0.000019 * pow((*phoEt)[p], 2.0))))
-       //      <<", "<<
-       //      (0.2 * ((*phoEt)[p]))<<" )"<<std::endl;
-
-       //     std::cout<<"  fail loose:    must fail one of"<<std::endl;
-
-       //      std::cout<<"    PFchIso:        max( 0, "<<
-       //      (*phoPFChIso)[p]<< " ) < min( 3.32, "<<
-       //      (0.2 * ((*phoEt)[p]))<<" )"<<std::endl;
-
-       //      std::cout<<"    PFphoIso:       max( 0, "<<
-       //      (*phoPFPhoIso)[p] - ( rho * EAphoton((*phoSCEta)[p]) )
-       //      << " ) < min( "<<
-       //      (0.81 + (0.053 * (*phoEt)[p]) )
-       //      <<", "<<
-       //      (0.2 * ((*phoEt)[p]))<<" )"<<std::endl;
-
-       //      std::cout<<"    PFneuIso:       max( 0, "<<
-       //      (*phoPFNeuIso)[p] - ( rho * EAneutral((*phoSCEta)[p]) )
-       //      << " ) < min( "<<
-       //      (1.92 + (0.014 * (*phoEt)[p]) + (0.000019 * pow((*phoEt)[p], 2.0)))
-       //      <<", "<<
-       //      (0.2 * ((*phoEt)[p]))<<" )"<<std::endl<<std::endl;
-
-
-       //     std::cout<<"  To Pass Numerator Cut  sssssssssssssssssssssssssssssss"<<std::endl;
-       //     std::cout<<"xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"<<std::endl;
-       //     std::cout<<"Neutral Iso     NeuIso - rho*EA = "<<
-       //      (*phoPFNeuIso)[p] - ( rho * EAneutral((*phoSCEta)[p]) )<<std::endl;
-       //     std::cout<<"  1.06 + 0.014pT + 0.000019pT^2 = "<<  
-       //      (1.06 + (0.014 * (*phoEt)[p]) + (0.000019 * pow((*phoEt)[p], 2.0)))<<std::endl;
-       //     std::cout<<"xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"<<std::endl;
-       //     std::cout<<"Photon Iso      PhoIso - rho*EA = "<<
-       //      (*phoPFPhoIso)[p] - ( rho * EAphoton((*phoSCEta)[p]) )<<std::endl;
-       //     std::cout<<"                 0.28 + 0.053pT = "<<  
-       //      (0.28 + (0.053 * (*phoEt)[p]) )<<std::endl;
-       //     std::cout<<"xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"<<std::endl;
-       //     std::cout<<"CHad Iso                        = "<< (*phoPFChIso)[p] <<" < 1.37"<<std::endl<<std::endl;
-
-       //     std::cout<<"---------------------------------------"<<std::endl;
-       //     std::cout<<" Cuts are:"<<std::endl;
-       //     std::cout<<"  pT:             175 < "<<(*phoEt)[p]<<" < 190"<<std::endl;
-       //     std::cout<<"  eta:            | "<<(*phoSCEta)[p]<<" | < 1.442"<<std::endl;
-       //     std::cout<<"  met:            "<<pfMET<<" < 30"<<std::endl;
-       //     std::cout<<"  h/e:            "<<(*phoHoverE)[p]<<" < 0.05"<<std::endl;
-       //     std::cout<<"  pixel seed:     "<<(*phohasPixelSeed)[p]<<" == 0"<<std::endl;
-       //     std::cout<<"  |seed time|     3 > "<<    fabs((*phoseedTimeFull5x5)[p])<<std::endl;
-       //     std::cout<<"  MIP             6.3 > "<<    fabs((*phomipTotEnergy)[p])<<std::endl;
-       //     std::cout<<"  sieie           0.001 < "<<    fabs((*phoSigmaIEtaIEtaFull5x5)[p])<<std::endl;
-       //     std::cout<<"  sipip           0.001 < "<<    fabs((*phoSigmaIPhiIPhiFull5x5)[p])<<std::endl;
-       //     std::cout<<"  pass med:         must pass all"<<std::endl;
-
-       //      std::cout<<"    PFchIso:        max( 0, "<<
-       //      (*phoPFChIso)[p]<< " ) < 1.37"<<std::endl;
-
-       //      std::cout<<"    PFphoIso:       max( 0, "<<
-       //      (*phoPFPhoIso)[p] - ( rho * EAphoton((*phoSCEta)[p]) )
-       //      << " ) < "<<
-       //      (0.28 + (0.053 * (*phoEt)[p]) )
-       //      <<std::endl;
-
-       //      std::cout<<"    PFneuIso:       max( 0, "<<
-       //      (*phoPFNeuIso)[p] - ( rho * EAneutral((*phoSCEta)[p]) )
-       //      << " ) < "<<
-       //      (1.06 + (0.014 * (*phoEt)[p]) + (0.000019 * pow((*phoEt)[p], 2.0)))
-       //      <<std::endl<<std::endl;
-       //     }
-            }
+//           if (
+//              ( run==258446 && event==121132593 && lumis==97  )  
+//           || ( run==258702 && event==280995575 && lumis==180 ) 
+//           || ( run==258712 && event==494069084 && lumis==312 ) 
+//           || ( run==258712 && event==22840508  && lumis==15  )
+//           || ( run==258712 && event==64168685  && lumis==40  )
+//           || ( run==258712 && event==88413644  && lumis==55  )
+//           || ( run==259809 && event==177969654 && lumis==138 ) 
+//           || ( run==259862 && event==90465340  && lumis==53  )
+//           || ( run==259862 && event==89817711  && lumis==53  )
+//             ) {
+//            //std::cout<<"A : "<<run<<" : "<<event<<" : "<<lumis<<std::endl;
+//            std::cout<<"Ashim Event  oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"<<std::endl;
+//            std::cout<<" run           "<<   run            <<std::endl;
+//            std::cout<<" lumis          "<<   lumis           <<std::endl;
+//            std::cout<<" event         "<<   event          <<std::endl;
+//            std::cout<<" (HLTPho>>7&1)  "<< (HLTPho>>7&1) <<std::endl; 
+//            std::cout<<" (HLTPho>>8&1)  "<< (HLTPho>>8&1) <<std::endl; 
+//            std::cout<<" (HLTPho>>9&1)  "<< (HLTPho>>9&1) <<std::endl; 
+//            std::cout<<" (HLTPho>>10&1) "<< (HLTPho>>10&1)<<std::endl; 
+//            std::cout<<" (HLTPho>>11&1) "<< (HLTPho>>11&1)<<std::endl; 
+//            std::cout<<" (HLTPho>>12&1) "<< (HLTPho>>12&1)<<std::endl; 
+//            std::cout<<" (HLTPho>>22&1) "<< (HLTPho>>22&1)<<std::endl; 
+//         for(int p=0;p<nPho;p++)  // nPho from ntuple (should = phoE->length() )
+//           {
+//            std::cout<<"..................................................................."<<std::endl;
+//            std::cout<<" photon index  "<<   p     <<std::endl;
+//
+//            std::cout<<" phoEt          "<<   (*phoEt)[p]          <<std::endl; 
+//            std::cout<<" phoSCEta       "<<   (*phoSCEta)[p]       <<std::endl;
+//            std::cout<<" pfMET          "<<   pfMET          <<std::endl;
+//            std::cout<<" phoPFNeuIso    "<<   (*phoPFNeuIso)[p]    <<std::endl;
+//            std::cout<<" phoPFPhoIso    "<<   (*phoPFPhoIso)[p]    <<std::endl;
+//            std::cout<<" phoPFChIso     "<<   (*phoPFChIso) [p]     <<std::endl;
+//            std::cout<<" rho            "<<   rho            <<std::endl;
+//            std::cout<<" EAneutral      "<<   EAneutral((*phoSCEta)[p]) <<std::endl;
+//            std::cout<<" EAphoton       "<<   EAphoton((*phoSCEta)[p])       <<std::endl<<std::endl;   
+//
+//            std::cout<<"  To Pass Denominator Cut  sssssssssssssssssssssssssssssss"<<std::endl;
+//            std::cout<<"xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"<<std::endl;
+//            std::cout<<" (V)Loose ID Variables"<<std::endl;
+//            std::cout<<"Neutral Iso     NeuIso - rho*EA = "<<
+//             (*phoPFNeuIso)[p] - ( rho * EAneutral((*phoSCEta)[p]) )<<std::endl;
+//            std::cout<<"  1.92 + 0.014pT + 0.000019pT^2 = "<<  
+//             (1.92 + (0.014 * (*phoEt)[p]) + (0.000019 * pow((*phoEt)[p], 2.0)))<<std::endl;
+//            std::cout<<"5(1.92 + 0.014pT + 0.000019pT^2)= "<<  
+//             (5 * (1.92 + (0.014 * (*phoEt)[p]) + (0.000019 * pow((*phoEt)[p], 2.0))))<<std::endl;
+//            std::cout<<"                        0.2(pT) = "<<(0.2 * ((*phoEt)[p]))<<std::endl;
+//            std::cout<<"xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"<<std::endl;
+//            std::cout<<"Photon Iso      PhoIso - rho*EA = "<<
+//             (*phoPFPhoIso)[p] - ( rho * EAphoton((*phoSCEta)[p]) )<<std::endl;
+//            std::cout<<"                 0.81 + 0.053pT = "<<  
+//             (0.81 + (0.053 * (*phoEt)[p]) )<<std::endl;
+//            std::cout<<"              5(0.81 + 0.053pT) = "<<  
+//             (5 * (0.81 + (0.053 * (*phoEt)[p]) ))<<std::endl;
+//            std::cout<<"                        0.2(pT) = "<<(0.2 * ((*phoEt)[p]))<<std::endl;
+//            std::cout<<"xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"<<std::endl;
+//            std::cout<<"CHad Iso                        = "<< (*phoPFChIso)[p] <<std::endl;
+//            std::cout<<"                        0.2(pT) = "<<(0.2 * ((*phoEt)[p]))<<std::endl;
+//            std::cout<<"---------------------------------------"<<std::endl;
+//            std::cout<<" Cuts are:"<<std::endl;
+//            std::cout<<"  pT:             175 < "<<(*phoEt)[p]<<" < 190"<<std::endl;
+//            std::cout<<"  eta:            | "<<(*phoSCEta)[p]<<" | < 1.442"<<std::endl;
+//            std::cout<<"  met:            "<<pfMET<<" < 30"<<std::endl;
+//            std::cout<<"  h/e:            "<<(*phoHoverE)[p]<<" < 0.05"<<std::endl;
+//            std::cout<<"  pixel seed:     "<<(*phohasPixelSeed)[p]<<" == 0"<<std::endl;
+//            std::cout<<"  |seed time|     3 > "<<    fabs((*phoseedTimeFull5x5)[p])<<std::endl;
+//            std::cout<<"  MIP             6.3 > "<<    fabs((*phomipTotEnergy)[p])<<std::endl;
+//            std::cout<<"  sieie           0.001 < "<<    fabs((*phoSigmaIEtaIEtaFull5x5)[p])<<std::endl;
+//            std::cout<<"  sipip           0.001 < "<<    fabs((*phoSigmaIPhiIPhiFull5x5)[p])<<std::endl;
+//            std::cout<<"  pass vloose:    must pass all"<<std::endl;
+//
+//             std::cout<<"    PFchIso:        max( 0, "<<
+//             (*phoPFChIso)[p]<< " ) < min( 16.6, "<<
+//             (0.2 * ((*phoEt)[p]))<<" )"<<std::endl;
+//
+//             std::cout<<"    PFphoIso:       max( 0, "<<
+//             (*phoPFPhoIso)[p] - ( rho * EAphoton((*phoSCEta)[p]) )
+//             << " ) < min( "<<
+//             (5 * (0.81 + (0.053 * (*phoEt)[p]) ))
+//             <<", "<<
+//             (0.2 * ((*phoEt)[p]))<<" )"<<std::endl;
+//
+//             std::cout<<"    PFneuIso:       max( 0, "<<
+//             (*phoPFNeuIso)[p] - ( rho * EAneutral((*phoSCEta)[p]) )
+//             << " ) < min( "<<
+//             (5 * (1.92 + (0.014 * (*phoEt)[p]) + (0.000019 * pow((*phoEt)[p], 2.0))))
+//             <<", "<<
+//             (0.2 * ((*phoEt)[p]))<<" )"<<std::endl;
+//
+//            std::cout<<"  fail loose:    must fail one of"<<std::endl;
+//
+//             std::cout<<"    PFchIso:        max( 0, "<<
+//             (*phoPFChIso)[p]<< " ) < min( 3.32, "<<
+//             (0.2 * ((*phoEt)[p]))<<" )"<<std::endl;
+//
+//             std::cout<<"    PFphoIso:       max( 0, "<<
+//             (*phoPFPhoIso)[p] - ( rho * EAphoton((*phoSCEta)[p]) )
+//             << " ) < min( "<<
+//             (0.81 + (0.053 * (*phoEt)[p]) )
+//             <<", "<<
+//             (0.2 * ((*phoEt)[p]))<<" )"<<std::endl;
+//
+//             std::cout<<"    PFneuIso:       max( 0, "<<
+//             (*phoPFNeuIso)[p] - ( rho * EAneutral((*phoSCEta)[p]) )
+//             << " ) < min( "<<
+//             (1.92 + (0.014 * (*phoEt)[p]) + (0.000019 * pow((*phoEt)[p], 2.0)))
+//             <<", "<<
+//             (0.2 * ((*phoEt)[p]))<<" )"<<std::endl<<std::endl;
+//
+//
+//            std::cout<<"  To Pass Numerator Cut  sssssssssssssssssssssssssssssss"<<std::endl;
+//            std::cout<<"xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"<<std::endl;
+//            std::cout<<"Neutral Iso     NeuIso - rho*EA = "<<
+//             (*phoPFNeuIso)[p] - ( rho * EAneutral((*phoSCEta)[p]) )<<std::endl;
+//            std::cout<<"  1.06 + 0.014pT + 0.000019pT^2 = "<<  
+//             (1.06 + (0.014 * (*phoEt)[p]) + (0.000019 * pow((*phoEt)[p], 2.0)))<<std::endl;
+//            std::cout<<"xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"<<std::endl;
+//            std::cout<<"Photon Iso      PhoIso - rho*EA = "<<
+//             (*phoPFPhoIso)[p] - ( rho * EAphoton((*phoSCEta)[p]) )<<std::endl;
+//            std::cout<<"                 0.28 + 0.053pT = "<<  
+//             (0.28 + (0.053 * (*phoEt)[p]) )<<std::endl;
+//            std::cout<<"xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"<<std::endl;
+//            std::cout<<"CHad Iso                        = "<< (*phoPFChIso)[p] <<" < 1.37"<<std::endl<<std::endl;
+//
+//            std::cout<<"---------------------------------------"<<std::endl;
+//            std::cout<<" Cuts are:"<<std::endl;
+//            std::cout<<"  pT:             175 < "<<(*phoEt)[p]<<" < 190"<<std::endl;
+//            std::cout<<"  eta:            | "<<(*phoSCEta)[p]<<" | < 1.442"<<std::endl;
+//            std::cout<<"  met:            "<<pfMET<<" < 30"<<std::endl;
+//            std::cout<<"  h/e:            "<<(*phoHoverE)[p]<<" < 0.05"<<std::endl;
+//            std::cout<<"  pixel seed:     "<<(*phohasPixelSeed)[p]<<" == 0"<<std::endl;
+//            std::cout<<"  |seed time|     3 > "<<    fabs((*phoseedTimeFull5x5)[p])<<std::endl;
+//            std::cout<<"  MIP             6.3 > "<<    fabs((*phomipTotEnergy)[p])<<std::endl;
+//            std::cout<<"  sieie           0.001 < "<<    fabs((*phoSigmaIEtaIEtaFull5x5)[p])<<std::endl;
+//            std::cout<<"  sipip           0.001 < "<<    fabs((*phoSigmaIPhiIPhiFull5x5)[p])<<std::endl;
+//            std::cout<<"  pass med:         must pass all"<<std::endl;
+//
+//             std::cout<<"    PFchIso:        max( 0, "<<
+//             (*phoPFChIso)[p]<< " ) < 1.37"<<std::endl;
+//
+//             std::cout<<"    PFphoIso:       max( 0, "<<
+//             (*phoPFPhoIso)[p] - ( rho * EAphoton((*phoSCEta)[p]) )
+//             << " ) < "<<
+//             (0.28 + (0.053 * (*phoEt)[p]) )
+//             <<std::endl;
+//
+//             std::cout<<"    PFneuIso:       max( 0, "<<
+//             (*phoPFNeuIso)[p] - ( rho * EAneutral((*phoSCEta)[p]) )
+//             << " ) < "<<
+//             (1.06 + (0.014 * (*phoEt)[p]) + (0.000019 * pow((*phoEt)[p], 2.0)))
+//             <<std::endl<<std::endl;
+//            }
+//            }
 
   // if event passes MonoPhoton triggers
   if( 
@@ -528,16 +528,15 @@ std::vector<int> postAnalyzer_QCD::pcPassSel(int sel, int sys, double phoPtLo, d
                        ( fabs((*phoSCEta)[p]) < phoEtaMax)
                       );
 
-
-     passMET = pfMET < 30.;
-     if(sys==3){ passMET = pfMET < 35.;}
-     if(sys==4){ passMET = pfMET < 20.;}
+     passMET = pfMET > 30.;
+     if(sys==3){ passMET = pfMET > 45.;}
+     if(sys==4){ passMET = pfMET > 15.;}
 
      // nsig, nbkg, deno
      passHoEPSeed = (
                      ((*phoHoverE)[p] < 0.05 ) &&
                      ((*phohasPixelSeed)[p] ==  0 ) //&&
-                     //((*phoSigmaIEtaIEtaFull5x5)[p]  <  0.0102 )
+                     //((*phohasPixelSeed)[p] ==  1 ) //&&   //  for electron sieie template
                     );
      // nsig, nbkg
      passPhoNHMedIso = (
@@ -550,7 +549,7 @@ std::vector<int> postAnalyzer_QCD::pcPassSel(int sel, int sys, double phoPtLo, d
                        );
 
      // nsig
-     passCHMedIso = ( TMath::Max( ( (*phoPFChIso)[p] - rho*EAcharged((*phoSCEta)[p]) ), 0.0) < 1.37 );
+     passCHMedIso = ( TMath::Max( ( (*phoPFChWorstIso)[p] - rho*EAcharged((*phoSCEta)[p]) ), 0.0) < 1.37 );
 
      // nbkg
      chIsoLB = 5.;
@@ -558,8 +557,8 @@ std::vector<int> postAnalyzer_QCD::pcPassSel(int sel, int sys, double phoPtLo, d
      if(sys==1){chIsoUB = 12.;}
      if(sys==2){chIsoUB = 8.;}
      passCHBkgIso = (
-                     ( TMath::Max( ( (*phoPFChIso)[p] - rho*EAcharged((*phoSCEta)[p]) ), 0.0) > chIsoLB )  &&
-                     ( TMath::Max( ( (*phoPFChIso)[p] - rho*EAcharged((*phoSCEta)[p]) ), 0.0) < chIsoUB ) 
+                     ( TMath::Max( ( (*phoPFChWorstIso)[p] - rho*EAcharged((*phoSCEta)[p]) ), 0.0) > chIsoLB )  &&
+                     ( TMath::Max( ( (*phoPFChWorstIso)[p] - rho*EAcharged((*phoSCEta)[p]) ), 0.0) < chIsoUB ) 
                     );
 
      // deno
@@ -567,7 +566,7 @@ std::vector<int> postAnalyzer_QCD::pcPassSel(int sel, int sys, double phoPtLo, d
      vloosePFPhoton = TMath::Min(5.0*(0.81+ (0.0053 * (*phoEt)[p])) , 0.20*(*phoEt)[p]);
      vloosePFNeutral= TMath::Min(5.0*(1.92 + (0.014 * (*phoEt)[p]) + (0.000019 * pow((*phoEt)[p], 2.0))) , 0.20*(*phoEt)[p]);
      passVLooseIso = ( 
-                      ( TMath::Max( ( (*phoPFChIso)[p]  - rho*EAcharged((*phoSCEta)[p]) ), 0.0) < vloosePFCharged )  &&  
+                      ( TMath::Max( ( (*phoPFChWorstIso)[p]  - rho*EAcharged((*phoSCEta)[p]) ), 0.0) < vloosePFCharged )  &&  
                       ( TMath::Max( ( (*phoPFNeuIso)[p] - rho*EAneutral((*phoSCEta)[p]) ), 0.0) < vloosePFNeutral )  &&  
                       ( TMath::Max( ( (*phoPFPhoIso)[p] - rho*EAphoton((*phoSCEta)[p])  ), 0.0) < vloosePFPhoton )
                      ); 
@@ -576,7 +575,7 @@ std::vector<int> postAnalyzer_QCD::pcPassSel(int sel, int sys, double phoPtLo, d
                        (0.81 + (0.0053 * (*phoEt)[p])) );
      if(sys==7){passLoosePIso= true;}
      passLooseIso = (  // deno must fail this cut
-                     ( TMath::Max( ( (*phoPFChIso)[p]  - rho*EAcharged((*phoSCEta)[p]) ), 0.0) < 3.32 )  &&
+                     ( TMath::Max( ( (*phoPFChWorstIso)[p]  - rho*EAcharged((*phoSCEta)[p]) ), 0.0) < 3.32 )  &&
                      ( TMath::Max( ( (*phoPFNeuIso)[p] - rho*EAneutral((*phoSCEta)[p]) ), 0.0) <
                        (1.92 + (0.014* (*phoEt)[p]) + (0.000019 * pow((*phoEt)[p], 2.0))))  &&
                      passLoosePIso
@@ -603,6 +602,16 @@ std::vector<int> postAnalyzer_QCD::pcPassSel(int sel, int sys, double phoPtLo, d
 
 // Effective area to be needed in PF Iso for photon ID
 // https://indico.cern.ch/event/455258/contribution/0/attachments/1173322/1695132/SP15_253rd.pdf -- slide-5
+
+// worst charged hadron isolation EA
+Double_t postAnalyzer_QCD::EAcharged(Double_t eta){
+  Float_t EffectiveArea = 0.0;
+  if(fabs(eta) >= 0.0   && fabs(eta) < 1.0   ) EffectiveArea = 0.078;
+  if(fabs(eta) >= 1.0   && fabs(eta) < 1.479 ) EffectiveArea = 0.089;
+  return EffectiveArea;
+}
+
+/*
 Double_t postAnalyzer_QCD::EAcharged(Double_t eta){
   Float_t EffectiveArea = 0.0;
   if(fabs(eta) >= 0.0   && fabs(eta) < 1.0   ) EffectiveArea = 0.0; // 0.0456;
@@ -615,6 +624,7 @@ Double_t postAnalyzer_QCD::EAcharged(Double_t eta){
 
   return EffectiveArea;
 }
+*/
 
 Double_t postAnalyzer_QCD::EAneutral(Double_t eta){
   Float_t EffectiveArea = 0.;
