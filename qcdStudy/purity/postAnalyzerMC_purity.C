@@ -20,7 +20,6 @@ void postAnalyzerMC_purity::Loop(TString outfilename, Bool_t isMC, Double_t lumi
 
  Long64_t nbytes = 0, nb = 0;
  for (Long64_t jentry=0; jentry<nentries;jentry++) {
- //for (Long64_t jentry=0; jentry<1000;jentry++) {
   if (jentry%20000 == 0)
     {
       std::cout<<"Starting entry "<<jentry<<"/"<<(nentries)<<" at "<<sw.RealTime()<<" RealTime, "<<sw.CpuTime()<<" CpuTime"<<std::endl;
@@ -39,13 +38,21 @@ void postAnalyzerMC_purity::Loop(TString outfilename, Bool_t isMC, Double_t lumi
    int lstptbin = ptbinnames.size()-3; // ( = 4 : 700-1000)
 
    // clear collections
-   recPCvint.clear(); 
    genPCvint.clear(); 
+
+   // standard (no met or trigger req)
+   recPCvint.clear(); 
    mchPCvint.clear(); 
    nmhPCvint.clear(); 
 
+   // old cuts from james' code
+   orecPCvint.clear(); 
+   omchPCvint.clear(); 
+   onmhPCvint.clear(); 
+
    // Find all reco photons passing selections
-   recPCvint = pcPassSel();
+   recPCvint = pcPassSel(90.,2000.,1.4442);
+   orecPCvint = pcPassOldSel(90.,2000.,1.4442);
 
    //Find all GEN photons
    for(int i = 0; i < nMC; i++)
@@ -58,7 +65,7 @@ void postAnalyzerMC_purity::Loop(TString outfilename, Bool_t isMC, Double_t lumi
     }
    }
 
-   //Loop over all reconstructed photons to find (GEN)matched and nonmatched photons
+   //Loop over all    rec    photons to find (GEN)matched and nonmatched photons
    for(int i = 0; i < recPCvint.size(); i++)
    {
     int phonr = recPCvint[i];
@@ -76,6 +83,38 @@ void postAnalyzerMC_purity::Loop(TString outfilename, Bool_t isMC, Double_t lumi
     if(dRmin > 0.1) { nmhPCvint.push_back(phonr); }
    }
 
+   //Loop over all    orec    photons to find (GEN)matched and nonmatched photons
+   for(int i = 0; i < orecPCvint.size(); i++)
+   {
+    int phonr = orecPCvint[i];
+    //std::cout<<" photon number: "<<phonr<<std::endl;
+    double dRmin = 99.99;
+    double dRtemp = 99.99;
+    // technically a gen photon could be matched to more than one RECO photon in this method..
+    for(int k = 0; k < genPCvint.size(); k++) 
+    {
+     int gennr = genPCvint[k];
+     dRtemp = dR(mcEta->at(gennr),mcPhi->at(gennr),phoEta->at(phonr),phoPhi->at(phonr));
+     if(dRtemp < dRmin) { dRmin = dRtemp; }
+    }
+    if(dRmin < 0.1) { omchPCvint.push_back(phonr); }
+    if(dRmin > 0.1) { onmhPCvint.push_back(phonr); }
+   }
+
+   // some more filters
+   bool passTriggers;
+   bool passMET;
+   passTriggers = 
+    ((HLTPho>>7&1) == 1) ||
+    ((HLTPho>>8&1) == 1) ||
+    ((HLTPho>>9&1) == 1) ||
+    ((HLTPho>>10&1) == 1) ||
+    ((HLTPho>>11&1) == 1) ||
+    ((HLTPho>>12&1) == 1) ||
+    ((HLTPho>>22&1) == 1) ;
+   passMET = pfMET < 30.;
+
+
 // fill histograms
     // Fill Numerator (matched) Signal Histograms
     if( mchPCvint.size()>0 ){ // if any photon indexes passed sig selection
@@ -86,26 +125,67 @@ void postAnalyzerMC_purity::Loop(TString outfilename, Bool_t isMC, Double_t lumi
           (phoEt->at(mchPCvint.at(k)) > ptbins[ptb]) &&
           (phoEt->at(mchPCvint.at(k)) < ptbins[ptb+1])
          ){
+            //std::cout<<"found event"<<std::endl;
+            // idnc, idnc_mL30, idnc_trig, idnc_mL30_trig, oldj
             //nc++;
-            FillSigHistograms(ptb, mchPCvint.at(k), event_weight);
-            FillDenHistograms(ptb, mchPCvint.at(k), event_weight);
+            FillSigHistograms(ptb, 0, mchPCvint.at(k), event_weight);
+            FillDenHistograms(ptb, 0, mchPCvint.at(k), event_weight);
+            if(passMET){
+             FillSigHistograms(ptb, 1, mchPCvint.at(k), event_weight);
+             FillDenHistograms(ptb, 1, mchPCvint.at(k), event_weight);
+            }
+            if(passTriggers){
+             FillSigHistograms(ptb, 2, mchPCvint.at(k), event_weight);
+             FillDenHistograms(ptb, 2, mchPCvint.at(k), event_weight);
+            }
+            if(passTriggers && passMET){
+             FillSigHistograms(ptb, 3, mchPCvint.at(k), event_weight);
+             FillDenHistograms(ptb, 3, mchPCvint.at(k), event_weight);
+            }
            }
        }
       // inclusive from pT bins
       if(  
-         (phoEt->at(mchPCvint.at(k)) > ptbins[0]) &&
+         (phoEt->at(mchPCvint.at(k)) > 175. ) && //ptbins[0]) &&
          (phoEt->at(mchPCvint.at(k)) < ptbins[ptbins.size()-1])
         ){
-       FillSigHistograms(selptbin, mchPCvint.at(k), event_weight);
-       FillDenHistograms(selptbin, mchPCvint.at(k), event_weight);
-      }
-      // fully inclusive in pT (depending only on selections for mchPCvint)
-      FillSigHistograms(lstptbin, mchPCvint.at(k), event_weight);
-      FillDenHistograms(lstptbin, mchPCvint.at(k), event_weight);
-    }
-   }
+          FillSigHistograms(selptbin, 0, mchPCvint.at(k), event_weight);
+          FillDenHistograms(selptbin, 0, mchPCvint.at(k), event_weight);
+          if(passMET){
+           FillSigHistograms(selptbin, 1, mchPCvint.at(k), event_weight);
+           FillDenHistograms(selptbin, 1, mchPCvint.at(k), event_weight);
+          }
+          if(passTriggers){
+           FillSigHistograms(selptbin, 2, mchPCvint.at(k), event_weight);
+           FillDenHistograms(selptbin, 2, mchPCvint.at(k), event_weight);
+          }
+          if(passTriggers && passMET){
+           FillSigHistograms(selptbin, 3, mchPCvint.at(k), event_weight);
+           FillDenHistograms(selptbin, 3, mchPCvint.at(k), event_weight);
+          }
+         }
 
-    // Fill Numerator (unmatched) Signal Histograms
+      // fully inclusive in pT (depending only on selections for mchPCvint)
+      FillSigHistograms(incptbin, 0, mchPCvint.at(k), event_weight);
+      FillDenHistograms(incptbin, 0, mchPCvint.at(k), event_weight);
+      if(passMET){
+       FillSigHistograms(incptbin, 1, mchPCvint.at(k), event_weight);
+       FillDenHistograms(incptbin, 1, mchPCvint.at(k), event_weight);
+      }
+      if(passTriggers){
+       FillSigHistograms(incptbin, 2, mchPCvint.at(k), event_weight);
+       FillDenHistograms(incptbin, 2, mchPCvint.at(k), event_weight);
+      }
+      if(passTriggers && passMET){
+       FillSigHistograms(incptbin, 3, mchPCvint.at(k), event_weight);
+       FillDenHistograms(incptbin, 3, mchPCvint.at(k), event_weight);
+      }
+
+     }
+    }
+
+
+    // Fill Numerator (unmatched) Bkgnal Histograms
     if( nmhPCvint.size()>0 ){ // if any photon indexes passed sig selection
      for(unsigned int k=0; k<nmhPCvint.size(); ++k){ // go through each photon passing sel
       // pt bins
@@ -114,27 +194,128 @@ void postAnalyzerMC_purity::Loop(TString outfilename, Bool_t isMC, Double_t lumi
           (phoEt->at(nmhPCvint.at(k)) > ptbins[ptb]) &&
           (phoEt->at(nmhPCvint.at(k)) < ptbins[ptb+1])
          ){
+            // idnc, idnc_mL30, idnc_trig, idnc_mL30_trig, oldj
             //nc++;
-            FillBkgHistograms(ptb, nmhPCvint.at(k), event_weight);
-            FillDenHistograms(ptb, nmhPCvint.at(k), event_weight);
+            FillBkgHistograms(ptb, 0, nmhPCvint.at(k), event_weight);
+            FillDenHistograms(ptb, 0, nmhPCvint.at(k), event_weight);
+            if(passMET){
+             FillBkgHistograms(ptb, 1, nmhPCvint.at(k), event_weight);
+             FillDenHistograms(ptb, 1, nmhPCvint.at(k), event_weight);
+            }
+            if(passTriggers){
+             FillBkgHistograms(ptb, 2, nmhPCvint.at(k), event_weight);
+             FillDenHistograms(ptb, 2, nmhPCvint.at(k), event_weight);
+            }
+            if(passTriggers && passMET){
+             FillBkgHistograms(ptb, 3, nmhPCvint.at(k), event_weight);
+             FillDenHistograms(ptb, 3, nmhPCvint.at(k), event_weight);
+            }
            }
        }
       // inclusive from pT bins
       if(  
-         (phoEt->at(nmhPCvint.at(k)) > ptbins[0]) &&
+         (phoEt->at(nmhPCvint.at(k)) > 175. ) && // ptbins[0]) &&
          (phoEt->at(nmhPCvint.at(k)) < ptbins[ptbins.size()-1])
         ){
-       FillBkgHistograms(selptbin, nmhPCvint.at(k), event_weight);
-       FillDenHistograms(selptbin, nmhPCvint.at(k), event_weight);
-      }
+          FillBkgHistograms(selptbin, 0, nmhPCvint.at(k), event_weight);
+          FillDenHistograms(selptbin, 0, nmhPCvint.at(k), event_weight);
+          if(passMET){
+           FillBkgHistograms(selptbin, 1, nmhPCvint.at(k), event_weight);
+           FillDenHistograms(selptbin, 1, nmhPCvint.at(k), event_weight);
+          }
+          if(passTriggers){
+           FillBkgHistograms(selptbin, 2, nmhPCvint.at(k), event_weight);
+           FillDenHistograms(selptbin, 2, nmhPCvint.at(k), event_weight);
+          }
+          if(passTriggers && passMET){
+           FillBkgHistograms(selptbin, 3, nmhPCvint.at(k), event_weight);
+           FillDenHistograms(selptbin, 3, nmhPCvint.at(k), event_weight);
+          }
+         }
+
       // fully inclusive in pT (depending only on selections for nmhPCvint)
-      FillBkgHistograms(lstptbin, nmhPCvint.at(k), event_weight);
-      FillDenHistograms(lstptbin, nmhPCvint.at(k), event_weight);
+      FillBkgHistograms(incptbin, 0, nmhPCvint.at(k), event_weight);
+      FillDenHistograms(incptbin, 0, nmhPCvint.at(k), event_weight);
+      if(passMET){
+       FillBkgHistograms(incptbin, 1, nmhPCvint.at(k), event_weight);
+       FillDenHistograms(incptbin, 1, nmhPCvint.at(k), event_weight);
+      }
+      if(passTriggers){
+       FillBkgHistograms(incptbin, 2, nmhPCvint.at(k), event_weight);
+       FillDenHistograms(incptbin, 2, nmhPCvint.at(k), event_weight);
+      }
+      if(passTriggers && passMET){
+       FillBkgHistograms(incptbin, 3, nmhPCvint.at(k), event_weight);
+       FillDenHistograms(incptbin, 3, nmhPCvint.at(k), event_weight);
+      }
+
+     }
     }
-   }
+
+    /////////////////////////////// old selections
+    // Fill Numerator (matched) Signal Histograms
+    if( omchPCvint.size()>0 ){ // if any photon indexes passed sig selection
+     for(unsigned int k=0; k<omchPCvint.size(); ++k){ // go through each photon passing sel
+      // pt bins
+      for(unsigned int ptb=0; ptb<lstptbin; ++ptb){
+       if(
+          (phoEt->at(omchPCvint.at(k)) > ptbins[ptb]) &&
+          (phoEt->at(omchPCvint.at(k)) < ptbins[ptb+1])
+         ){
+            // idnc, idnc_mL30, idnc_trig, idnc_mL30_trig, oldj
+            //nc++;
+            FillSigHistograms(ptb, 4, omchPCvint.at(k), event_weight);
+            FillDenHistograms(ptb, 4, omchPCvint.at(k), event_weight);
+           }
+       }
+      // inclusive from pT bins
+      if(  
+         (phoEt->at(omchPCvint.at(k)) > 175. ) && // ptbins[0]) &&
+         (phoEt->at(omchPCvint.at(k)) < ptbins[ptbins.size()-1])
+        ){
+          FillSigHistograms(selptbin, 4, omchPCvint.at(k), event_weight);
+          FillDenHistograms(selptbin, 4, omchPCvint.at(k), event_weight);
+         }
+
+      // fully inclusive in pT (depending only on selections for omchPCvint)
+      FillSigHistograms(incptbin, 4, omchPCvint.at(k), event_weight);
+      FillDenHistograms(incptbin, 4, omchPCvint.at(k), event_weight);
+
+     }
+    }
+    // Fill Numerator (unmatched) Bkgnal Histograms
+    if( onmhPCvint.size()>0 ){ // if any photon indexes passed sig selection
+     for(unsigned int k=0; k<onmhPCvint.size(); ++k){ // go through each photon passing sel
+      // pt bins
+      for(unsigned int ptb=0; ptb<lstptbin; ++ptb){
+       if(
+          (phoEt->at(onmhPCvint.at(k)) > ptbins[ptb]) &&
+          (phoEt->at(onmhPCvint.at(k)) < ptbins[ptb+1])
+         ){
+            // idnc, idnc_mL30, idnc_trig, idnc_mL30_trig, oldj
+            //nc++;
+            FillBkgHistograms(ptb, 4, onmhPCvint.at(k), event_weight);
+            FillDenHistograms(ptb, 4, onmhPCvint.at(k), event_weight);
+           }
+       }
+      // inclusive from pT bins
+      if(  
+         (phoEt->at(onmhPCvint.at(k)) > 175. ) && // ptbins[0]) &&
+         (phoEt->at(onmhPCvint.at(k)) < ptbins[ptbins.size()-1])
+        ){
+          FillBkgHistograms(selptbin, 4, onmhPCvint.at(k), event_weight);
+          FillDenHistograms(selptbin, 4, onmhPCvint.at(k), event_weight);
+         }
+
+      // fully inclusive in pT (depending only on selections for onmhPCvint)
+      FillBkgHistograms(incptbin, 4, onmhPCvint.at(k), event_weight);
+      FillDenHistograms(incptbin, 4, onmhPCvint.at(k), event_weight);
+
+     }
+    }
 
 //// end fill histograms
-
+  
  } //end loop through entries
 
  // write these histograms to file
@@ -165,12 +346,14 @@ void postAnalyzerMC_purity::Loop(TString outfilename, Bool_t isMC, Double_t lumi
 //  for (unsigned int i=0; i<events_denomi.size(); ++i){ logfile_denomi<<"\t "<<run_denomi[i]<<" : "<<events_denomi[i]<<" : "<<lumi_denomi[i]<<" : 0"<<std::endl; }
 //  //for (unsigned int i=0; i<events_denomi.size(); ++i){ logfile_denomi<<"\t "<<run_denomi[i]<<"\t "<<lumi_denomi[i]<<"\t "<<events_denomi[i]<<std::endl; }
 //  logfile_denomi.close();
-  
+
 
  TFile *outfile = new TFile(outfilename,"RECREATE");
  outfile->cd();
  for(unsigned int i=0; i<ptbinnames.size(); ++i){
-   WriteHistograms(i);
+  for(unsigned int j=0; j<cuts.size(); ++j){
+   WriteHistograms(i,j);
+  }
  }
  outfile->Close();
  sw.Stop();
@@ -184,10 +367,8 @@ void postAnalyzerMC_purity::Loop(TString outfilename, Bool_t isMC, Double_t lumi
 std::vector<int> postAnalyzerMC_purity::pcPassSel( double phoPtLo, double phoPtHi, double phoEtaMax ){
   std::vector<int> tmpCand;
   tmpCand.clear();
-  bool passTriggers;
   bool noncoll;
   bool passKinematics;
-  bool passMET;
 
   bool passHoEPSeed;
   bool passPhoNHMedIso;
@@ -195,21 +376,10 @@ std::vector<int> postAnalyzerMC_purity::pcPassSel( double phoPtLo, double phoPtH
 
   bool passPhotonID;
 
-  passTriggers = 
-   ((HLTPho>>7&1) == 1) ||
-   ((HLTPho>>8&1) == 1) ||
-   ((HLTPho>>9&1) == 1) ||
-   ((HLTPho>>10&1) == 1) ||
-   ((HLTPho>>11&1) == 1) ||
-   ((HLTPho>>12&1) == 1) ||
-   ((HLTPho>>22&1) == 1) ;
-
   //Loop over photons
   for(int p=0;p<nPho;p++)  // nPho from ntuple (should = phoE->length() )
     {
      // from https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedPhotonIdentificationRun2#SPRING15_selections_25_ns
-
-
      // non collision backgrounds
      noncoll = (*phoSigmaIEtaIEtaFull5x5)[p] > 0.001 && (*phoSigmaIPhiIPhiFull5x5)[p] > 0.001; // isMC
      //noncoll = fabs((*phoseedTimeFull5x5)[p]) < 3. && (*phomipTotEnergy)[p] < 4.9 && (*phoSigmaIEtaIEtaFull5x5)[p] > 0.001 && (*phoSigmaIPhiIPhiFull5x5)[p] > 0.001;
@@ -220,11 +390,6 @@ std::vector<int> postAnalyzerMC_purity::pcPassSel( double phoPtLo, double phoPtH
                        ( fabs((*phoSCEta)[p]) < phoEtaMax)
                       );
 
-     // QCD 
-     passMET = pfMET < 30.;
-     //passMET = kTRUE; //pfMET < 30.;
-//     passMET = pfMET < 15.;
-//     passMET = pfMET < 45.;
 
      // H on E, and pixel seed 
      passHoEPSeed = (
@@ -245,14 +410,123 @@ std::vector<int> postAnalyzerMC_purity::pcPassSel( double phoPtLo, double phoPtH
 //     passCHMedIso = ( TMath::Max( ( (*phoPFChWorstIso)[p] - rho*EAcharged((*phoSCEta)[p]) ), 0.0) < 1.37 );
      passCHMedIso = kTRUE;
 
-     passPhotonID = passMET && passHoEPSeed && passPhoNHMedIso && passCHMedIso;
-     if( passTriggers && noncoll && passPhotonID && passKinematics){
+     passPhotonID = passHoEPSeed && passPhoNHMedIso && passCHMedIso;
+     if( noncoll && passPhotonID && passKinematics){
       // std::cout<<" Found a photon, pfMET="<<pfMET<<" pT="<<phoEt->at(p)<<" sel: "<<sel<<" sys: "<<sys<<std::endl;
       // std::cout<<"  CHiso:  "<<TMath::Max( ( (*phoPFChIso)[p] - rho*EAcharged((*phoSCEta)[p]) ), 0.0)<<std::endl;
        tmpCand.push_back(p);
      }
     }
   return tmpCand;
+}
+
+
+// photon candidates passing signal selection in low MET region - (no sieie or (w)chiso cuts)
+std::vector<int> postAnalyzerMC_purity::pcPassOldSel( double phoPtLo, double phoPtHi, double phoEtaMax ){
+        bool HEpass = false;
+        //bool sigmaietaietapass = false;
+        //bool corrChargedIsopass = false;
+        bool corrNeutralIsopass = false;
+        bool corrPhotonIsopass = false;
+
+        std::vector<int> tmpCand;
+        tmpCand.clear();
+        //Loop over photons
+        for(int p=0;p<nPho;p++)  // nPho from ntuple (should = phoE->length() )
+        {
+
+        float photon_pt = phoEt->at(p);
+        float SC_eta = phoSCEta->at(p);
+        float HE = phoHoverE->at(p);
+         //float sigmaietaieta = phoSigmaIEtaIEta->at(p);
+
+         bool passKinematics;
+         passKinematics = (
+                           ( photon_pt > phoPtLo  ) &&
+                           ( photon_pt <= phoPtHi ) &&
+                           ( fabs(SC_eta) < phoEtaMax)
+                          );
+      
+         //float EAcharged = 0.0;
+         float EAneutral = 0.0;
+         float EAphoton = 0.0;
+         if(abs(SC_eta) <= 1.0)
+         {   
+                 //EAcharged = 0.0157;
+                 EAneutral = 0.0143;
+                 EAphoton = 0.0725;
+         }   
+         else if(1.0 < abs(SC_eta) && abs(SC_eta) <= 1.479)
+         {   
+                 //EAcharged = 0.0143;
+                 EAneutral = 0.0210;
+                 EAphoton = 0.0604;
+         }   
+         else if(1.479 < abs(SC_eta) && abs(SC_eta) <= 2.0)
+         {   
+                 //EAcharged = 0.0115;
+                 EAneutral = 0.0147;
+                 EAphoton = 0.0320;
+         }   
+         else if(2.0 < abs(SC_eta) && abs(SC_eta) <= 2.2)
+         {   
+                 //EAcharged = 0.0094;
+                 EAneutral = 0.0082;
+                 EAphoton = 0.0512;
+         }   
+         else if(2.2 < abs(SC_eta) && abs(SC_eta) <= 2.3)
+         {   
+                 //EAcharged = 0.0095;
+                 EAneutral = 0.0124;
+                 EAphoton = 0.0766;
+         }   
+         else if(2.3 < abs(SC_eta) && abs(SC_eta) <= 2.4)
+         {   
+                 //EAcharged = 0.0068;
+                 EAneutral = 0.0186;
+                 EAphoton = 0.0949;
+         }   
+         else if(2.4 < abs(SC_eta))
+         {   
+                 //EAcharged = 0.0053;
+                 EAneutral = 0.0320;
+                 EAphoton = 0.1160;
+         }   
+
+         //Being very explicit about types here, to avoid a conversion ambiguity
+         //Float_t corrChargedIso_nonzero = phoPFChIso->at(p) - rho*EAcharged;
+         Float_t corrNeutralIso_nonzero = phoPFNeuIso->at(p)  - rho*EAneutral;
+         Float_t corrPhotonIso_nonzero = phoPFPhoIso->at(p) - rho*EAphoton;
+         Float_t zero = 0.0;
+         //Float_t corrChargedIso = TMath::Max(corrChargedIso_nonzero,zero);
+         Float_t corrNeutralIso = TMath::Max(corrNeutralIso_nonzero,zero);
+         Float_t corrPhotonIso = TMath::Max(corrPhotonIso_nonzero,zero);
+      
+         //Barrel
+         if(SC_eta < 1.4442)
+         {   
+                 HEpass = HE < 0.05;
+                 //sigmaietaietapass = sigmaietaieta < 0.0100;
+                 //corrChargedIsopass = corrChargedIso < 1.31;
+                 corrNeutralIsopass = corrNeutralIso < (0.60 + exp(0.0044*photon_pt + 0.5809));
+                 corrPhotonIsopass = corrPhotonIso < (1.33 + 0.0043*photon_pt);
+         }   
+         //Endcap
+         else if(SC_eta > 1.566)
+         {   
+                 HEpass = HE < 0.05;
+                 //sigmaietaietapass = sigmaietaieta < 0.0267;
+                 //corrChargedIsopass = corrChargedIso < 1.25;
+                 corrNeutralIsopass = corrNeutralIso < (1.65 + exp(0.0040*photon_pt + 0.9402));
+                 corrPhotonIsopass = corrPhotonIso < (1.02 + 0.0041*photon_pt);
+         }   
+      
+         if(HEpass && corrNeutralIsopass && corrPhotonIsopass && passKinematics) {
+          tmpCand.push_back(p);
+         }
+      
+        }
+        return tmpCand;
 }
 
 

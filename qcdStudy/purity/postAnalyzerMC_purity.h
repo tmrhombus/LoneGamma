@@ -34,16 +34,40 @@ public :
 
    std::vector<int> ptbins; //6 //9
    std::vector<TString> ptbinnames; //7 = (6-1)+1+1; // 10
-   TH1F h_Nsig_wchiso[10], h_Nbkg_wchiso[10], h_Deno_wchiso[10];
-   TH1F h_Nsig_chiso[10], h_Nbkg_chiso[10], h_Deno_chiso[10];
-   TH1F h_Nsig_phoet[10], h_Nbkg_phoet[10], h_Deno_phoet[10];
-   TH1F h_Nsig_sieieF5x5[10], h_Nbkg_sieieF5x5[10], h_Deno_sieieF5x5[10];
-   TH1F h_Nsig_pfMET[10], h_Nbkg_pfMET[10], h_Deno_pfMET[10];
+   std::vector<TString> cuts; // 4  //  met<30, trigger, met<30+trigger, forward (no met, no trigger)
+                              // idnc, idnc_mL30, idnc_trig, idnc_mL30_trig, oldj
+
+   TH1F h_Nsig_wchiso[10][5], h_Nbkg_wchiso[10][5], h_Deno_wchiso[10][5];
+   TH1F h_Nsig_chiso[10][5], h_Nbkg_chiso[10][5], h_Deno_chiso[10][5];
+   TH1F h_Nsig_phoet[10][5], h_Nbkg_phoet[10][5], h_Deno_phoet[10][5];
+   TH1F h_Nsig_sieieF5x5[10][5], h_Nbkg_sieieF5x5[10][5], h_Deno_sieieF5x5[10][5];
+   TH1F h_Nsig_pfMET[10][5], h_Nbkg_pfMET[10][5], h_Deno_pfMET[10][5];
+
+   TH1F h_TNsig_wchiso[10][5], h_TNbkg_wchiso[10][5], h_TDeno_wchiso[10][5];
+   TH1F h_TNsig_chiso[10][5], h_TNbkg_chiso[10][5], h_TDeno_chiso[10][5];
+   TH1F h_TNsig_phoet[10][5], h_TNbkg_phoet[10][5], h_TDeno_phoet[10][5];
+   TH1F h_TNsig_sieieF5x5[10][5], h_TNbkg_sieieF5x5[10][5], h_TDeno_sieieF5x5[10][5];
+   TH1F h_TNsig_pfMET[10][5], h_TNbkg_pfMET[10][5], h_TDeno_pfMET[10][5];
+
+   TH1F h_MNsig_wchiso[10][5], h_MNbkg_wchiso[10][5], h_MDeno_wchiso[10][5];
+   TH1F h_MNsig_chiso[10][5], h_MNbkg_chiso[10][5], h_MDeno_chiso[10][5];
+   TH1F h_MNsig_phoet[10][5], h_MNbkg_phoet[10][5], h_MDeno_phoet[10][5];
+   TH1F h_MNsig_sieieF5x5[10][5], h_MNbkg_sieieF5x5[10][5], h_MDeno_sieieF5x5[10][5];
+   TH1F h_MNsig_pfMET[10][5], h_MNbkg_pfMET[10][5], h_MDeno_pfMET[10][5];
+
+   TH1F h_TMNsig_wchiso[10][5], h_TMNbkg_wchiso[10][5], h_TMDeno_wchiso[10][5];
+   TH1F h_TMNsig_chiso[10][5], h_TMNbkg_chiso[10][5], h_TMDeno_chiso[10][5];
+   TH1F h_TMNsig_phoet[10][5], h_TMNbkg_phoet[10][5], h_TMDeno_phoet[10][5];
+   TH1F h_TMNsig_sieieF5x5[10][5], h_TMNbkg_sieieF5x5[10][5], h_TMDeno_sieieF5x5[10][5];
+   TH1F h_TMNsig_pfMET[10][5], h_TMNbkg_pfMET[10][5], h_TMDeno_pfMET[10][5];
 
    std::vector<int> genPCvint;
    std::vector<int> recPCvint;
    std::vector<int> mchPCvint;
    std::vector<int> nmhPCvint;
+   std::vector<int> orecPCvint;
+   std::vector<int> omchPCvint;
+   std::vector<int> onmhPCvint;
 
    double event_weight;
 
@@ -868,17 +892,16 @@ public :
    virtual double DeltaPhi(double phi1, double phi2);
    virtual double dR(double eta1, double phi1, double eta2, double phi2);
    virtual vector<int> pcPassSel(double phoPtLo=90., double phoPtHi=2000., double phoEtaMax=1.4442);
+   virtual vector<int> pcPassOldSel(double phoPtLo=90., double phoPtHi=2000., double phoEtaMax=1.4442);
    //virtual vector<int> pcPassSel(int sel=0, int sys=0, double phoPtLo=175., double phoPtHi=1000., double phoEtaMax=1.4442, Bool_t isMC=kTRUE);
     // sel = 0:numerator signal; 1:numerator background; 2:denominator
    Double_t EAcharged(Double_t eta);
    Double_t EAneutral(Double_t eta);
    Double_t EAphoton(Double_t eta);
-   Bool_t FillSigHistograms(int ptbin, int photonIndex, double weight);
-   Bool_t FillBkgHistograms(int ptbin, int photonIndex, double weight);
-   Bool_t FillDenHistograms(int ptbin, int photonIndex, double weight);
-   Bool_t WriteHistograms(int ptbin);
-
-
+   Bool_t FillSigHistograms(int ptbin, int cutbin, int photonIndex, double weight);
+   Bool_t FillBkgHistograms(int ptbin, int cutbin, int photonIndex, double weight);
+   Bool_t FillDenHistograms(int ptbin, int cutbin, int photonIndex, double weight);
+   Bool_t WriteHistograms(int ptbin, int cutbin);
 
 };
 
@@ -926,6 +949,7 @@ void postAnalyzerMC_purity::Init(TTree *tree)
 
    ptbins.clear();
    ptbinnames.clear();
+   cuts.clear(); 
 
    ptbins.push_back(90);
    ptbins.push_back(120);
@@ -948,90 +972,98 @@ void postAnalyzerMC_purity::Init(TTree *tree)
    ptbinnames.push_back("175to1000");
    ptbinnames.push_back("allpt");
 
+   cuts.push_back("idnc");
+   cuts.push_back("idnc_mL30");
+   cuts.push_back("idnc_trig");
+   cuts.push_back("idnc_mL30_trig");
+   cuts.push_back("oldj");
+
    for(unsigned int i=0; i<ptbinnames.size(); ++i){
+    for(unsigned int j=0; j<cuts.size(); ++j){
      // set up names
 
-     TString histname_Nsig_wchiso    = "h_Nsig_wchiso_"+ptbinnames[i];
-     TString histname_Nsig_chiso     = "h_Nsig_chiso_"+ptbinnames[i];
-     TString histname_Nsig_phoet     = "h_Nsig_phoet_"+ptbinnames[i];
-     TString histname_Nsig_sieieF5x5 = "h_Nsig_sieieF5x5_"+ptbinnames[i];
-     TString histname_Nsig_pfMET     = "h_Nsig_pfMET_"+ptbinnames[i];
+     TString histname_Nsig_wchiso    = "h_Nsig_wchiso_"+ptbinnames[i]+"_"+cuts[j];
+     TString histname_Nsig_chiso     = "h_Nsig_chiso_"+ptbinnames[i]+"_"+cuts[j];
+     TString histname_Nsig_phoet     = "h_Nsig_phoet_"+ptbinnames[i]+"_"+cuts[j];
+     TString histname_Nsig_sieieF5x5 = "h_Nsig_sieieF5x5_"+ptbinnames[i]+"_"+cuts[j];
+     TString histname_Nsig_pfMET     = "h_Nsig_pfMET_"+ptbinnames[i]+"_"+cuts[j];
 
-     TString histname_Nbkg_wchiso    = "h_Nbkg_wchiso_"+ptbinnames[i];
-     TString histname_Nbkg_chiso     = "h_Nbkg_chiso_"+ptbinnames[i];
-     TString histname_Nbkg_phoet     = "h_Nbkg_phoet_"+ptbinnames[i];
-     TString histname_Nbkg_sieieF5x5 = "h_Nbkg_sieieF5x5_"+ptbinnames[i];
-     TString histname_Nbkg_pfMET     = "h_Nbkg_pfMET_"+ptbinnames[i];
+     TString histname_Nbkg_wchiso    = "h_Nbkg_wchiso_"+ptbinnames[i]+"_"+cuts[j];
+     TString histname_Nbkg_chiso     = "h_Nbkg_chiso_"+ptbinnames[i]+"_"+cuts[j];
+     TString histname_Nbkg_phoet     = "h_Nbkg_phoet_"+ptbinnames[i]+"_"+cuts[j];
+     TString histname_Nbkg_sieieF5x5 = "h_Nbkg_sieieF5x5_"+ptbinnames[i]+"_"+cuts[j];
+     TString histname_Nbkg_pfMET     = "h_Nbkg_pfMET_"+ptbinnames[i]+"_"+cuts[j];
 
-     TString histname_Deno_wchiso    = "h_Deno_wchiso_"+ptbinnames[i];
-     TString histname_Deno_chiso     = "h_Deno_chiso_"+ptbinnames[i];
-     TString histname_Deno_phoet     = "h_Deno_phoet_"+ptbinnames[i];
-     TString histname_Deno_sieieF5x5 = "h_Deno_sieieF5x5_"+ptbinnames[i];
-     TString histname_Deno_pfMET     = "h_Deno_pfMET_"+ptbinnames[i];
+     TString histname_Deno_wchiso    = "h_Deno_wchiso_"+ptbinnames[i]+"_"+cuts[j];
+     TString histname_Deno_chiso     = "h_Deno_chiso_"+ptbinnames[i]+"_"+cuts[j];
+     TString histname_Deno_phoet     = "h_Deno_phoet_"+ptbinnames[i]+"_"+cuts[j];
+     TString histname_Deno_sieieF5x5 = "h_Deno_sieieF5x5_"+ptbinnames[i]+"_"+cuts[j];
+     TString histname_Deno_pfMET     = "h_Deno_pfMET_"+ptbinnames[i]+"_"+cuts[j];
 
      // reserve histograms
      //
-     h_Nsig_phoet[i].Clear();
-     h_Nsig_phoet[i] = TH1F(histname_Nsig_phoet,"Photon Transverse Energy",190,50.,1000.);
-     h_Nsig_phoet[i].Sumw2();
+     h_Nsig_phoet[i][j].Clear();
+     h_Nsig_phoet[i][j] = TH1F(histname_Nsig_phoet,"Photon Transverse Energy",190,50.,1000.);
+     h_Nsig_phoet[i][j].Sumw2();
 
-     h_Nbkg_phoet[i].Clear();
-     h_Nbkg_phoet[i] = TH1F(histname_Nbkg_phoet,"Photon Transverse Energy",190,50.,1000.);
-     h_Nbkg_phoet[i].Sumw2();
+     h_Nbkg_phoet[i][j].Clear();
+     h_Nbkg_phoet[i][j] = TH1F(histname_Nbkg_phoet,"Photon Transverse Energy",190,50.,1000.);
+     h_Nbkg_phoet[i][j].Sumw2();
 
-     h_Deno_phoet[i].Clear();
-     //h_Deno_phoet[i] = TH1F(histname_Deno_phoet,"Photon Transverse Energy",165,175.,1000.);
-     h_Deno_phoet[i] = TH1F(histname_Deno_phoet,"Photon Transverse Energy",190,50.,1000.);
-     h_Deno_phoet[i].Sumw2();
+     h_Deno_phoet[i][j].Clear();
+     h_Deno_phoet[i][j] = TH1F(histname_Deno_phoet,"Photon Transverse Energy",190,50.,1000.);
+     h_Deno_phoet[i][j].Sumw2();
      //
-     h_Nsig_chiso[i].Clear();
-     h_Nsig_chiso[i] = TH1F(histname_Nsig_chiso,"Charged Hadron Isolation",50,0.,25.);
-     h_Nsig_chiso[i].Sumw2();
+     h_Nsig_chiso[i][j].Clear();
+     h_Nsig_chiso[i][j] = TH1F(histname_Nsig_chiso,"Charged Hadron Isolation",50,0.,25.);
+     h_Nsig_chiso[i][j].Sumw2();
 
-     h_Nbkg_chiso[i].Clear();
-     h_Nbkg_chiso[i] = TH1F(histname_Nbkg_chiso,"Charged Hadron Isolation",50,0.,25.);
-     h_Nbkg_chiso[i].Sumw2();
+     h_Nbkg_chiso[i][j].Clear();
+     h_Nbkg_chiso[i][j] = TH1F(histname_Nbkg_chiso,"Charged Hadron Isolation",50,0.,25.);
+     h_Nbkg_chiso[i][j].Sumw2();
 
-     h_Deno_chiso[i].Clear();
-     h_Deno_chiso[i] = TH1F(histname_Deno_chiso,"Charged Hadron Isolation",50,0.,25.);
-     h_Deno_chiso[i].Sumw2();
+     h_Deno_chiso[i][j].Clear();
+     h_Deno_chiso[i][j] = TH1F(histname_Deno_chiso,"Charged Hadron Isolation",50,0.,25.);
+     h_Deno_chiso[i][j].Sumw2();
      //
-     h_Nsig_wchiso[i].Clear();
-     h_Nsig_wchiso[i] = TH1F(histname_Nsig_wchiso,"Worst Charged Hadron Isolation",50,0.,25.);
-     h_Nsig_wchiso[i].Sumw2();
+     h_Nsig_wchiso[i][j].Clear();
+     h_Nsig_wchiso[i][j] = TH1F(histname_Nsig_wchiso,"Worst Charged Hadron Isolation",50,0.,25.);
+     h_Nsig_wchiso[i][j].Sumw2();
 
-     h_Nbkg_wchiso[i].Clear();
-     h_Nbkg_wchiso[i] = TH1F(histname_Nbkg_wchiso,"Worst Charged Hadron Isolation",50,0.,25.);
-     h_Nbkg_wchiso[i].Sumw2();
+     h_Nbkg_wchiso[i][j].Clear();
+     h_Nbkg_wchiso[i][j] = TH1F(histname_Nbkg_wchiso,"Worst Charged Hadron Isolation",50,0.,25.);
+     h_Nbkg_wchiso[i][j].Sumw2();
 
-     h_Deno_wchiso[i].Clear();
-     h_Deno_wchiso[i] = TH1F(histname_Deno_wchiso,"Worst Charged Hadron Isolation",50,0.,25.);
-     h_Deno_wchiso[i].Sumw2();
+     h_Deno_wchiso[i][j].Clear();
+     h_Deno_wchiso[i][j] = TH1F(histname_Deno_wchiso,"Worst Charged Hadron Isolation",50,0.,25.);
+     h_Deno_wchiso[i][j].Sumw2();
      //
-     h_Nsig_sieieF5x5[i].Clear();
-     h_Nsig_sieieF5x5[i] = TH1F(histname_Nsig_sieieF5x5,"Leading Photon SigmaIetaIeta",100,0.,0.025);
-     h_Nsig_sieieF5x5[i].Sumw2();
+     h_Nsig_sieieF5x5[i][j].Clear();
+     h_Nsig_sieieF5x5[i][j] = TH1F(histname_Nsig_sieieF5x5,"Leading Photon SigmaIetaIeta",100,0.,0.025);
+     h_Nsig_sieieF5x5[i][j].Sumw2();
 
-     h_Nbkg_sieieF5x5[i].Clear();
-     h_Nbkg_sieieF5x5[i] = TH1F(histname_Nbkg_sieieF5x5,"Leading Photon SigmaIetaIeta",100,0.,0.025);
-     h_Nbkg_sieieF5x5[i].Sumw2();
+     h_Nbkg_sieieF5x5[i][j].Clear();
+     h_Nbkg_sieieF5x5[i][j] = TH1F(histname_Nbkg_sieieF5x5,"Leading Photon SigmaIetaIeta",100,0.,0.025);
+     h_Nbkg_sieieF5x5[i][j].Sumw2();
 
-     h_Deno_sieieF5x5[i].Clear();
-     h_Deno_sieieF5x5[i] = TH1F(histname_Deno_sieieF5x5,"Leading Photon SigmaIetaIeta",100,0.,0.025);
-     h_Deno_sieieF5x5[i].Sumw2();
+     h_Deno_sieieF5x5[i][j].Clear();
+     h_Deno_sieieF5x5[i][j] = TH1F(histname_Deno_sieieF5x5,"Leading Photon SigmaIetaIeta",100,0.,0.025);
+     h_Deno_sieieF5x5[i][j].Sumw2();
      //
-     h_Nsig_pfMET[i].Clear();
-     h_Nsig_pfMET[i] = TH1F(histname_Nsig_pfMET,"ParticleFlow MET",300,0.,300.);
-     h_Nsig_pfMET[i].Sumw2();
+     h_Nsig_pfMET[i][j].Clear();
+     h_Nsig_pfMET[i][j] = TH1F(histname_Nsig_pfMET,"ParticleFlow MET",300,0.,300.);
+     h_Nsig_pfMET[i][j].Sumw2();
 
-     h_Nbkg_pfMET[i].Clear();
-     h_Nbkg_pfMET[i] = TH1F(histname_Nbkg_pfMET,"ParticleFlow MET",300,0.,300.);
-     h_Nbkg_pfMET[i].Sumw2();
+     h_Nbkg_pfMET[i][j].Clear();
+     h_Nbkg_pfMET[i][j] = TH1F(histname_Nbkg_pfMET,"ParticleFlow MET",300,0.,300.);
+     h_Nbkg_pfMET[i][j].Sumw2();
 
-     h_Deno_pfMET[i].Clear();
-     h_Deno_pfMET[i] = TH1F(histname_Deno_pfMET,"ParticleFlow MET",300,0.,300.);
-     h_Deno_pfMET[i].Sumw2();
+     h_Deno_pfMET[i][j].Clear();
+     h_Deno_pfMET[i][j] = TH1F(histname_Deno_pfMET,"ParticleFlow MET",300,0.,300.);
+     h_Deno_pfMET[i][j].Sumw2();
+
     }
+   }
 
    // For MC
    // Set object pointer
@@ -1818,51 +1850,53 @@ Int_t postAnalyzerMC_purity::Cut(Long64_t entry)
    return 1;
 }
 
-Bool_t postAnalyzerMC_purity::FillSigHistograms(int ptbin, int photonIndex, double weight){
- h_Nsig_phoet[ptbin].Fill( phoEt->at(photonIndex), weight );
- h_Nsig_wchiso[ptbin].Fill( phoPFChWorstIso->at(photonIndex), weight );
- h_Nsig_chiso[ptbin].Fill( phoPFChIso->at(photonIndex), weight );
- h_Nsig_sieieF5x5[ptbin].Fill( phoSigmaIEtaIEtaFull5x5->at(photonIndex), weight );
- h_Nsig_pfMET[ptbin].Fill( pfMET, weight );
+Bool_t postAnalyzerMC_purity::FillSigHistograms(int ptbin, int cutbin, int photonIndex, double weight){
+ //std::cout<<" filling sig histograms "<<ptbin<<" "<<cutbin<<" "<<photonIndex<<std::endl;
+ h_Nsig_phoet[ptbin][cutbin].Fill( phoEt->at(photonIndex), weight );
+ h_Nsig_wchiso[ptbin][cutbin].Fill( phoPFChWorstIso->at(photonIndex), weight );
+ h_Nsig_chiso[ptbin][cutbin].Fill( phoPFChIso->at(photonIndex), weight );
+ h_Nsig_sieieF5x5[ptbin][cutbin].Fill( phoSigmaIEtaIEtaFull5x5->at(photonIndex), weight );
+ h_Nsig_pfMET[ptbin][cutbin].Fill( pfMET, weight );
  return kTRUE;
 }
 
-Bool_t postAnalyzerMC_purity::FillBkgHistograms(int ptbin, int photonIndex, double weight){
- h_Nbkg_phoet[ptbin].Fill( phoEt->at(photonIndex), weight );
- h_Nbkg_wchiso[ptbin].Fill( phoPFChWorstIso->at(photonIndex), weight );
- h_Nbkg_chiso[ptbin].Fill( phoPFChIso->at(photonIndex), weight );
- h_Nbkg_sieieF5x5[ptbin].Fill( phoSigmaIEtaIEtaFull5x5->at(photonIndex), weight );
- h_Nbkg_pfMET[ptbin].Fill( pfMET, weight );
+Bool_t postAnalyzerMC_purity::FillBkgHistograms(int ptbin, int cutbin, int photonIndex, double weight){
+ h_Nbkg_phoet[ptbin][cutbin].Fill( phoEt->at(photonIndex), weight );
+ h_Nbkg_wchiso[ptbin][cutbin].Fill( phoPFChWorstIso->at(photonIndex), weight );
+ h_Nbkg_chiso[ptbin][cutbin].Fill( phoPFChIso->at(photonIndex), weight );
+ h_Nbkg_sieieF5x5[ptbin][cutbin].Fill( phoSigmaIEtaIEtaFull5x5->at(photonIndex), weight );
+ h_Nbkg_pfMET[ptbin][cutbin].Fill( pfMET, weight );
  return kTRUE;
 }
 
-Bool_t postAnalyzerMC_purity::FillDenHistograms(int ptbin, int photonIndex, double weight){
- h_Deno_phoet[ptbin].Fill( phoEt->at(photonIndex), weight );
- h_Deno_wchiso[ptbin].Fill( phoPFChWorstIso->at(photonIndex), weight );
- h_Deno_chiso[ptbin].Fill( phoPFChIso->at(photonIndex), weight );
- h_Deno_sieieF5x5[ptbin].Fill( phoSigmaIEtaIEtaFull5x5->at(photonIndex), weight );
- h_Deno_pfMET[ptbin].Fill( pfMET, weight );
+Bool_t postAnalyzerMC_purity::FillDenHistograms(int ptbin, int cutbin, int photonIndex, double weight){
+ h_Deno_phoet[ptbin][cutbin].Fill( phoEt->at(photonIndex), weight );
+ h_Deno_wchiso[ptbin][cutbin].Fill( phoPFChWorstIso->at(photonIndex), weight );
+ h_Deno_chiso[ptbin][cutbin].Fill( phoPFChIso->at(photonIndex), weight );
+ h_Deno_sieieF5x5[ptbin][cutbin].Fill( phoSigmaIEtaIEtaFull5x5->at(photonIndex), weight );
+ h_Deno_pfMET[ptbin][cutbin].Fill( pfMET, weight );
  return kTRUE;
 }
 
-Bool_t postAnalyzerMC_purity::WriteHistograms(int ptbin){
- h_Nsig_phoet[ptbin].Write();
- h_Nsig_wchiso[ptbin].Write();
- h_Nsig_chiso[ptbin].Write();
- h_Nsig_sieieF5x5[ptbin].Write();
- h_Nsig_pfMET[ptbin].Write();
+Bool_t postAnalyzerMC_purity::WriteHistograms(int ptbin, int cutbin){
+ //std::cout<<"   writing histograms "<<ptbin<<" "<<cutbin<<" "<<std::endl;
+ h_Nsig_phoet[ptbin][cutbin].Write();
+ h_Nsig_wchiso[ptbin][cutbin].Write();
+ h_Nsig_chiso[ptbin][cutbin].Write();
+ h_Nsig_sieieF5x5[ptbin][cutbin].Write();
+ h_Nsig_pfMET[ptbin][cutbin].Write();
  
- h_Nbkg_phoet[ptbin].Write();
- h_Nbkg_wchiso[ptbin].Write();
- h_Nbkg_chiso[ptbin].Write();
- h_Nbkg_sieieF5x5[ptbin].Write();
- h_Nbkg_pfMET[ptbin].Write();
+ h_Nbkg_phoet[ptbin][cutbin].Write();
+ h_Nbkg_wchiso[ptbin][cutbin].Write();
+ h_Nbkg_chiso[ptbin][cutbin].Write();
+ h_Nbkg_sieieF5x5[ptbin][cutbin].Write();
+ h_Nbkg_pfMET[ptbin][cutbin].Write();
  
- h_Deno_phoet[ptbin].Write();
- h_Deno_wchiso[ptbin].Write();
- h_Deno_chiso[ptbin].Write();
- h_Deno_sieieF5x5[ptbin].Write();
- h_Deno_pfMET[ptbin].Write();
+ h_Deno_phoet[ptbin][cutbin].Write();
+ h_Deno_wchiso[ptbin][cutbin].Write();
+ h_Deno_chiso[ptbin][cutbin].Write();
+ h_Deno_sieieF5x5[ptbin][cutbin].Write();
+ h_Deno_pfMET[ptbin][cutbin].Write();
  
  return kTRUE;
 }
