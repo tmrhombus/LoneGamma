@@ -35,10 +35,6 @@ void postAnalyzer_ZnunuG::Loop(TString outfilename, Bool_t isMC, Double_t lumi, 
   Long64_t ientry = LoadTree(jentry);
   if (ientry < 0) break;
   nb = fChain->GetEntry(jentry);   nbytes += nb;
-
-  //=1.0 for real data
-  event_weight=1.0;
-  if(isMC){ event_weight=lumi*crossSec/nrEvents; }
   
   // if event passes MonoPhoton triggers
   if( 
@@ -67,6 +63,11 @@ void postAnalyzer_ZnunuG::Loop(TString outfilename, Bool_t isMC, Double_t lumi, 
       int ieta = 5;
       bool passSpike = !(phoIPhi->at(candphotonindex) == iphi && phoIEta->at(candphotonindex) == ieta) ;
       bool passMETfilters = ( metFilters==0 ) ;
+
+      // Event Weight
+      //=1.0 for real data
+      event_weight=1.0;
+      if(isMC){ event_weight=lumi*crossSec/nrEvents; }
 
       fourVec_l1.SetPtEtaPhiE(0,0,0,0);
       fourVec_l2.SetPtEtaPhiE(0,0,0,0);
@@ -128,8 +129,10 @@ void postAnalyzer_ZnunuG::Loop(TString outfilename, Bool_t isMC, Double_t lumi, 
     std::vector<int> genPhotonList;
     std::vector<int> genMuonList;
     std::vector<int> genEleList;
+
     for( int a=0; a<nMC; ++a ){
-     if( mcPID->at(a)==22 && mcPt->at(a)>175. && abs(mcEta->at(a))<1.4442){ genPhotonList.push_back(a); }
+     if( mcPID->at(a)==22 && (((mcStatusFlag->at(a)>>0)&1)==1 || ((mcStatusFlag->at(a)>>1)&1)==1)
+      && mcPt->at(a)>175. && abs(mcEta->at(a))<1.4442){ genPhotonList.push_back(a); }
      if( abs(mcPID->at(a))==11 && mcPt->at(a)>10. && abs(mcEta->at(a))<2.5){ genEleList.push_back(a); }
      if( abs(mcPID->at(a))==13 && mcPt->at(a)>10. && abs(mcEta->at(a))<2.5){ genMuonList.push_back(a); }
      //printf(" mcPID: %i",mcPID->at(a));
@@ -170,7 +173,7 @@ void postAnalyzer_ZnunuG::Loop(TString outfilename, Bool_t isMC, Double_t lumi, 
    genLeptoMET = fourVec_genLeptoMET.Pt();
    genLeptoMEPhi = fourVec_genLeptoMET.Phi();
 
-  bool passGenMET = genLeptoMET > 140.;
+  bool passGenMET = genLeptoMET > 170.;
   bool passGendPhiPhoMET = ( DeltaPhi( mcPhi->at(candphotonindex), genLeptoMEPhi ) > 2.0 ) ;
 
   // fill histograms

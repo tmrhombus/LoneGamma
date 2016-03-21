@@ -4,7 +4,7 @@
 
 domc=true
 dodata=false
-dosubmit=true
+dosubmit=false
 
 START=$(date +%s);
 printf "Started at `date`\n\n"
@@ -15,7 +15,6 @@ mkdir -p "${submitbase}/${version}/submit"
 lumi=2240. # /pb
 
   #"ZLLG"
-  #"ZNuNuG"
 if [ ${domc} = true ]
 then
  for mc_samplename in \
@@ -29,6 +28,7 @@ then
    "600ToInf"
   do 
 
+  #submitname="${mc_samplename}"
   submitname="${mc_samplename}${htbin}"
 
   initevents="${submitbase}/${version}/lists/initialEvents.txt"
@@ -114,10 +114,8 @@ then
   
   printf " making list of files\n"
 
-  #find /hdfs/store/user/jjbuch/SinglePhoton/crab_ggNtuplizer_spring15_SinglePhoton_Run2015D_PromptReco_v3_try5/151212_080518/0000/*root > \
   find /hdfs/store/user/gomber/SinglePhoton_Crab_2015D_v3_226fb/SinglePhoton/crab_job_single_photon_13TeV_v3_226fb/160109_082344/0000/*root > \
    ${submitbase}/${version}/lists/hdfslist_${data_samplename}.txt
-  #find /hdfs/store/user/jjbuch/SinglePhoton/crab_ggNtuplizer_spring15_SinglePhoton_Run2015D_PromptReco_v4_try5/151212_080439/0000/*root >> \
   find /hdfs/store/user/gomber/SinglePhoton_Crab_2015D_v4_226fb/SinglePhoton/crab_job_single_photon_13TeV_v4_226fb/160109_082133/000*/*root >> \
    ${submitbase}/${version}/lists/hdfslist_${data_samplename}.txt
 
@@ -134,7 +132,7 @@ then
   treename="ggNtuplizer/EventTree"
   isMC="kFALSE"
   xc="1."
-  nrE="2260."
+  nrE=${lumi}
 
   # make correct executable xx_callpostAnalyzer_ZnunuG
   cp template_callpostAnalyzer_ZnunuG.cc         "${submitbase}/${version}/submit/${data_samplename}_callpostAnalyzer_ZnunuG.cc"

@@ -887,8 +887,6 @@ public :
    TBranch        *b_AK8softdropSubjetFlavour;   //!
    TBranch        *b_AK8softdropSubjetCSV;   //!
 
-
-
 // //For Data
 //   Int_t           run;
 //   Long64_t        event;

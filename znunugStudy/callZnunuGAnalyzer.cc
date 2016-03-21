@@ -19,7 +19,7 @@ void callZnunuGAnalyzer(void)
  Double_t nrEvents=10000;
  Double_t crossSec=40000;
  
- Bool_t isMC=kFALSE;
+ Bool_t isMC=kTRUE;
  TString path = "./test";
  TString outfilename=path+"/ZNNG_ZGMC.root";
  //TString outfilename=path+"/ZNNG_DataD.root";
