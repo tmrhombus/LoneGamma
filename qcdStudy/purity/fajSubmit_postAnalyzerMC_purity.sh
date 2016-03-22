@@ -17,7 +17,7 @@ then
  cp "${submitbase}/Domb/lists/"*txt "${submitbase}/${version}/lists/"
 fi
 
-lumi=2240. # /pb
+lumi=2320. # /pb
 
 if [ ${domc} = true ]
 then
