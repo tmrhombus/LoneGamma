@@ -29,11 +29,11 @@ void plotpurity()
  ptranges.push_back("250to400");
  ptranges.push_back("400to700");
  ptranges.push_back("700to1000");
- //ptranges.push_back("250to1000");
- //ptranges.push_back("400to1000");
+// ptranges.push_back("250to1000");
+// ptranges.push_back("400to1000");
 
  std::vector<TString> isovars;
- //isovars.push_back("wchiso");
+ isovars.push_back("wchiso");
  isovars.push_back("chiso");
 
  std::vector<TString> cuts;
@@ -56,7 +56,9 @@ void plotpurity()
  TFile *infile_QCD = new TFile(inname_QCD);
  
  ofstream log;
+ ofstream log_latex;
  log.open (outpath+"/Purity_log.txt");
+ log_latex.open (outpath+"/Purity_log_latex.txt");
 
  Int_t fillcolor = 3;
  gStyle->SetOptStat(0);
@@ -107,6 +109,19 @@ void plotpurity()
      TString cut = cuts.at(k);
      TString rebin = rebins.at(l);
 
+     TString cutname;
+     if(cut=="idnc"){cutname="ID";}
+     if(cut=="idnc_mL30"){cutname="ID+MET";}
+     if(cut=="idnc_trig"){cutname="ID+Trigger";}
+     if(cut=="idnc_mL30_trig"){cutname="ID+MET+Trigger";}
+
+     TString bwidth;
+     if(rebin=="rebin1"){bwidth="width=0.5";}
+     if(rebin=="rebin2"){bwidth="width=1.0";}
+     if(rebin=="rebin3"){bwidth="width=1.5";}
+     if(rebin=="rebin4"){bwidth="width=2.0";}
+     if(rebin=="rebin5"){bwidth="width=2.5";}
+
      std::cout<<boost::format("%8s %15s %7s %7s ") % ptrange % cut % isovar % rebin<<std::endl;
 
      //Signal purity
@@ -136,6 +151,11 @@ void plotpurity()
      h_Deno->SetLineColor(c_den); h_Deno_GJ->SetLineColor(c_den); h_Deno_QCD->SetLineColor(c_den);
      h_Deno->SetLineStyle(ls_cmb); h_Deno_GJ->SetLineStyle(ls_gj); h_Deno_QCD->SetLineStyle(ls_qcd);
      h_Deno->SetLineWidth(2); h_Deno_GJ->SetLineWidth(2); h_Deno_QCD->SetLineWidth(2);
+
+     // should probably add these as last bin..
+     h_Nsig->ClearUnderflowAndOverflow();
+     h_Nbkg->ClearUnderflowAndOverflow();
+     h_Deno->ClearUnderflowAndOverflow();
      
      //Define purity
      TGraphAsymmErrors *purity_signal     = new TGraphAsymmErrors(h_Nsig,h_Deno,"n");
@@ -159,7 +179,7 @@ void plotpurity()
      nbins = purity_background->GetN();
      log<<boost::format("(%2i bins) \n") % nbins ; 
 
-     std::vector<Double_t> thresholds, xsatthresh, ysatthresh, xsatqt;
+     std::vector<Double_t> thresholds, xsatthresh, ysatthresh, xsatqt, avgpur;
      std::vector<Int_t> batthresh, batqt;
 
      thresholds.clear(); // purity thresholds
@@ -169,6 +189,8 @@ void plotpurity()
 
      batqt.clear();      // bin at upper threshold
      xsatqt.clear();     // x value at upper thresh
+
+     avgpur.clear();     // average purity over range
 
      thresholds.push_back(0.50);
      thresholds.push_back(0.55);
@@ -242,6 +264,44 @@ void plotpurity()
     log<<"       Target Eventcount: "<<goalsize<<" = fullsize/4 = "<<fullsize<<"/4 \n";
      log<<boost::format("   Threshold blo bhi (xlo,xhi) Int(blo,bhi) Int(blo,bhi+1) Int(blo,bhi-1)\n");
 
+    // find average purity over range
+    // must weight each purity bin by nr. events in bin
+    for(int n=0; n<nthreshs; ++n){
+     int nbins = batqt.at(n) - batthresh.at(n);
+     //std::cout<<nbins<<" "<<batthresh.at(n)<<" "<<batqt.at(n)<<std::endl;
+     Double_t sumpurs, sumweights;
+     sumpurs = 0.;
+     sumweights = 0.;
+     for(int o=0; o<nbins+1; ++o){
+      int thisbin = batthresh.at(n) + o;
+      int thispoint = thisbin - 1;  // bin nr = point nr + 1
+      purity_background->GetPoint(thispoint, pointx,pointy);
+      sumpurs += pointy*h_Nbkg->GetBinContent(thisbin);
+      sumweights += h_Nbkg->GetBinContent(thisbin);
+      //std::cout<<" "<<thispoint<<"|"<<pointy<<"|"<<h_Nbkg->GetBinContent(thisbin)<<" "<<std::endl;;
+     }
+     //std::cout<<std::endl;
+     //std::cout<<sumpurs/sumweights<<std::endl<<std::endl;;
+     avgpur.push_back( sumpurs/sumweights );
+    }
+     log_latex<<"\\begin{tabular}{r|r|r|r|r|r|r|r}\n";
+     log_latex<<boost::format("\\multicolumn{2}{c|}{%8s} & \\multicolumn{2}{c|}{%15s} & \\multicolumn{2}{c|}{%7s} & \\multicolumn{2}{c|}{%7s} \\\\ \\hline \\hline  \n") % ptrange % cutname % isovar % bwidth  ;
+     log_latex<<boost::format("   %10s & %5s & %5s & %10s & %5s & %8s & %15s & %10s  \\\\  \\hline \n")
+      % "Threshold" 
+      % "x lo" % "x hi" 
+      % "avg purity"
+      % "err \\%" 
+      % "evts. tot." 
+      % "evts. > x lo" 
+      % "evts in rng." ;
+
+     ///log_latex<<"\\begin{tabular}{r|r|r|r|r}\n";
+     ///log_latex<<boost::format("%8s & \\multicolumn{2}{c}{%15s} & %7s & %7s \\\\  \n \\hline \\hline \n") % ptrange % cutname % isovar % bwidth  ;
+     ///log_latex<<boost::format("   %10s & %5s & %5s & %10s & %5s \\\\ \n \\hline \n")
+     /// % "Threshold" 
+     /// % "x lo" % "x hi" 
+     /// % "avg purity"
+     /// % "err \\%" ;
     for(int n=0; n<nthreshs; ++n){
      log<<boost::format("    %7.2f %3i %3i (%2.1f,%1.2f) %10.2f %10.2f %10.2f  \n")
       % thresholds.at(n) % batthresh.at(n) %batqt.at(n)
@@ -249,7 +309,26 @@ void plotpurity()
       % h_Nbkg->Integral(batthresh.at(n),batqt.at(n))
       % h_Nbkg->Integral(batthresh.at(n),batqt.at(n)+1)
       % h_Nbkg->Integral(batthresh.at(n),batqt.at(n)-1) ;
+
+     Double_t nrevents, errevents, pcterr;
+     nrevents = h_Nbkg->IntegralAndError(batthresh.at(n),batqt.at(n),errevents);
+     pcterr = errevents/nrevents;
+     log_latex<<boost::format("   %10.2f & %5.2f & %5.2f & %10.4f &  %5.2f &  %8.1f & %15.1f & %10.1f  \\\\  \n")
+      % thresholds.at(n) 
+      % xsatthresh.at(n) % xsatqt.at(n) 
+      % avgpur.at(n)
+      % (pcterr*100) 
+      % fullsize 
+      % h_Nbkg->Integral(batthresh.at(n),-1)
+      % h_Nbkg->Integral(batthresh.at(n),batqt.at(n));
+
+     ///log_latex<<boost::format("   %10.2f & %5.2f & %5.2f & %7.3f &  %5.2f  \\\\  \n")
+     /// % thresholds.at(n) 
+     /// % xsatthresh.at(n) % xsatqt.at(n) 
+     /// % avgpur.at(n)
+     /// % (pcterr*100) ;
     }
+     log_latex<<"\\hline \n  \\end{tabular}\n";
 
      //-----------------------------------------------------
      // all set, now to start thinking about plotting
@@ -327,6 +406,52 @@ void plotpurity()
      lgc_hi2->SetLineStyle(2);
      lgc_hi3->SetLineStyle(2);
      lgc_hi4->SetLineStyle(2);
+
+     //Make avg purity horizontal lines
+     TLine *lgb_pur0 = new TLine(xsatthresh.at(0), avgpur.at(0), xsatqt.at(0), avgpur.at(0));
+     TLine *lgb_pur1 = new TLine(xsatthresh.at(1), avgpur.at(1), xsatqt.at(1), avgpur.at(1));
+     TLine *lgb_pur2 = new TLine(xsatthresh.at(2), avgpur.at(2), xsatqt.at(2), avgpur.at(2));
+     TLine *lgb_pur3 = new TLine(xsatthresh.at(3), avgpur.at(3), xsatqt.at(3), avgpur.at(3));
+     TLine *lgb_pur4 = new TLine(xsatthresh.at(4), avgpur.at(4), xsatqt.at(4), avgpur.at(4));
+     TLine *lgc_pur0 = new TLine(xsatthresh.at(0), avgpur.at(0), xsatqt.at(0), avgpur.at(0));
+     TLine *lgc_pur1 = new TLine(xsatthresh.at(1), avgpur.at(1), xsatqt.at(1), avgpur.at(1));
+     TLine *lgc_pur2 = new TLine(xsatthresh.at(2), avgpur.at(2), xsatqt.at(2), avgpur.at(2));
+     TLine *lgc_pur3 = new TLine(xsatthresh.at(3), avgpur.at(3), xsatqt.at(3), avgpur.at(3));
+     TLine *lgc_pur4 = new TLine(xsatthresh.at(4), avgpur.at(4), xsatqt.at(4), avgpur.at(4));
+
+     lgb_pur0->SetLineColor(1);
+     lgb_pur1->SetLineColor(1);
+     lgb_pur2->SetLineColor(1);
+     lgb_pur3->SetLineColor(1);
+     lgb_pur4->SetLineColor(1);
+     //lgb_pur0->SetLineColor(2);
+     //lgb_pur1->SetLineColor(3);
+     //lgb_pur2->SetLineColor(4);
+     //lgb_pur3->SetLineColor(5);
+     //lgb_pur4->SetLineColor(6);
+     lgc_pur0->SetLineColor(2);
+     lgc_pur1->SetLineColor(3);
+     lgc_pur2->SetLineColor(4);
+     lgc_pur3->SetLineColor(5);
+     lgc_pur4->SetLineColor(6);
+
+     lgb_pur0->SetLineWidth(4);
+     lgb_pur1->SetLineWidth(4);
+     lgb_pur2->SetLineWidth(4);
+     lgb_pur3->SetLineWidth(4);
+     lgb_pur4->SetLineWidth(4);
+     lgc_pur0->SetLineWidth(2);
+     lgc_pur1->SetLineWidth(2);
+     lgc_pur2->SetLineWidth(2);
+     lgc_pur3->SetLineWidth(2);
+     lgc_pur4->SetLineWidth(2);
+
+     //lgc_pur0->SetLineStyle(2);
+     //lgc_pur1->SetLineStyle(2);
+     //lgc_pur2->SetLineStyle(2);
+     //lgc_pur3->SetLineStyle(2);
+     //lgc_pur4->SetLineStyle(2);
+
      //-----------------------------------------------------
      Double_t themax = 0 ;
      themax = std::max(themax, h_Nsig->GetMaximum());
@@ -339,7 +464,7 @@ void plotpurity()
      logmax = std::log(themax);
      logmin = std::log(1);
      Double_t spacing = (logmax-logmin)/nthreshs;
-     std::cout<<spacing<<std::endl;
+     //std::cout<<spacing<<std::endl;
 
      //Double_t fifmax = themax/5.;
      TLine *lhb_lo0 = new TLine(xsatthresh.at(0), exp(logmin+0*spacing), xsatthresh.at(0), exp(logmin+1*spacing));
@@ -558,6 +683,17 @@ void plotpurity()
      lgc_hi2->Draw();
      lgc_hi3->Draw();
      lgc_hi4->Draw();
+
+     lgb_pur0->Draw();
+     lgb_pur1->Draw();
+     lgb_pur2->Draw();
+     lgb_pur3->Draw();
+     lgb_pur4->Draw();
+     lgc_pur0->Draw();
+     lgc_pur1->Draw();
+     lgc_pur2->Draw();
+     lgc_pur3->Draw();
+     lgc_pur4->Draw();
      
      canvas->SaveAs(outpath+"/Purity_"+isovar+"_"+ptrange+"_"+cut+"_"+rebin+"_lines"+xn+".pdf");
 
@@ -576,9 +712,11 @@ void plotpurity()
      h_Deno_QCD->Delete();
     }
    log<<"--------------------------------------\n";
+   log_latex<<"--------------------------------------\n";
    }
   }
  }
  log.close();
+ log_latex.close();
 }
 
