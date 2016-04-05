@@ -1,0 +1,5 @@
+/hdfs/store/user/jjbuch/ZLLGJets_MonoPhoton_PtG-130_TuneCUETP8M1_13TeV-madgraph/crab_ggNtuplizer_spring15_ZLLGJets_try5/151212_075328/0000/ggtree_mc_1.root
+/hdfs/store/user/jjbuch/ZLLGJets_MonoPhoton_PtG-130_TuneCUETP8M1_13TeV-madgraph/crab_ggNtuplizer_spring15_ZLLGJets_try5/151212_075328/0000/ggtree_mc_2.root
+/hdfs/store/user/jjbuch/ZLLGJets_MonoPhoton_PtG-130_TuneCUETP8M1_13TeV-madgraph/crab_ggNtuplizer_spring15_ZLLGJets_try5/151212_075328/0000/ggtree_mc_3.root
+/hdfs/store/user/jjbuch/ZLLGJets_MonoPhoton_PtG-130_TuneCUETP8M1_13TeV-madgraph/crab_ggNtuplizer_spring15_ZLLGJets_try5/151212_075328/0000/ggtree_mc_4.root
+/hdfs/store/user/jjbuch/ZLLGJets_MonoPhoton_PtG-130_TuneCUETP8M1_13TeV-madgraph/crab_ggNtuplizer_spring15_ZLLGJets_try5/151212_075328/0000/ggtree_mc_5.root
