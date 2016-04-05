@@ -25,12 +25,24 @@ void postAnalyzer_Signal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, 
  int n_passdPhiPhoMET=0;
  int n_passdPhiJM    =0;
 
+ int n_initial = 0;
+ int n_trig    = 0;
+ int n_phokin  = 0;
+ int n_spike   = 0;
+ int n_met     = 0;
+ int n_metfilt = 0;
+ int n_dphipho = 0;
+ int n_lepveto = 0;
+ int n_dphijet = 0;
+
+
  if (fChain == 0) return;
 
  Long64_t nentries = fChain->GetEntriesFast();
 
  Long64_t nbytes = 0, nb = 0;
  for (Long64_t jentry=0; jentry<nentries;jentry++) {
+  n_initial++; // 
   if (jentry%20000 == 0)
     {
       std::cout<<"Starting entry "<<jentry<<"/"<<(nentries)<<" at "<<sw.RealTime()<<" RealTime, "<<sw.CpuTime()<<" CpuTime"<<std::endl;
@@ -44,28 +56,22 @@ void postAnalyzer_Signal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, 
   //=1.0 for real data
   event_weight=1.0;
   if(isMC){ event_weight=lumi*crossSec/nrEvents; }
-  
-  // if event passes MonoPhoton triggers
-  if( 
-   ((HLTPho>>7&1) == 1) ||
-   ((HLTPho>>8&1) == 1) ||
-   ((HLTPho>>9&1) == 1) ||
-   ((HLTPho>>10&1) == 1) ||
-   ((HLTPho>>11&1) == 1) ||
-   ((HLTPho>>12&1) == 1) ||
-   ((HLTPho>>22&1) == 1) )
-  {   
 
-   // vector of ints, each int corresponds to location in vector of photons of photon passing cut
-   // one such vector for each systematic bin
-
+  //// vector of ints, each int corresponds to location in vector of photons of photon passing cut
+  //// one such vector for each systematic bin
   //for(unsigned int sysb=0; sysb<lastsysbin; ++sysb){
   // phoCand[sysb] = getPhoCand(175,1.4442);
   //}
   phoCand = getPhoCand(175,1.4442);
    if(phoCand.size()>0)
      {
+      n_phokin++; //
       int candphotonindex = phoCand.at(0);
+
+  
+      // if event passes MonoPhoton triggers (HLT_Photon165_HE10_v)
+      // https://github.com/cmkuo/ggAnalysis/blob/master/ggNtuplizer/plugins/ggNtuplizer_globalEvent.cc#L179
+      bool passTrig =( (HLTPho>>12&1) == 1);
 
       // spike cleaning
       int iphi = 41; 
@@ -78,9 +84,11 @@ void postAnalyzer_Signal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, 
       bool passLepRej = false;
       if( elelist.size()==0 && mulist.size()==0 ){ passLepRej = true; }
 
+
       // MET requirements
-      bool passMETfilters = ( metFilters==0 ) ;
-      bool passMET = (pfMET > 140.) ;
+      bool passMETfilters = ( metFilters==0 ) ; //|| metFilters==4 ) ;
+      //bool passMETfilters = true ; // ( metFilters==0 ) ;
+      bool passMET = (pfMET > 170.) ;
 
       // dPhi( Jets, MET )
       std::vector<int>  jetindexvector = selectedJets(candphotonindex);
@@ -89,13 +97,6 @@ void postAnalyzer_Signal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, 
       // dPhi( photon, MET )
       bool passdPhiPhoMET = ( DeltaPhi(phoPhi->at(candphotonindex),pfMETPhi)>2.0 ) ;
 
-      printf("Event: %lli \n",event);
-      printf("  passSpike       %i \n",passSpike      );
-      printf("  passLepRej      %i \n",passLepRej     );
-      printf("  passMETfilters  %i \n",passMETfilters );
-      printf("  passMET         %i \n",passMET        );
-      printf("  passdPhiPhoMET  %i \n",passdPhiPhoMET );
-      printf("  passdPhiJM      %i \n",passdPhiJM     );
 
       if( passSpike     ){ ++n_passSpike      ;}
       if( passLepRej    ){ ++n_passLepRej     ;}
@@ -104,12 +105,83 @@ void postAnalyzer_Signal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, 
       if( passdPhiPhoMET){ ++n_passdPhiPhoMET ;}
       if( passdPhiJM    ){ ++n_passdPhiJM     ;}
 
+//if( event==767326116 ){
+//      printf("Event: %lli \n",event);
+//      printf("  passSpike       %i \n",passSpike      );
+//      printf("  passLepRej      %i \n",passLepRej     );
+//      printf("  passMETfilters  %i \n",passMETfilters );
+//      printf("  passMET         %i \n",passMET        );
+//      printf("  passdPhiPhoMET  %i \n",passdPhiPhoMET );
+//      printf("  passdPhiJM      %i \n",passdPhiJM     );
+// std::cout<<elelist.size()<<std::endl;
+// std::cout<<mulist.size()<<std::endl;
+//}
+
+
+//
+//if( event==767326116 ){
+//
+//
+//            std::cout<<"D : "<<run<<" : "<<event<<" : "<<lumis<<" : "<<phoCand1[0]<<std::endl;
+//            std::cout<<"Passed Denominator Cut-----------------------------------------------------------"<<std::endl;
+//            std::cout<<" run           "<<   run            <<std::endl;
+//            std::cout<<" lumis          "<<   lumis           <<std::endl;
+//            std::cout<<" event         "<<   event          <<std::endl;
+//            std::cout<<" photon index  "<<   phoCand1[0]     <<std::endl;
+//
+//            std::cout<<" phoEt         "<<   (*phoEt)[phoCand1[0]]          <<std::endl;
+//            std::cout<<" phoSCEta      "<<   (*phoSCEta)[phoCand1[0]]       <<std::endl;
+//            std::cout<<" pfMET         "<<   pfMET          <<std::endl;
+//            std::cout<<" phoPFNeuIso   "<<   (*phoPFNeuIso)[phoCand1[0]]    <<std::endl;
+//            std::cout<<" phoPFPhoIso   "<<   (*phoPFPhoIso)[phoCand1[0]]    <<std::endl;
+//            std::cout<<" phoPFChIso    "<<   (*phoPFChIso) [phoCand1[0]]     <<std::endl;
+//            std::cout<<" rho           "<<   rho            <<std::endl;
+//            std::cout<<" EAneutral     "<<   EAneutral((*phoSCEta)[phoCand1[0]]) <<std::endl;
+//            std::cout<<" EAphoton      "<<   EAphoton((*phoSCEta)[phoCand1[0]])       <<std::endl<<std::endl;
+//
+//
+//
+//std::cout<< metFilters <<std::endl;
+//std::cout<< HLTPho <<std::endl;
+////std::cout<< TMath::Max( ( (*phoPFChWorstIso)[phoCand1[0]]  - rho*EAchargedworst((*phoSCEta)[phoCand1[0]]) ), 0.0) < 1.37  <<std::endl;
+//std::cout<< pfMET <<std::endl;
+////std::cout<< DeltaPhi(phoPhi->at(phoCand1[0]),pfMETPhi)>2.0 <<std::endl;
+//std::cout<< electron_veto_looseID(phoCand1[0],10) <<std::endl;
+//std::cout<< muon_veto_looseID(phoCand1[0],10) <<std::endl<<std::endl<<std::endl;
+//if(0){std::cout<<0<<std::endl;}
+//if(1){std::cout<<1<<std::endl;}
+//
+//
+//}
+//
+
+
+      if( passTrig ){
+       n_trig++; //
+       if( passSpike){
+        n_spike++; //
+        if( passMET ){
+         n_met++; //
+         if( passMETfilters ){
+          n_metfilt++; //
+          if( passdPhiPhoMET ){
+           n_dphipho++; //
+           if( passLepRej ){
+            n_lepveto++; //
+            if( passdPhiJM ){
+             n_dphijet++; //
+            }
+           }
+          }
+         }
+        }
+       }
+      }
+
       // fill histograms
       if ( passSpike && passLepRej && passMETfilters && passMET && passdPhiPhoMET && passdPhiJM)
-      //printf("passed  ");
-      //printf("dilep mass : %f", dilep_mass);
-      //if ( passSpike && passMETfilters && passdPhiJetMET && passMET && passdPhiPhoMET )
          {
+          printf("%i:%i:%lli \n",run,lumis,event);
           nc++;
           for(unsigned int ptb=0; ptb<lastptbin-2; ++ptb){ // break into pT bins
            if(
@@ -130,83 +202,82 @@ void postAnalyzer_Signal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, 
          }
       // end fill histograms
      } //end if phoCand[0].size()>0
-  } //end if passes MonoPhoton triggers
 
 
-//////////////////////////////////////////////////////////////////
-  // now do gen part
-    std::vector<int> genPhotonList;
-    std::vector<int> genMuonList;
-    std::vector<int> genEleList;
-    for( int a=0; a<nMC; ++a ){
-     if( mcPID->at(a)==22 && mcPt->at(a)>175. && abs(mcEta->at(a))<1.4442){ genPhotonList.push_back(a); }
-     if( abs(mcPID->at(a))==11 && mcPt->at(a)>10. && abs(mcEta->at(a))<2.5){ genEleList.push_back(a); }
-     if( abs(mcPID->at(a))==13 && mcPt->at(a)>10. && abs(mcEta->at(a))<2.5){ genMuonList.push_back(a); }
-     //printf(" mcPID: %i",mcPID->at(a));
-    }
-
-   int    leadingG;
-   double leadingGpt;
-   leadingG = 0;
-   leadingGpt = 0.;
-   for( int i=0; i<genPhotonList.size(); ++i ){ 
-    if (mcEt->at(genPhotonList.at(i)) > leadingGpt){
-     leadingGpt = mcEt->at(genPhotonList.at(i)) ;
-     leadingG = genPhotonList.at(i) ;
-    } 
-   }
-
-  if( genPhotonList.size()>0 ){
-
-   int candphotonindex = genPhotonList.at(0);
-
-   //printf(" photonindex: %i  pT: %.3f \n",candphotonindex,mcPt->at(candphotonindex));
-
-   fourVec_genl1.SetPtEtaPhiE(0,0,0,0);
-   fourVec_genl2.SetPtEtaPhiE(0,0,0,0);
-
-   // get electrons and muons and put into 4vectors
-   makeGenDilep(candphotonindex, genEleList, genMuonList, &fourVec_genl1, &fourVec_genl2, &fourVec_genee, &fourVec_genmm);
-   // make dilepton object and add to met
-   fourVec_genll = fourVec_genl1 + fourVec_genl2;
-   //printf("  pt: %.4f  eta: %.4f  phi: %.4f  mass: %.4f \n", fourVec_l1.Pt(), fourVec_l1.Eta(), fourVec_l1.Phi(), fourVec_l1.M() );
-   //printf("  pt: %.4f  eta: %.4f  phi: %.4f  mass: %.4f \n", fourVec_l2.Pt(), fourVec_l2.Eta(), fourVec_l2.Phi(), fourVec_l2.M() );
-   //printf("  pt: %.4f  eta: %.4f  phi: %.4f  mass: %.4f \n", fourVec_ll.Pt(), fourVec_ll.Eta(), fourVec_ll.Phi(), fourVec_ll.M() );
-   gen_dilep_mass = fourVec_genll.M();
-
-   fourVec_genMET.SetPtEtaPhiE( genMET, 0., genMETPhi, 0. );
-
-   fourVec_genLeptoMET = fourVec_genMET + fourVec_genll;
-   genLeptoMET = fourVec_genLeptoMET.Pt();
-   genLeptoMEPhi = fourVec_genLeptoMET.Phi();
-
-  bool passGenMET = genLeptoMET > 140.;
-  bool passGendPhiPhoMET = ( DeltaPhi( mcPhi->at(candphotonindex), genLeptoMEPhi ) > 2.0 ) ;
-
-  // fill histograms
-  if ( passGenMET && passGendPhiPhoMET && gen_dilep_mass>60. && gen_dilep_mass<120.)
-     {
-      gencount++;
-      for(unsigned int ptb=0; ptb<lastptbin-2; ++ptb){ // break into pT bins
-       if(
-          (mcEt->at(candphotonindex) > ptbins[ptb]) &&
-          (mcEt->at(candphotonindex) < ptbins[ptb+1])
-         ){
-        FillGenHistograms(ptb, 0, candphotonindex, event_weight);
-       } // end if passes pt cuts then fill
-      } // end pt bin loop
-      if(  // do an inclusive pT plot from bins
-         (mcEt->at(candphotonindex) > ptbins[0]) &&
-         (mcEt->at(candphotonindex) < ptbins[inclptbin])
-        ){
-       FillGenHistograms(lastptbin-1, 0, candphotonindex, event_weight);
-      }
-      // and one fully inclusive in pT
-      FillGenHistograms(lastptbin, 0, candphotonindex, event_weight);
-     }
-  // end fill histograms
-  }
-///////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////
+//  // now do gen part
+//    std::vector<int> genPhotonList;
+//    std::vector<int> genMuonList;
+//    std::vector<int> genEleList;
+//    for( int a=0; a<nMC; ++a ){
+//     if( mcPID->at(a)==22 && mcPt->at(a)>175. && abs(mcEta->at(a))<1.4442){ genPhotonList.push_back(a); }
+//     if( abs(mcPID->at(a))==11 && mcPt->at(a)>10. && abs(mcEta->at(a))<2.5){ genEleList.push_back(a); }
+//     if( abs(mcPID->at(a))==13 && mcPt->at(a)>10. && abs(mcEta->at(a))<2.5){ genMuonList.push_back(a); }
+//     //printf(" mcPID: %i",mcPID->at(a));
+//    }
+//
+//   int    leadingG;
+//   double leadingGpt;
+//   leadingG = 0;
+//   leadingGpt = 0.;
+//   for( int i=0; i<genPhotonList.size(); ++i ){ 
+//    if (mcEt->at(genPhotonList.at(i)) > leadingGpt){
+//     leadingGpt = mcEt->at(genPhotonList.at(i)) ;
+//     leadingG = genPhotonList.at(i) ;
+//    } 
+//   }
+//
+//  if( genPhotonList.size()>0 ){
+//
+//   int candphotonindex = genPhotonList.at(0);
+//
+//   //printf(" photonindex: %i  pT: %.3f \n",candphotonindex,mcPt->at(candphotonindex));
+//
+//   fourVec_genl1.SetPtEtaPhiE(0,0,0,0);
+//   fourVec_genl2.SetPtEtaPhiE(0,0,0,0);
+//
+//   // get electrons and muons and put into 4vectors
+//   makeGenDilep(candphotonindex, genEleList, genMuonList, &fourVec_genl1, &fourVec_genl2, &fourVec_genee, &fourVec_genmm);
+//   // make dilepton object and add to met
+//   fourVec_genll = fourVec_genl1 + fourVec_genl2;
+//   //printf("  pt: %.4f  eta: %.4f  phi: %.4f  mass: %.4f \n", fourVec_l1.Pt(), fourVec_l1.Eta(), fourVec_l1.Phi(), fourVec_l1.M() );
+//   //printf("  pt: %.4f  eta: %.4f  phi: %.4f  mass: %.4f \n", fourVec_l2.Pt(), fourVec_l2.Eta(), fourVec_l2.Phi(), fourVec_l2.M() );
+//   //printf("  pt: %.4f  eta: %.4f  phi: %.4f  mass: %.4f \n", fourVec_ll.Pt(), fourVec_ll.Eta(), fourVec_ll.Phi(), fourVec_ll.M() );
+//   gen_dilep_mass = fourVec_genll.M();
+//
+//   fourVec_genMET.SetPtEtaPhiE( genMET, 0., genMETPhi, 0. );
+//
+//   fourVec_genLeptoMET = fourVec_genMET + fourVec_genll;
+//   genLeptoMET = fourVec_genLeptoMET.Pt();
+//   genLeptoMEPhi = fourVec_genLeptoMET.Phi();
+//
+//  bool passGenMET = genLeptoMET > 140.;
+//  bool passGendPhiPhoMET = ( DeltaPhi( mcPhi->at(candphotonindex), genLeptoMEPhi ) > 2.0 ) ;
+//
+//  // fill histograms
+//  if ( passGenMET && passGendPhiPhoMET && gen_dilep_mass>60. && gen_dilep_mass<120.)
+//     {
+//      gencount++;
+//      for(unsigned int ptb=0; ptb<lastptbin-2; ++ptb){ // break into pT bins
+//       if(
+//          (mcEt->at(candphotonindex) > ptbins[ptb]) &&
+//          (mcEt->at(candphotonindex) < ptbins[ptb+1])
+//         ){
+//        FillGenHistograms(ptb, 0, candphotonindex, event_weight);
+//       } // end if passes pt cuts then fill
+//      } // end pt bin loop
+//      if(  // do an inclusive pT plot from bins
+//         (mcEt->at(candphotonindex) > ptbins[0]) &&
+//         (mcEt->at(candphotonindex) < ptbins[inclptbin])
+//        ){
+//       FillGenHistograms(lastptbin-1, 0, candphotonindex, event_weight);
+//      }
+//      // and one fully inclusive in pT
+//      FillGenHistograms(lastptbin, 0, candphotonindex, event_weight);
+//     }
+//  // end fill histograms
+//  }
+/////////////////////////////////////////////////////////////////////
 
 
  } //end loop through entries
@@ -223,6 +294,17 @@ void postAnalyzer_Signal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, 
   printf(" n_passMET        %i\n", n_passMET       );
   printf(" n_passdPhiPhoMET %i\n", n_passdPhiPhoMET);
   printf(" n_passdPhiJM     %i\n", n_passdPhiJM    );
+
+
+  printf(" n_initial %i\n",  n_initial);
+  printf(" n_trig    %i\n",  n_trig   );
+  printf(" n_phokin  %i\n",  n_phokin );
+  printf(" n_spike   %i\n",  n_spike  );
+  printf(" n_met     %i\n",  n_met    );
+  printf(" n_metfilt %i\n",  n_metfilt);
+  printf(" n_dphipho %i\n",  n_dphipho);
+  printf(" n_lepveto %i\n",  n_lepveto);
+  printf(" n_dphijet %i\n",  n_dphijet);
 
 
  TFile *outfile = new TFile(outfilename,"RECREATE");
@@ -251,25 +333,26 @@ std::vector<int> postAnalyzer_Signal::getPhoCand(double phoPtCut, double phoEtaC
   for(int p=0;p<nPho;p++)
     {
       bool kinematic = (*phoEt)[p] > phoPtCut  && fabs((*phoSCEta)[p])<phoEtaCut;
+
       bool photonId = (
                        ((*phoHoverE)[p]                <  0.05   ) &&
                        ((*phoSigmaIEtaIEtaFull5x5)[p]  <  0.0102 ) &&
                        ((*phohasPixelSeed)[p]              ==  0      ) &&
-                       ( TMath::Max( ( (*phoPFChIso)[p]  - rho*EAcharged((*phoSCEta)[p]) ), 0.0) < 1.37 )  &&
-                       //( TMath::Max( ( (*phoPFChWorstIso)[p]  - rho*EAcharged((*phoSCEta)[p]) ), 0.0) < 1.37 )  &&
+                       ( TMath::Max( (*phoPFChIso)[p] - 0.0, 0.0) < 1.37 )  && // wtf TMath - shouldn't do anything since we have worstCHiso ..
+                       ( TMath::Max( ( (*phoPFChWorstIso)[p]  - rho*EAcharged((*phoSCEta)[p]) ), 0.0) < 1.37 )  &&
                        ( TMath::Max( ( (*phoPFNeuIso)[p] - rho*EAneutral((*phoSCEta)[p]) ), 0.0) <
                         (1.06 + (0.014 * (*phoEt)[p]) + (0.000019 * pow((*phoEt)[p], 2.0))) )  &&
                        ( TMath::Max( ( (*phoPFPhoIso)[p] - rho*EAphoton((*phoSCEta)[p])  ), 0.0) < 
                         (0.28 + (0.0053 * (*phoEt)[p])) ) 
                       );
 
-      bool noncoll = (*phoSigmaIEtaIEtaFull5x5)[p] > 0.001 &&
-                     (*phoSigmaIPhiIPhiFull5x5)[p] > 0.001;   
+      //bool noncoll = (*phoSigmaIEtaIEtaFull5x5)[p] > 0.001 &&
+      //               (*phoSigmaIPhiIPhiFull5x5)[p] > 0.001;   
                      
-      //bool noncoll = fabs((*phoseedTimeFull5x5)[p]) < 3. && 
-      //               (*phomipTotEnergy)[p] < 4.9 && 
-      //               (*phoSigmaIEtaIEtaFull5x5)[p] > 0.001 && 
-      //               (*phoSigmaIPhiIPhiFull5x5)[p] > 0.001;
+      bool noncoll = fabs((*phoseedTimeFull5x5)[p]) < 3. && 
+                     (*phomipTotEnergy)[p] < 4.9 && 
+                     (*phoSigmaIEtaIEtaFull5x5)[p] > 0.001 && 
+                     (*phoSigmaIPhiIPhiFull5x5)[p] > 0.001;
 
       if(photonId && kinematic && noncoll){
         pholist.push_back(p);
@@ -363,81 +446,81 @@ bool postAnalyzer_Signal::passdphiJetMET(std::vector<int> *jets, double mephi)
 
 
 
-//-------------------------makeGenDilep
-void postAnalyzer_Signal::makeGenDilep(int pho_index, std::vector<int> elelist, std::vector<int> mulist, TLorentzVector *fv_1, TLorentzVector *fv_2, TLorentzVector *fv_ee, TLorentzVector *fv_mm)
-{
-
-  TLorentzVector e1, e2, ee;
-  TLorentzVector m1, m2, mm;
-
-  int    leadingE, leadingM;
-  leadingE = 0;
-  leadingM = 0;
-  double leadingEpt, leadingMpt;
-  leadingEpt = 0.;
-  leadingMpt = 0.;
-
-  for( int i=0; i<mulist.size(); ++i ){ 
-   if (mcEt->at(mulist.at(i)) > leadingMpt){
-    leadingMpt = mcEt->at(mulist.at(i)) ;
-    leadingM = mulist.at(i) ;
-   } 
-  }
-
-  for( int i=0; i<elelist.size(); ++i ){ 
-   if (mcEt->at(elelist.at(i)) > leadingEpt){
-    leadingEpt = mcEt->at(elelist.at(i)) ;
-    leadingE = elelist.at(i) ;
-   } 
-  }
-
-
-  // no pairs
-  if( elelist.size()<2 && mulist.size()<2 ){return;}
-
-  // electrons
-  if( elelist.size()>1 ){
-   for(int i=0; i<elelist.size(); ++i)
-   {
-     if( mcPID->at(leadingE) + mcPID->at(elelist[i])==0 )
-     {
-      //printf(" --we have electrons ");
-      e1.SetPtEtaPhiE( mcPt->at(leadingE), mcEta->at(leadingE), mcPhi->at(leadingE), mcE->at(leadingE) );
-      e2.SetPtEtaPhiE( mcPt->at(elelist[i]), mcEta->at(elelist[i]), mcPhi->at(elelist[i]), mcE->at(elelist[i]) );
-      break;
-     }
-   }
-   ee = e1 + e2;
-   //printf(": dilep mass = %f", ee.M());
-  }
-
-  // muons
-  if( mulist.size()>1 ){
-   for(int i=0; i<mulist.size(); ++i)
-   {
-     if( mcPID->at(leadingM) + mcPID->at(mulist[i])==0 )
-     {
-      //printf(" --we have muons ");
-      m1.SetPtEtaPhiE( mcPt->at(leadingM), mcEta->at(leadingM), mcPhi->at(leadingM), mcE->at(leadingM) );
-      m2.SetPtEtaPhiE( mcPt->at(mulist[i]), mcEta->at(mulist[i]), mcPhi->at(mulist[i]), mcE->at(mulist[i]) );
-      break;
-     }
-   }
-   mm = m1 + m2;
-   //printf(": dilep mass = %f", mm.M());
-  }
-
-  *fv_ee = ee;
-  *fv_mm = mm;
-  // take highest mass dilepton pair
-  if( ee.M()>60. && ee.M()<120. ){ *fv_1 = e1; *fv_2 = e2; }
-  else if( mm.M()>60. && mm.M()<120. ){ *fv_1 = m1; *fv_2 = m2; }
-  //if( ee.M() > mm.M() && ee.M()>60. && ee.M()<120. ){ printf(": using ee\n"); *fv_1 = e1; *fv_2 = e2; }
-  //else if( ee.M() < mm.M() && mm.M()>60. && mm.M()<120. ){ printf(": using mm\n"); *fv_1 = m1; *fv_2 = m2; }
-
-  return;
-  
-}
+////-------------------------makeGenDilep
+//void postAnalyzer_Signal::makeGenDilep(int pho_index, std::vector<int> elelist, std::vector<int> mulist, TLorentzVector *fv_1, TLorentzVector *fv_2, TLorentzVector *fv_ee, TLorentzVector *fv_mm)
+//{
+//
+//  TLorentzVector e1, e2, ee;
+//  TLorentzVector m1, m2, mm;
+//
+//  int    leadingE, leadingM;
+//  leadingE = 0;
+//  leadingM = 0;
+//  double leadingEpt, leadingMpt;
+//  leadingEpt = 0.;
+//  leadingMpt = 0.;
+//
+//  for( int i=0; i<mulist.size(); ++i ){ 
+//   if (mcEt->at(mulist.at(i)) > leadingMpt){
+//    leadingMpt = mcEt->at(mulist.at(i)) ;
+//    leadingM = mulist.at(i) ;
+//   } 
+//  }
+//
+//  for( int i=0; i<elelist.size(); ++i ){ 
+//   if (mcEt->at(elelist.at(i)) > leadingEpt){
+//    leadingEpt = mcEt->at(elelist.at(i)) ;
+//    leadingE = elelist.at(i) ;
+//   } 
+//  }
+//
+//
+//  // no pairs
+//  if( elelist.size()<2 && mulist.size()<2 ){return;}
+//
+//  // electrons
+//  if( elelist.size()>1 ){
+//   for(int i=0; i<elelist.size(); ++i)
+//   {
+//     if( mcPID->at(leadingE) + mcPID->at(elelist[i])==0 )
+//     {
+//      //printf(" --we have electrons ");
+//      e1.SetPtEtaPhiE( mcPt->at(leadingE), mcEta->at(leadingE), mcPhi->at(leadingE), mcE->at(leadingE) );
+//      e2.SetPtEtaPhiE( mcPt->at(elelist[i]), mcEta->at(elelist[i]), mcPhi->at(elelist[i]), mcE->at(elelist[i]) );
+//      break;
+//     }
+//   }
+//   ee = e1 + e2;
+//   //printf(": dilep mass = %f", ee.M());
+//  }
+//
+//  // muons
+//  if( mulist.size()>1 ){
+//   for(int i=0; i<mulist.size(); ++i)
+//   {
+//     if( mcPID->at(leadingM) + mcPID->at(mulist[i])==0 )
+//     {
+//      //printf(" --we have muons ");
+//      m1.SetPtEtaPhiE( mcPt->at(leadingM), mcEta->at(leadingM), mcPhi->at(leadingM), mcE->at(leadingM) );
+//      m2.SetPtEtaPhiE( mcPt->at(mulist[i]), mcEta->at(mulist[i]), mcPhi->at(mulist[i]), mcE->at(mulist[i]) );
+//      break;
+//     }
+//   }
+//   mm = m1 + m2;
+//   //printf(": dilep mass = %f", mm.M());
+//  }
+//
+//  *fv_ee = ee;
+//  *fv_mm = mm;
+//  // take highest mass dilepton pair
+//  if( ee.M()>60. && ee.M()<120. ){ *fv_1 = e1; *fv_2 = e2; }
+//  else if( mm.M()>60. && mm.M()<120. ){ *fv_1 = m1; *fv_2 = m2; }
+//  //if( ee.M() > mm.M() && ee.M()>60. && ee.M()<120. ){ printf(": using ee\n"); *fv_1 = e1; *fv_2 = e2; }
+//  //else if( ee.M() < mm.M() && mm.M()>60. && mm.M()<120. ){ printf(": using mm\n"); *fv_1 = m1; *fv_2 = m2; }
+//
+//  return;
+//  
+//}
 
 
 //-------------------------makeDilep
@@ -613,6 +696,7 @@ std::vector<int> postAnalyzer_Signal::muon_passLooseID(int pho_index, float muPt
   Float_t tightIso_combinedRelative = 999.9;
   for(int i = 0; i < nMu; i++)
     {   
+
       pass_PFMuon = muIsPFMuon->at(i);
       pass_globalMuon = muIsGlobalMuon->at(i);
       pass_trackerMuon = muIsTrackerMuon->at(i);
@@ -620,7 +704,25 @@ std::vector<int> postAnalyzer_Signal::muon_passLooseID(int pho_index, float muPt
       tightIso_combinedRelative = (muPFChIso->at(i) + TMath::Max(zero,muPhoPU))/(muPt->at(i));
       pass_iso = tightIso_combinedRelative < 0.25;
       //Muon passes Loose Muon ID and PF-based combined relative, dBeta-corrected Loose Muon Isolation cuts  
-      if(pass_PFMuon && (pass_globalMuon || pass_trackerMuon) && pass_iso)
+
+//if( event==767326116 ){
+//      printf(" Event: %lli \n",event);
+//      printf("  muPt              %f \n",  muPt->at(i)                        );
+//      printf("  muIsPFMuon        %f \n",  muIsPFMuon->at(i)                  );
+//      printf("  muIsGlobalMuon    %f \n",  muIsGlobalMuon->at(i)              );
+//      printf("  muIsTrackerMuon   %f \n",  muIsTrackerMuon->at(i)             );
+//      printf("  muPFNeuIso        %f \n",  muPFNeuIso->at(i)                  );
+//      printf("  muPFPhoIso        %f \n",  muPFPhoIso->at(i)                  );
+//      printf("  muPFPUIso         %f \n",  muPFPUIso->at(i)                   );
+//      printf("  muPhoPU           %f \n",  muPhoPU                            );
+//      printf("\n\n");
+//                   std::cout<<muPt->at(i)<<std::endl;
+//                   std::cout<<muEta->at(i)<<std::endl;
+//                   std::cout<<"veto Passed!!!!"<<muEta->at(i)<<" "<<muPhi->at(i)<<" "<<phoSCEta->at(pho_index)<<" "<<phoSCPhi->at(pho_index)<<std::endl;
+//}
+
+      //if(pass_PFMuon && (pass_globalMuon || pass_trackerMuon) && pass_iso)
+      if(pass_PFMuon && (pass_globalMuon || pass_trackerMuon) )
         {   
           //Muon passes pt cut 
           if(muPt->at(i) > muPtCut)
@@ -635,6 +737,44 @@ std::vector<int> postAnalyzer_Signal::muon_passLooseID(int pho_index, float muPt
     }   
   return mulist;
 }
+
+////Veto failed if a muon is found that passes Loose Muon ID, Loose Muon Isolation, and muPtcut, and does not overlap the candidate photon within dR of 0.5                                                                                                                                                                    
+//bool postAnalyzer::muon_veto_looseID(int pho_index, float muPtCut)
+//{
+//  bool veto_passed = true; //pass veto if no good muon found                                                                                                                                                                                                                                                           
+//  bool pass_PFMuon = false;
+//  bool pass_globalMuon = false;
+//  bool pass_trackerMuon = false;
+//  bool pass_iso = false;
+//  //Explicitly stating types to avoid a TMath::Max conversion issue                                                                                                                                                                                                                                                    
+//  Float_t zero = 0.0;
+//  Float_t muPhoPU = 999.9;
+//  Float_t tightIso_combinedRelative = 999.9;
+//  for(int i = 0; i < nMu; i++)
+//    {   
+//      pass_PFMuon = muIsPFMuon->at(i);
+//      pass_globalMuon = muIsGlobalMuon->at(i);
+//      pass_trackerMuon = muIsTrackerMuon->at(i);
+//      muPhoPU = muPFNeuIso->at(i) + muPFPhoIso->at(i) - 0.5*muPFPUIso->at(i);
+//      tightIso_combinedRelative = (muPFChIso->at(i) + TMath::Max(zero,muPhoPU))/(muPt->at(i));
+//      pass_iso = tightIso_combinedRelative < 0.25;
+//      //Muon passes Loose Muon ID and PF-based combined relative, dBeta-corrected Loose Muon Isolation cuts                                                                                                                                                                                                        
+//      if(pass_PFMuon && (pass_globalMuon || pass_trackerMuon))
+//        {   
+//          //Muon passes pt cut                                                                                                                                                                                                                                                                                 
+//          if(muPt->at(i) > muPtCut)
+//            {   
+//              //Muon does not overlap photon                                                                                                                                                                                                                                                               
+//              if(dR(muEta->at(i),muPhi->at(i),phoSCEta->at(pho_index),phoSCPhi->at(pho_index)) > 0.5)
+//                {   
+//                  veto_passed = false;
+//                  break;
+//                }   
+//            }   
+//        }   
+//    }   
+//  return veto_passed;
+//}
 
 
 
@@ -772,18 +912,27 @@ std::vector<int> postAnalyzer_Signal::muon_passLooseID(int pho_index, float muPt
 
 // Effective area to be needed in PF Iso for photon ID
 // https://indico.cern.ch/event/455258/contribution/0/attachments/1173322/1695132/SP15_253rd.pdf -- slide-5
+// Worst Charged Hadron Isolation EA
 Double_t postAnalyzer_Signal::EAcharged(Double_t eta){
   Float_t EffectiveArea = 0.0;
-  if(fabs(eta) >= 0.0   && fabs(eta) < 1.0   ) EffectiveArea = 0.0;
-  if(fabs(eta) >= 1.0   && fabs(eta) < 1.479 ) EffectiveArea = 0.0;
-  if(fabs(eta) >= 1.479 && fabs(eta) < 2.0   ) EffectiveArea = 0.0;
-  if(fabs(eta) >= 2.0   && fabs(eta) < 2.2   ) EffectiveArea = 0.0;
-  if(fabs(eta) >= 2.2   && fabs(eta) < 2.3   ) EffectiveArea = 0.0;
-  if(fabs(eta) >= 2.3   && fabs(eta) < 2.4   ) EffectiveArea = 0.0;
-  if(fabs(eta) >= 2.4                        ) EffectiveArea = 0.0;
-
+  if(fabs(eta) >= 0.0   && fabs(eta) < 1.0   ) EffectiveArea = 0.078;
+  if(fabs(eta) >= 1.0   && fabs(eta) < 1.479 ) EffectiveArea = 0.089;
   return EffectiveArea;
 }
+
+// standard EA
+//Double_t postAnalyzer_Signal::EAcharged(Double_t eta){
+//  Float_t EffectiveArea = 0.0;
+//  if(fabs(eta) >= 0.0   && fabs(eta) < 1.0   ) EffectiveArea = 0.0;
+//  if(fabs(eta) >= 1.0   && fabs(eta) < 1.479 ) EffectiveArea = 0.0;
+//  if(fabs(eta) >= 1.479 && fabs(eta) < 2.0   ) EffectiveArea = 0.0;
+//  if(fabs(eta) >= 2.0   && fabs(eta) < 2.2   ) EffectiveArea = 0.0;
+//  if(fabs(eta) >= 2.2   && fabs(eta) < 2.3   ) EffectiveArea = 0.0;
+//  if(fabs(eta) >= 2.3   && fabs(eta) < 2.4   ) EffectiveArea = 0.0;
+//  if(fabs(eta) >= 2.4                        ) EffectiveArea = 0.0;
+//
+//  return EffectiveArea;
+//}
 
 Double_t postAnalyzer_Signal::EAneutral(Double_t eta){
   Float_t EffectiveArea = 0.; 
