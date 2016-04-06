@@ -32,7 +32,9 @@ void callSignalAnalyzer(void)
  //TString inputListName=path+"/filenames_Data2015D_Full.txt";
  //TString inputListName=path+"/filenames_Data2015D_20.txt";
  //TString inputListName=path+"/SinglePhoton_badevent.inputs";
- TString inputListName=path+"/SinglePhoton_callpostAnalyzer_Signal-ggtree_data_1017.inputs";
+ //TString inputListName=path+"/SinglePhoton_callpostAnalyzer_Signal-ggtree_data_1017.inputs";
+ TString inputListName=path+"/SinglePhoton_callpostAnalyzer_Signal-ggtree_data_1117.inputs";
+ //TString inputListName=path+"/SinglePhoton_callpostAnalyzer_Signal-ggtree_data_37.inputs";
  std::vector<TString> infilename_dump;
   
  // open file_name_list.txt

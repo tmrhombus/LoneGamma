@@ -796,8 +796,10 @@ public :
    vector<float>   *mcTrkIsoDR04;
    Float_t         genMET;
    Float_t         genMETPhi;
-   vector<float>   *phoIEta;
-   vector<float>   *phoIPhi;
+   vector<int>   *phoIEta;
+   vector<int>   *phoIPhi;
+   //vector<float>   *phoIEta;
+   //vector<float>   *phoIPhi;
    vector<int>     *jetPartonID;
    vector<int>     *jetGenJetIndex;
    vector<float>   *jetGenJetEn;
@@ -1863,6 +1865,7 @@ Bool_t postAnalyzer_Signal::Notify()
    // is started when using PROOF. It is normally not necessary to make changes
    // to the generated code, but the routine can be extended by the
    // user if needed. The return value is currently not used.
+   printf("new file\n");
 
    return kTRUE;
 }

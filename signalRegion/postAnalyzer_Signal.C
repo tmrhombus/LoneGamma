@@ -43,7 +43,7 @@ void postAnalyzer_Signal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, 
  Long64_t nbytes = 0, nb = 0;
  for (Long64_t jentry=0; jentry<nentries;jentry++) {
   n_initial++; // 
-  if (jentry%20000 == 0)
+  if (jentry%10000 == 0)
     {
       std::cout<<"Starting entry "<<jentry<<"/"<<(nentries)<<" at "<<sw.RealTime()<<" RealTime, "<<sw.CpuTime()<<" CpuTime"<<std::endl;
       sw.Continue();
@@ -77,6 +77,16 @@ void postAnalyzer_Signal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, 
       int iphi = 41; 
       int ieta = 5;
       bool passSpike = !(phoIPhi->at(candphotonindex) == iphi && phoIEta->at(candphotonindex) == ieta) ;
+if( event==295505278  ){std::cout<<candphotonindex<<"spike p, e  "<<phoIPhi->at(candphotonindex)<<" "<<phoIEta->at(candphotonindex)<<std::endl;}
+if( event==285078441  ){std::cout<<candphotonindex<<"spike p, e  "<<phoIPhi->at(candphotonindex)<<" "<<phoIEta->at(candphotonindex)<<std::endl;}
+if( event==46661859   ){std::cout<<candphotonindex<<"spike p, e  "<<phoIPhi->at(candphotonindex)<<" "<<phoIEta->at(candphotonindex)<<std::endl;}
+if( event==389981922  ){std::cout<<candphotonindex<<"spike p, e  "<<phoIPhi->at(candphotonindex)<<" "<<phoIEta->at(candphotonindex)<<std::endl;}
+if( event==2208621600 ){std::cout<<candphotonindex<<"spike p, e  "<<phoIPhi->at(candphotonindex)<<" "<<phoIEta->at(candphotonindex)<<std::endl;}
+if( event==2127047219 ){std::cout<<candphotonindex<<"spike p, e  "<<phoIPhi->at(candphotonindex)<<" "<<phoIEta->at(candphotonindex)<<std::endl;}
+if( event==1215728566 ){std::cout<<candphotonindex<<"spike p, e  "<<phoIPhi->at(candphotonindex)<<" "<<phoIEta->at(candphotonindex)<<std::endl;}
+if( event==85380629   ){std::cout<<candphotonindex<<"spike p, e  "<<phoIPhi->at(candphotonindex)<<" "<<phoIEta->at(candphotonindex)<<std::endl;}
+if( event==89128679   ){std::cout<<candphotonindex<<"spike p, e  "<<phoIPhi->at(candphotonindex)<<" "<<phoIEta->at(candphotonindex)<<std::endl;}
+if( event==776377515  ){std::cout<<candphotonindex<<"spike p, e  "<<phoIPhi->at(candphotonindex)<<" "<<phoIEta->at(candphotonindex)<<std::endl;} 
 
       // lepton rejection
       std::vector<int> elelist = electron_passLooseID(candphotonindex, 10.);
@@ -106,22 +116,40 @@ void postAnalyzer_Signal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, 
       if( passdPhiJM    ){ ++n_passdPhiJM     ;}
 
 //if( event==767326116 ){
-//      printf("Event: %lli \n",event);
-//      printf("  passSpike       %i \n",passSpike      );
-//      printf("  passLepRej      %i \n",passLepRej     );
-//      printf("  passMETfilters  %i \n",passMETfilters );
-//      printf("  passMET         %i \n",passMET        );
-//      printf("  passdPhiPhoMET  %i \n",passdPhiPhoMET );
-//      printf("  passdPhiJM      %i \n",passdPhiJM     );
-// std::cout<<elelist.size()<<std::endl;
-// std::cout<<mulist.size()<<std::endl;
-//}
+if( event==194194378 ){
+      printf("Event: %lli \n",event);
+      printf("  HLTPho        %llu \n",HLTPho         );
+      printf("  passSpike       %i \n",passSpike      );
+      printf("  passLepRej      %i \n",passLepRej     );
+      printf("  passMETfilters  %i \n",passMETfilters );
+      printf("  passMET         %i \n",passMET        );
+      printf("  passdPhiPhoMET  %i \n",passdPhiPhoMET );
+      printf("  passdPhiJM      %i \n",passdPhiJM     );
+      printf("  passTrig        %i \n",passTrig       );
+ std::cout<<elelist.size()<<std::endl;
+ std::cout<<mulist.size()<<std::endl;
+std::cout<< "(HLTPho>>7&1 )   "<< (HLTPho>>7&1) <<std::endl;
+std::cout<< "(HLTPho>>8&1 )   "<< (HLTPho>>8&1) <<std::endl; 
+std::cout<< "(HLTPho>>9&1 )   "<< (HLTPho>>9&1) <<std::endl; 
+std::cout<< "(HLTPho>>10&1)   "<< (HLTPho>>10&1)<<std::endl; 
+std::cout<< "(HLTPho>>11&1)   "<< (HLTPho>>11&1)<<std::endl; 
+std::cout<< "(HLTPho>>12&1)   "<< (HLTPho>>12&1)<<std::endl; 
+std::cout<< "(HLTPho>>22&1)   "<< (HLTPho>>22&1)<<std::endl; 
+
+std::cout<< "(HLTPho>>7&1 == 1)   "<< (HLTPho>>7&1 == 1) <<std::endl;
+std::cout<< "(HLTPho>>8&1 == 1)   "<< (HLTPho>>8&1 == 1) <<std::endl; 
+std::cout<< "(HLTPho>>9&1 == 1)   "<< (HLTPho>>9&1 == 1) <<std::endl; 
+std::cout<< "(HLTPho>>10&1 == 1)  "<< (HLTPho>>10&1 == 1)<<std::endl; 
+std::cout<< "(HLTPho>>11&1 == 1)  "<< (HLTPho>>11&1 == 1)<<std::endl; 
+std::cout<< "(HLTPho>>12&1 == 1)  "<< (HLTPho>>12&1 == 1)<<std::endl; 
+std::cout<< "(HLTPho>>22&1 == 1)  "<< (HLTPho>>22&1 == 1)<<std::endl; 
+
+}
 
 
-//
+
 //if( event==767326116 ){
-//
-//
+//if( event==194194378 ){
 //            std::cout<<"D : "<<run<<" : "<<event<<" : "<<lumis<<" : "<<phoCand1[0]<<std::endl;
 //            std::cout<<"Passed Denominator Cut-----------------------------------------------------------"<<std::endl;
 //            std::cout<<" run           "<<   run            <<std::endl;
@@ -139,8 +167,6 @@ void postAnalyzer_Signal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, 
 //            std::cout<<" EAneutral     "<<   EAneutral((*phoSCEta)[phoCand1[0]]) <<std::endl;
 //            std::cout<<" EAphoton      "<<   EAphoton((*phoSCEta)[phoCand1[0]])       <<std::endl<<std::endl;
 //
-//
-//
 //std::cout<< metFilters <<std::endl;
 //std::cout<< HLTPho <<std::endl;
 ////std::cout<< TMath::Max( ( (*phoPFChWorstIso)[phoCand1[0]]  - rho*EAchargedworst((*phoSCEta)[phoCand1[0]]) ), 0.0) < 1.37  <<std::endl;
@@ -153,8 +179,6 @@ void postAnalyzer_Signal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, 
 //
 //
 //}
-//
-
 
       if( passTrig ){
        n_trig++; //
@@ -179,7 +203,7 @@ void postAnalyzer_Signal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, 
       }
 
       // fill histograms
-      if ( passSpike && passLepRej && passMETfilters && passMET && passdPhiPhoMET && passdPhiJM)
+      if ( passSpike && passLepRej && passMETfilters && passMET && passdPhiPhoMET && passdPhiJM && passTrig )
          {
           printf("%i:%i:%lli \n",run,lumis,event);
           nc++;

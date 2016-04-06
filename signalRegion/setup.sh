@@ -1,6 +1,6 @@
-export version="Heiraten"
+export version="Luft"
 export submitbase="${CMSSW_BASE}/src/LoneGamma/signalRegion"
 
-export analyzed="${submitbase}/${version}/analyzed"
-export plots="${submitbase}/${version}/plots"
+export analyzed="${submitbase}/gitignore/${version}/analyzed"
+export plots="${submitbase}/gitignore/${version}/plots"
 
