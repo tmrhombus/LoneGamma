@@ -88,7 +88,7 @@ void postAnalyzer_ZnunuG::Loop(TString outfilename, Bool_t isMC, Double_t lumi, 
       leptoMET = fourVec_leptomet.Pt();
       leptoMEPhi = fourVec_leptomet.Phi();
 
-      bool passMET = (leptoMET > 170.) ;
+      bool passMET = (leptoMET > 140.) ;
       bool passdPhiPhoMET = ( DeltaPhi(phoPhi->at(candphotonindex),leptoMEPhi)>2.0 ) ;
       //if(passMET       )  printf(" passMET       \n");
       //if(passdPhiPhoMET)  printf(" passdPhiPhoMET\n");
@@ -173,7 +173,7 @@ void postAnalyzer_ZnunuG::Loop(TString outfilename, Bool_t isMC, Double_t lumi, 
    genLeptoMET = fourVec_genLeptoMET.Pt();
    genLeptoMEPhi = fourVec_genLeptoMET.Phi();
 
-  bool passGenMET = genLeptoMET > 170.;
+  bool passGenMET = genLeptoMET > 140.;
   bool passGendPhiPhoMET = ( DeltaPhi( mcPhi->at(candphotonindex), genLeptoMEPhi ) > 2.0 ) ;
 
   // fill histograms

@@ -4,7 +4,7 @@
 
 domc=true
 dodata=false
-dosubmit=false
+dosubmit=true
 
 START=$(date +%s);
 printf "Started at `date`\n\n"
@@ -13,8 +13,8 @@ mkdir -p "${submitbase}/${version}/lists"
 mkdir -p "${submitbase}/${version}/submit"
 
 lumi=2240. # /pb
-
   #"ZLLG"
+
 if [ ${domc} = true ]
 then
  for mc_samplename in \
@@ -86,7 +86,7 @@ then
   printf " submitting\n"
 
   farmoutAnalysisJobs \
-   --infer-cmssw-path \
+   --infer-cmssw-path --resubmit-failed-jobs \
    --fwklite \
    --input-file-list=${xrdlist} \
    --input-files-per-job=100 \

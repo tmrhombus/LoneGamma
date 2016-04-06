@@ -19,15 +19,16 @@ void callZnunuGAnalyzer(void)
  Double_t nrEvents=10000;
  Double_t crossSec=40000;
  
- Bool_t isMC=kTRUE;
+ //Bool_t isMC=kTRUE;
+ Bool_t isMC=kFALSE;
  TString path = "./test";
- TString outfilename=path+"/ZNNG_ZGMC.root";
- //TString outfilename=path+"/ZNNG_DataD.root";
+ //TString outfilename=path+"/ZNNG_ZGMC.root";
+ TString outfilename=path+"/ZNNG_DataD.root";
  std::cout << "Output File Name: " << outfilename << std::endl;
  
  // get each filename from list and add it to TChain
- TString inputListName=path+"/filenames_ZGMC_10.txt";
- //TString inputListName=path+"/filenames_Data2015D_20.txt";
+ //TString inputListName=path+"/filenames_ZGMC_10.txt";
+ TString inputListName=path+"/filenames_Data2015D_20.txt";
  std::vector<TString> infilename_dump;
   
  // open file_name_list.txt

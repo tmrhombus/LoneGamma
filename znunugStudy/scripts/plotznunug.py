@@ -20,6 +20,7 @@ parser.add_argument("-nn","--nc_filename",   help="mc filename Z(nunu)Jets (.roo
 parser.add_argument("-dn","--data_filename", help="data filename (.root)")
 parser.add_argument("-od","--outdir",        help="/path/to/output/directory")
 parser.add_argument("-on","--out_filename",  help="output name (no .root)")
+parser.add_argument("-sf","--scalefactor",   help="scale factor for mc")
 parser.add_argument("-var","--variable",     help="variable name")
 parser.add_argument("-rng","--ptrange",      help="pT range (ex. 250to400")
 parser.add_argument("-log","--do_log",  action='store_true', help="Set Log Scale")
@@ -32,6 +33,8 @@ nc_filename    = args.nc_filename
 data_filename  = args.data_filename   
 outdir         = args.outdir  
 out_filename   = args.out_filename  
+#sf             = args.scalefactor
+sf = 2320./2240.
 variable       = args.variable
 ptrange        = args.ptrange
 do_log         = args.do_log
@@ -99,6 +102,7 @@ h_zllmc.SetLineWidth(2)
 h_zllmc.SetFillStyle(fs)
 h_zllmc.SetLineStyle(n_ls)
 h_zllmc.SetFillColor(c_zllmc)
+h_zllmc.Scale(sf)
 h_zllmc.Draw("GOFF")
 themax = max( themax, h_zllmc.GetMaximum() )
 
@@ -111,6 +115,7 @@ h_znnmc.SetLineWidth(2)
 h_znnmc.SetFillStyle(fs)
 h_znnmc.SetLineStyle(n_ls)
 h_znnmc.SetFillColor(c_znnmc)
+h_znnmc.Scale(sf)
 h_znnmc.Draw("GOFF")
 themax = max( themax, h_znnmc.GetMaximum() )
 
@@ -183,7 +188,7 @@ s_mc.Draw('hist,GOFF,sames')
 leg.Draw('sames,GOFF')
 h_data.Draw('GOFF,sames')
 
-cpr.prelim_tdr(lumi=2240,hor=0.17)
+cpr.prelim_tdr(lumi=2320,hor=0.17)
 tex.SetTextSize(0.03)
 tex.SetTextAlign(11) #left, bottom
 #tex.DrawLatex(0.13,0.75,"pT Range [GeV]: %s"%(ptrange))
@@ -196,36 +201,36 @@ c.SaveAs("%s/%s.pdf"%(webdir,out_filename))
 print(  "%s/%s.pdf"%(outdir,out_filename))
 
 
-#
-####### Gen v Raw Reco ##############
-#h_zllgen.SetMaximum( 1.4*thegmax )
-#
-#h_zllgen.Draw("GOFF")
-##h_zllmc.Scale(h_data.Integral()/h_zllmc.Integral())
-##h_zllmc.Scale(0.041*1.3/117.864)
-#
-#print("Gen:         %.3f"%h_zllgen.Integral())
-#print("Raw Reco:    %.3f"%h_zllent.Integral())
-#
-#h_zllgen.GetYaxis().SetTitle("Events / 2 GeV")
+
+###### Gen v Raw Reco ##############
+h_zllgen.SetMaximum( 1.4*thegmax )
+
+h_zllgen.Draw("GOFF")
+#h_zllmc.Scale(h_data.Integral()/h_zllmc.Integral())
+#h_zllmc.Scale(0.041*1.3/117.864)
+
+print("Gen:         %.3f"%h_zllgen.Integral())
+print("Raw Reco:    %.3f"%h_zllent.Integral())
+
+h_zllgen.GetYaxis().SetTitle("Events / 2 GeV")
 #h_zllgen.GetXaxis().SetTitle("dilepton mass (#mu#mu)")
-##h_zllgen.GetXaxis().SetTitle("dilepton mass (#mu#mu,ee)")
-#
-#c.cd()
-#h_zllgen.Draw('GOFF')
-#h_zllent.Draw('hist,GOFF,sames')
-#legent.Draw('sames,GOFF')
-#h_zllgen.Draw('GOFF,sames')
-#
-#cpr.prelim_tdr(lumi=2240,hor=0.17)
-#tex.SetTextSize(0.03)
-#tex.SetTextAlign(11) #left, bottom
-##tex.DrawLatex(0.13,0.75,"pT Range [GeV]: %s"%(ptrange))
-#
-#c.Update()
-#time.sleep(1)
-#
-#c.SaveAs("%s/gen%s.pdf"%(outdir,out_filename))
-#c.SaveAs("%s/gen%s.pdf"%(webdir,out_filename))
-#print(  "%s/gen%s.pdf"%(outdir,out_filename))
-#
+h_zllgen.GetXaxis().SetTitle("dilepton mass (#mu#mu,ee)")
+
+c.cd()
+h_zllgen.Draw('GOFF')
+h_zllent.Draw('hist,GOFF,sames')
+legent.Draw('sames,GOFF')
+h_zllgen.Draw('GOFF,sames')
+
+cpr.prelim_tdr(lumi=2240,hor=0.17)
+tex.SetTextSize(0.03)
+tex.SetTextAlign(11) #left, bottom
+#tex.DrawLatex(0.13,0.75,"pT Range [GeV]: %s"%(ptrange))
+
+c.Update()
+time.sleep(1)
+
+c.SaveAs("%s/gen%s.pdf"%(outdir,out_filename))
+c.SaveAs("%s/gen%s.pdf"%(webdir,out_filename))
+print(  "%s/gen%s.pdf"%(outdir,out_filename))
+

@@ -20,15 +20,9 @@ do
  for ptrange in \
   "175to1000" 
  do
-#  python ${submitbase}/scripts/plotqcd.py \
-#   --version "${version}" \
-#   --inpdir "${submitbase}/${version}/analyzed" \
-#   --mc_filename "analyzed_GJets_Merged.root" \
-#   --data_filename "analyzed_SinglePhoton_2015D.root" \
-#   --outdir "${submitbase}/${version}/plots" \
-#   --out_filename "plotqcd_${var}_${ptrange}" \
-#   --variable "${var}" \
-#   --ptrange "${ptrange}" 
+
+  sf=2320./2240.
+  echo $sff
 
   python ${submitbase}/scripts/plotznunug.py \
    --version "${version}" \
@@ -37,6 +31,7 @@ do
    --nc_filename   "analyzed_ZnnJ.root" \
    --data_filename "analyzed_SinglePhoton.root" \
    --outdir "${plots}" \
+   --scalefactor ${sf} \
    --out_filename "plotZnunuG_${var}_${ptrange}" \
    --variable "${var}" \
    --ptrange "${ptrange}" #\

@@ -7,7 +7,7 @@ countanalyzed="True"
 nfstot=0
 hdfstot=0
 
-tabs 15
+tabs 20
 
 ####
 # Count 
@@ -19,10 +19,10 @@ printf "%s \n" "-----------------------------------------"
 
 for samplename in \
  "ZLLG" \
- "ZJets100To200" \
- "ZJets200To400" \
- "ZJets400To600" \
- "ZJets600ToInf" \
+ "ZJetsToNuNu100To200" \
+ "ZJetsToNuNu200To400" \
+ "ZJetsToNuNu400To600" \
+ "ZJetsToNuNu600ToInf" \
  "SinglePhoton"
 do
 
@@ -34,7 +34,8 @@ do
    analyzed_diff=$(($nfs_analyzed-$hdfs_analyzed))
    hdfstot=$((${hdfstot}+${hdfs_analyzed}))
    nfstot=$((${nfstot}+${nfs_analyzed}))
-  printf "  ${samplename}\t ${nfs_analyzed}\t ${hdfs_analyzed}\t ${analyzed_diff} incomplete analyzers\n"
+  #printf "  ${samplename}\t ${nfs_analyzed}\t ${hdfs_analyzed}\t ${analyzed_diff} incomplete analyzers\n"
+  printf "  %20s %20s %20s %20s incomplete analyzers\n" ${samplename} ${nfs_analyzed} ${hdfs_analyzed} ${analyzed_diff}
  fi
 done # for samplename in "GJets_*" "SingleP"
 
