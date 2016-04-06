@@ -24,31 +24,31 @@ void plotpurity()
 // ptranges.push_back("90to120");
 // ptranges.push_back("120to155");
 // ptranges.push_back("155to175");
- ptranges.push_back("175to190");
- ptranges.push_back("190to250");
- ptranges.push_back("250to400");
- ptranges.push_back("400to700");
- ptranges.push_back("700to1000");
-// ptranges.push_back("250to1000");
-// ptranges.push_back("400to1000");
+// ptranges.push_back("175to190");
+// ptranges.push_back("190to250");
+// ptranges.push_back("250to400");
+// ptranges.push_back("400to700");
+// ptranges.push_back("700to1000");
+ //ptranges.push_back("250to1000");
+ ptranges.push_back("400to1000");
 
  std::vector<TString> isovars;
- isovars.push_back("wchiso");
+// isovars.push_back("wchiso");
  isovars.push_back("chiso");
 
  std::vector<TString> cuts;
- cuts.push_back("idnc");
- cuts.push_back("idnc_mL30");
- cuts.push_back("idnc_trig");
+// cuts.push_back("idnc");
+// cuts.push_back("idnc_mL30");
+// cuts.push_back("idnc_trig");
  cuts.push_back("idnc_mL30_trig");
- cuts.push_back("oldj");
+// cuts.push_back("oldj");
 
  TString inpath = "/afs/hep.wisc.edu/cms/tperry/LoneG_slc6_491_CMSSW_7_4_14/src/LoneGamma/qcdStudy/Morvars/analyzed";
  TString outpath = "/afs/hep.wisc.edu/cms/tperry/LoneG_slc6_491_CMSSW_7_4_14/src/LoneGamma/qcdStudy/Morvars/plots";
- TString inname_GJ  = inpath+"/purity_GJets_Merged.root";
- TString inname_QCD = inpath+"/purity_QCD_Merged.root";
- //TString inname_GJ  = inpath+"/purity_mrg4bins_GJets.root";
- //TString inname_QCD = inpath+"/purity_mrg4bins_QCD.root";
+// TString inname_GJ  = inpath+"/purity_GJets_Merged.root";
+// TString inname_QCD = inpath+"/purity_QCD_Merged.root";
+ TString inname_GJ  = inpath+"/purity_mrg4bins_GJets.root";
+ TString inname_QCD = inpath+"/purity_mrg4bins_QCD.root";
  //TString inname_GJ  = inpath+"/purity_mrg3bins_GJets.root";
  //TString inname_QCD = inpath+"/purity_mrg3bins_QCD.root";
  
@@ -315,7 +315,8 @@ void plotpurity()
      pcterr = errevents/nrevents;
      log_latex<<boost::format("   %10.2f & %5.2f & %5.2f & %10.4f &  %5.2f &  %8.1f & %15.1f & %10.1f  \\\\  \n")
       % thresholds.at(n) 
-      % xsatthresh.at(n) % xsatqt.at(n) 
+      % h_Nbkg->GetBinLowEdge(h_Nbkg->FindBin(xsatthresh.at(n))) % h_Nbkg->GetBinLowEdge(h_Nbkg->FindBin(xsatqt.at(n) ))
+      //% xsatthresh.at(n) % xsatqt.at(n) 
       % avgpur.at(n)
       % (pcterr*100) 
       % fullsize 

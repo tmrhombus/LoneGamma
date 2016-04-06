@@ -15,22 +15,35 @@ void callQCDAnalyzer(void)
  TChain *theChain = new TChain("ggNtuplizer/EventTree"); ;
  theChain->Reset();
  
- Double_t lumi=2.26;
+ Double_t lumi=2.32;
  Double_t nrEvents=10000;
  Double_t crossSec=40000;
  
- Bool_t isMC=kFALSE;
- TString path = "./test";
+ TString path = "../test";
+
+//  // GJMC
+// Bool_t isMC=kTRUE;  Bool_t isEle=kFALSE;
+// TString outfilename=path+"/QCDs_GJMC.root";
+// TString inputListName=path+"/filenames_GJMC_10.txt";
+
+ // // QCDMC
+ //Bool_t isMC=kTRUE;  Bool_t isEle=kFALSE;
  //TString outfilename=path+"/QCDs_QCDMC.root";
- //TString outfilename=path+"/QCDs_GJMC.root";
- TString outfilename=path+"/Tom_AshimData.root";
+ //TString inputListName=path+"/filenames_MC_QCD_5.txt";
+
+//  // Data Mu
+// Bool_t isMC=kFALSE;  Bool_t isEle=kFALSE;
+// TString outfilename=path+"/QCDs_Data.root";
+// TString inputListName=path+"/filenames_Data2015D_20.txt";
+
+  // Data Ele
+ Bool_t isMC=kFALSE;  Bool_t isEle=kTRUE;
+ TString outfilename=path+"/QCDs_EleData.root";
+ TString inputListName=path+"/filenames_DataDoubleE_5.txt";
+
  std::cout << "Output File Name: " << outfilename << std::endl;
  
  // get each filename from list and add it to TChain
- //TString inputListName=path+"/filenames_MC_QCD_5.txt";
- //TString inputListName=path+"/filenames_GJMC_10.txt";
- //TString inputListName=path+"/filenames_Data2015D_short.txt";
- TString inputListName=path+"/filenames_AshimData.txt";
  std::vector<TString> infilename_dump;
   
  // open file_name_list.txt
@@ -56,7 +69,7 @@ void callQCDAnalyzer(void)
 
  postAnalyzer_QCD m;
  m.Init(theChain,isMC);
- m.Loop(outfilename,isMC,lumi,nrEvents,crossSec);
+ m.Loop(outfilename,isMC,isEle,lumi,nrEvents,crossSec);
 }
 
 #if !defined(__CINT__) && !defined(__ACLIC__)

@@ -44,6 +44,10 @@ void postAnalyzerMC_purity::Loop(TString outfilename, Bool_t isMC, Double_t lumi
    recPCvint.clear(); 
    mchPCvint.clear(); 
    nmhPCvint.clear(); 
+    // denominator
+   recDenPCvint.clear(); 
+   mchDenPCvint.clear(); 
+   nmhDenPCvint.clear(); 
 
    // old cuts from james' code
    orecPCvint.clear(); 
@@ -51,8 +55,11 @@ void postAnalyzerMC_purity::Loop(TString outfilename, Bool_t isMC, Double_t lumi
    onmhPCvint.clear(); 
 
    // Find all reco photons passing selections
-   recPCvint = pcPassSel(90.,2000.,1.4442);
-   orecPCvint = pcPassOldSel(90.,2000.,1.4442);
+   recPCvint = pcPassSel(175.,2000.,1.4442);
+   orecPCvint = pcPassOldSel(175.,2000.,1.4442);
+   recDenPCvint = pcPassDenSel(175.,2000.,1.4442);
+
+    // Denominator
 
    //Find all GEN photons
    for(int i = 0; i < nMC; i++)
@@ -101,19 +108,29 @@ void postAnalyzerMC_purity::Loop(TString outfilename, Bool_t isMC, Double_t lumi
     if(dRmin > 0.1) { onmhPCvint.push_back(phonr); }
    }
 
+   //Loop over all    den    photons to find (GEN)matched and nonmatched photons
+   for(int i = 0; i < recDenPCvint.size(); i++)
+   {
+    int phonr = recDenPCvint[i];
+    //std::cout<<" photon number: "<<phonr<<std::endl;
+    double dRmin = 99.99;
+    double dRtemp = 99.99;
+    // technically a gen photon could be matched to more than one RECO photon in this method..
+    for(int k = 0; k < genPCvint.size(); k++) 
+    {
+     int gennr = genPCvint[k];
+     dRtemp = dR(mcEta->at(gennr),mcPhi->at(gennr),phoEta->at(phonr),phoPhi->at(phonr));
+     if(dRtemp < dRmin) { dRmin = dRtemp; }
+    }
+    if(dRmin < 0.1) { mchDenPCvint.push_back(phonr); }
+    if(dRmin > 0.1) { nmhDenPCvint.push_back(phonr); }
+   }
+
    // some more filters
    bool passTriggers;
    bool passMET;
-   passTriggers = 
-    ((HLTPho>>7&1) == 1) ||
-    ((HLTPho>>8&1) == 1) ||
-    ((HLTPho>>9&1) == 1) ||
-    ((HLTPho>>10&1) == 1) ||
-    ((HLTPho>>11&1) == 1) ||
-    ((HLTPho>>12&1) == 1) ||
-    ((HLTPho>>22&1) == 1) ;
+   passTriggers = ((HLTPho>>12&1) == 1) ;
    passMET = pfMET < 30.;
-
 
 // fill histograms
     // Fill Numerator (matched) Signal Histograms
@@ -252,6 +269,143 @@ void postAnalyzerMC_purity::Loop(TString outfilename, Bool_t isMC, Double_t lumi
      }
     }
 
+    /////////////////////////////// Denominator selections
+    // Fill Numerator (matched) Denom Histograms
+    if( mchDenPCvint.size()>0 ){ // if any photon indexes passed sig selection
+     for(unsigned int k=0; k<mchDenPCvint.size(); ++k){ // go through each photon passing sel
+      // pt bins
+      for(unsigned int ptb=0; ptb<lstptbin; ++ptb){
+       if(
+          (phoEt->at(mchDenPCvint.at(k)) > ptbins[ptb]) &&
+          (phoEt->at(mchDenPCvint.at(k)) < ptbins[ptb+1])
+         ){
+            //std::cout<<"found event"<<std::endl;
+            // idnc, idnc_mL30, idnc_trig, idnc_mL30_trig, oldj
+            //nc++;
+            FillDenSigHistograms(ptb, 0, mchDenPCvint.at(k), event_weight);
+            FillDenDenHistograms(ptb, 0, mchDenPCvint.at(k), event_weight);
+            if(passMET){
+             FillDenSigHistograms(ptb, 1, mchDenPCvint.at(k), event_weight);
+             FillDenDenHistograms(ptb, 1, mchDenPCvint.at(k), event_weight);
+            }
+            if(passTriggers){
+             FillDenSigHistograms(ptb, 2, mchDenPCvint.at(k), event_weight);
+             FillDenDenHistograms(ptb, 2, mchDenPCvint.at(k), event_weight);
+            }
+            if(passTriggers && passMET){
+             FillDenSigHistograms(ptb, 3, mchDenPCvint.at(k), event_weight);
+             FillDenDenHistograms(ptb, 3, mchDenPCvint.at(k), event_weight);
+            }
+           }
+       }
+      // inclusive from pT bins
+      if(  
+         (phoEt->at(mchDenPCvint.at(k)) > 175. ) && //ptbins[0]) &&
+         (phoEt->at(mchDenPCvint.at(k)) < ptbins[ptbins.size()-1])
+        ){
+          FillDenSigHistograms(selptbin, 0, mchDenPCvint.at(k), event_weight);
+          FillDenDenHistograms(selptbin, 0, mchDenPCvint.at(k), event_weight);
+          if(passMET){
+           FillDenSigHistograms(selptbin, 1, mchDenPCvint.at(k), event_weight);
+           FillDenDenHistograms(selptbin, 1, mchDenPCvint.at(k), event_weight);
+          }
+          if(passTriggers){
+           FillDenSigHistograms(selptbin, 2, mchDenPCvint.at(k), event_weight);
+           FillDenDenHistograms(selptbin, 2, mchDenPCvint.at(k), event_weight);
+          }
+          if(passTriggers && passMET){
+           FillDenSigHistograms(selptbin, 3, mchDenPCvint.at(k), event_weight);
+           FillDenDenHistograms(selptbin, 3, mchDenPCvint.at(k), event_weight);
+          }
+         }
+
+      // fully inclusive in pT (depending only on selections for mchDenPCvint)
+      FillDenSigHistograms(incptbin, 0, mchDenPCvint.at(k), event_weight);
+      FillDenDenHistograms(incptbin, 0, mchDenPCvint.at(k), event_weight);
+      if(passMET){
+       FillDenSigHistograms(incptbin, 1, mchDenPCvint.at(k), event_weight);
+       FillDenDenHistograms(incptbin, 1, mchDenPCvint.at(k), event_weight);
+      }
+      if(passTriggers){
+       FillDenSigHistograms(incptbin, 2, mchDenPCvint.at(k), event_weight);
+       FillDenDenHistograms(incptbin, 2, mchDenPCvint.at(k), event_weight);
+      }
+      if(passTriggers && passMET){
+       FillDenSigHistograms(incptbin, 3, mchDenPCvint.at(k), event_weight);
+       FillDenDenHistograms(incptbin, 3, mchDenPCvint.at(k), event_weight);
+      }
+
+     }
+    }
+
+
+    // FillDen Numerator (unmatched) Den Histograms
+    if( nmhDenPCvint.size()>0 ){ // if any photon indexes passed sig selection
+     for(unsigned int k=0; k<nmhDenPCvint.size(); ++k){ // go through each photon passing sel
+      // pt bins
+      for(unsigned int ptb=0; ptb<lstptbin; ++ptb){
+       if(
+          (phoEt->at(nmhDenPCvint.at(k)) > ptbins[ptb]) &&
+          (phoEt->at(nmhDenPCvint.at(k)) < ptbins[ptb+1])
+         ){
+            // idnc, idnc_mL30, idnc_trig, idnc_mL30_trig, oldj
+            //nc++;
+            FillDenBkgHistograms(ptb, 0, nmhDenPCvint.at(k), event_weight);
+            FillDenDenHistograms(ptb, 0, nmhDenPCvint.at(k), event_weight);
+            if(passMET){
+             FillDenBkgHistograms(ptb, 1, nmhDenPCvint.at(k), event_weight);
+             FillDenDenHistograms(ptb, 1, nmhDenPCvint.at(k), event_weight);
+            }
+            if(passTriggers){
+             FillDenBkgHistograms(ptb, 2, nmhDenPCvint.at(k), event_weight);
+             FillDenDenHistograms(ptb, 2, nmhDenPCvint.at(k), event_weight);
+            }
+            if(passTriggers && passMET){
+             FillDenBkgHistograms(ptb, 3, nmhDenPCvint.at(k), event_weight);
+             FillDenDenHistograms(ptb, 3, nmhDenPCvint.at(k), event_weight);
+            }
+           }
+       }
+      // inclusive from pT bins
+      if(  
+         (phoEt->at(nmhDenPCvint.at(k)) > 175. ) && // ptbins[0]) &&
+         (phoEt->at(nmhDenPCvint.at(k)) < ptbins[ptbins.size()-1])
+        ){
+          FillDenBkgHistograms(selptbin, 0, nmhDenPCvint.at(k), event_weight);
+          FillDenDenHistograms(selptbin, 0, nmhDenPCvint.at(k), event_weight);
+          if(passMET){
+           FillDenBkgHistograms(selptbin, 1, nmhDenPCvint.at(k), event_weight);
+           FillDenDenHistograms(selptbin, 1, nmhDenPCvint.at(k), event_weight);
+          }
+          if(passTriggers){
+           FillDenBkgHistograms(selptbin, 2, nmhDenPCvint.at(k), event_weight);
+           FillDenDenHistograms(selptbin, 2, nmhDenPCvint.at(k), event_weight);
+          }
+          if(passTriggers && passMET){
+           FillDenBkgHistograms(selptbin, 3, nmhDenPCvint.at(k), event_weight);
+           FillDenDenHistograms(selptbin, 3, nmhDenPCvint.at(k), event_weight);
+          }
+         }
+
+      // fully inclusive in pT (depending only on selections for nmhDenPCvint)
+      FillDenBkgHistograms(incptbin, 0, nmhDenPCvint.at(k), event_weight);
+      FillDenDenHistograms(incptbin, 0, nmhDenPCvint.at(k), event_weight);
+      if(passMET){
+       FillDenBkgHistograms(incptbin, 1, nmhDenPCvint.at(k), event_weight);
+       FillDenDenHistograms(incptbin, 1, nmhDenPCvint.at(k), event_weight);
+      }
+      if(passTriggers){
+       FillDenBkgHistograms(incptbin, 2, nmhDenPCvint.at(k), event_weight);
+       FillDenDenHistograms(incptbin, 2, nmhDenPCvint.at(k), event_weight);
+      }
+      if(passTriggers && passMET){
+       FillDenBkgHistograms(incptbin, 3, nmhDenPCvint.at(k), event_weight);
+       FillDenDenHistograms(incptbin, 3, nmhDenPCvint.at(k), event_weight);
+      }
+
+     }
+    }
+
     /////////////////////////////// old selections
     // Fill Numerator (matched) Signal Histograms
     if( omchPCvint.size()>0 ){ // if any photon indexes passed sig selection
@@ -363,7 +517,8 @@ void postAnalyzerMC_purity::Loop(TString outfilename, Bool_t isMC, Double_t lumi
 
 } //end Loop()
 
-// photon candidates passing signal selection in low MET region - (no sieie or (w)chiso cuts)
+//------------------------------------
+// photon candidates passing SIGNAL selection in low MET region - (no sieie or (w)chiso cuts)
 std::vector<int> postAnalyzerMC_purity::pcPassSel( double phoPtLo, double phoPtHi, double phoEtaMax ){
   std::vector<int> tmpCand;
   tmpCand.clear();
@@ -411,6 +566,74 @@ std::vector<int> postAnalyzerMC_purity::pcPassSel( double phoPtLo, double phoPtH
      passCHMedIso = kTRUE;
 
      passPhotonID = passHoEPSeed && passPhoNHMedIso && passCHMedIso;
+     if( noncoll && passPhotonID && passKinematics){
+      // std::cout<<" Found a photon, pfMET="<<pfMET<<" pT="<<phoEt->at(p)<<" sel: "<<sel<<" sys: "<<sys<<std::endl;
+      // std::cout<<"  CHiso:  "<<TMath::Max( ( (*phoPFChIso)[p] - rho*EAcharged((*phoSCEta)[p]) ), 0.0)<<std::endl;
+       tmpCand.push_back(p);
+     }
+    }
+  return tmpCand;
+}
+
+//------------------------------------
+// photon candidates passing DENOMINATOR selection in low MET region - (no sieie or (w)chiso cuts)
+std::vector<int> postAnalyzerMC_purity::pcPassDenSel( double phoPtLo, double phoPtHi, double phoEtaMax ){
+  std::vector<int> tmpCand;
+  tmpCand.clear();
+  bool noncoll;
+  bool passKinematics;
+
+  bool passHoE;
+  bool passPSeed;
+
+  float vloosePFPhoton;
+  float vloosePFNeutral;
+  bool passVLooseIso;
+  bool passLoosePIso;
+  bool passLooseIso;
+
+  bool passPhoNHMedIso;
+  bool passCHMedIso; 
+
+  bool passPhotonID;
+
+  //Loop over photons
+  for(int p=0;p<nPho;p++)  // nPho from ntuple (should = phoE->length() )
+    {
+     noncoll = (*phoSigmaIEtaIEtaFull5x5)[p] > 0.001 && (*phoSigmaIPhiIPhiFull5x5)[p] > 0.001; // isMC
+
+     passKinematics = (
+                       ( (*phoEt)[p] > phoPtLo  ) &&
+                       ( (*phoEt)[p] <= phoPtHi ) &&
+                       ( fabs((*phoSCEta)[p]) < phoEtaMax)
+                      );
+
+
+     // H on E, and pixel seed 
+     passHoE   = ((*phoHoverE)[p] < 0.05 );
+     passPSeed = ((*phohasPixelSeed)[p] ==  0 );
+
+     // deno
+     //vloosePFCharged= TMath::Min(5.0*(3.32) , 0.20*(*phoEt)[p]);
+     vloosePFPhoton = TMath::Min(5.0*(0.81+ (0.0053 * (*phoEt)[p])) , 0.20*(*phoEt)[p]);
+     vloosePFNeutral= TMath::Min(5.0*(1.92 + (0.014 * (*phoEt)[p]) + (0.000019 * pow((*phoEt)[p], 2.0))) , 0.20*(*phoEt)[p]);
+     passVLooseIso = ( 
+                      //( TMath::Max( ( (*phoPFChWorstIso)[p]  - rho*EAcharged((*phoSCEta)[p]) ), 0.0) < vloosePFCharged )  &&  
+                      ( TMath::Max( ( (*phoPFNeuIso)[p] - rho*EAneutral((*phoSCEta)[p]) ), 0.0) < vloosePFNeutral )  &&  
+                      ( TMath::Max( ( (*phoPFPhoIso)[p] - rho*EAphoton((*phoSCEta)[p])  ), 0.0) < vloosePFPhoton )
+                     );  
+     passLoosePIso = 
+                     ( TMath::Max( ( (*phoPFPhoIso)[p] - rho*EAphoton((*phoSCEta)[p])  ), 0.0) <
+                       (0.81 + (0.0053 * (*phoEt)[p])) );
+     passLooseIso = (  // deno must fail this cut
+                     //( TMath::Max( ( (*phoPFChWorstIso)[p]  - rho*EAcharged((*phoSCEta)[p]) ), 0.0) < 3.32 )  &&  
+                     ( TMath::Max( ( (*phoPFNeuIso)[p] - rho*EAneutral((*phoSCEta)[p]) ), 0.0) <
+                       (1.92 + (0.014* (*phoEt)[p]) + (0.000019 * pow((*phoEt)[p], 2.0))))  &&  
+                     passLoosePIso
+                    ); 
+
+     //passPhotonID = passHoE && passPSeed; // && passVLooseIso;
+     passPhotonID = passHoE && passPSeed && !passLooseIso && passVLooseIso;
      if( noncoll && passPhotonID && passKinematics){
       // std::cout<<" Found a photon, pfMET="<<pfMET<<" pT="<<phoEt->at(p)<<" sel: "<<sel<<" sys: "<<sys<<std::endl;
       // std::cout<<"  CHiso:  "<<TMath::Max( ( (*phoPFChIso)[p] - rho*EAcharged((*phoSCEta)[p]) ), 0.0)<<std::endl;

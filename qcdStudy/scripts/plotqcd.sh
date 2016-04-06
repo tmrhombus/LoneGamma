@@ -17,7 +17,9 @@ do
    --version "${version}" \
    --inpdir "${analyzed}" \
    --mc_filename   "mrg4bins_GJets.root" \
+   --qcd_filename  "mrg4bins_QCD_Merged.root" \
    --data_filename "mrg4bins_SinglePhoton.root" \
+   --data_ele_filename "mrg4bins_DoubleElectron.root" \
    --outdir "${plots}" \
    --out_filename "plotqcd4bins_${var}_${ptrange}" \
    --variable "${var}" \

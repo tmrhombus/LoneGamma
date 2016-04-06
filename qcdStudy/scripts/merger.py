@@ -12,18 +12,30 @@ import os
 
 infilenames = [
 "analyzed_SinglePhoton",
+"analyzed_DoubleElectron",
 "analyzed_GJets_Merged",
 "analyzed_QCD_Merged",
+#"purity_GJets_Merged",
+#"purity_QCD_Merged",
+#"purity_mrg4bins_GJets",
+#"purity_mrg4bins_QCD",
 #"mrg4bins_SinglePhoton",
+#"mrg4bins_DoubleElectron",
 #"mrg4bins_GJets",
 #"mrg4bins_QCD",
 ]
 
 outfilenames = [
 "mrg4bins_SinglePhoton",
+"mrg4bins_DoubleElectron",
 "mrg4bins_GJets",
 "mrg4bins_QCD",
+#"purity_mrg4bins_GJets",
+#"purity_mrg4bins_QCD",
+#"purity_mrg3bins_GJets",
+#"purity_mrg3bins_QCD",
 #"mrg3bins_SinglePhoton",
+#"mrg3bins_DoubleElectron",
 #"mrg3bins_GJets",
 #"mrg3bins_QCD",
 ]
@@ -32,16 +44,21 @@ for infilename,outfilename in zip(infilenames,outfilenames):
 
   rebin = 1
   path = os.environ.get('analyzed')
-  
+  version = os.environ.get('version')
+  wwwpath = "/afs/hep.wisc.edu/home/tperry/www/MonoPhoton/qcdPlots/%s"%version
+
+  if not os.path.exists(wwwpath):
+          os.makedirs(wwwpath) 
+ 
   gStyle.SetOptStat('')
   gStyle.SetLineWidth(3)
   gStyle.SetPadTickY(1)
   
   infile = TFile("%s/%s.root"%(path,infilename))
   
-  canx = 900 
-  cany = 900
-  c = TCanvas('c','Canvas Named c',canx,cany)
+  #canx = 900 
+  #cany = 900
+  #c = TCanvas('c','Canvas Named c',canx,cany)
   
   log = open('%s/%s.log'%(path,outfilename),'w')
   log.write('\n\n') 
@@ -62,38 +79,39 @@ for infilename,outfilename in zip(infilenames,outfilenames):
      hname = hname.replace("700","1000")  # 400 to 1000
      obj.SetName(hname)
      tbaname = ""
-     #tbaname = hname.replace("250","400")  # 400 to 1000
-     tbaname = hname.replace("400","700")  # 700 to 1000
+     #tbaname = hname.replace("250","400")  # 250 to 1000
+     tbaname = hname.replace("400","700")  # 400 to 1000
      obj.Add(infile.Get(tbaname).Clone())
   
     #if fnm.fnmatch(hname,"*400to1000*"): continue
     if fnm.fnmatch(hname,"*700to1000*"): continue
     
-    if fnm.fnmatch(hname,"h_*_sieieF5x5_*0"): 
-     pdfname=outfilename+"_"+hname
-     obj_size_inp = obj.Integral(-1,-1)
-     obj_max = obj.GetMaximum()
-     obj.SetFillColor(0)
-     obj.SetLineColor(1)
-     obj.SetLineWidth(3)
+    #if fnm.fnmatch(hname,"h_*_sieieF5x5_*0"): 
+    # pdfname=outfilename+"_"+hname
+    # obj_size_inp = obj.Integral(-1,-1)
+    # obj_max = obj.GetMaximum()
+    # obj.SetFillColor(0)
+    # obj.SetLineColor(1)
+    # obj.SetLineWidth(3)
   
-     #leg=TLegend(0.58,0.7,0.78,0.88)
-     #leg.SetFillColor(0)
-     #leg.SetBorderSize(0)
-     #leg.AddEntry(obj,"Wisconsin")
+    # #leg=TLegend(0.58,0.7,0.78,0.88)
+    # #leg.SetFillColor(0)
+    # #leg.SetBorderSize(0)
+    # #leg.AddEntry(obj,"Wisconsin")
   
-     obj.GetXaxis().SetLabelSize(0.03)
-     obj.GetYaxis().SetLabelSize(0.03)
-     obj.GetYaxis().SetTitleOffset(1.5)
-     obj.GetYaxis().SetTitle( "Events / %s GeV"%(obj.GetBinWidth(1)) )
-     obj.SetMaximum(1.2*obj_max)
-     obj.GetXaxis().SetTitle( "#sigma i#eta i#eta" )
-     obj.SetTitle( hname )
+    # obj.GetXaxis().SetLabelSize(0.03)
+    # obj.GetYaxis().SetLabelSize(0.03)
+    # obj.GetYaxis().SetTitleOffset(1.5)
+    # obj.GetYaxis().SetTitle( "Events / %s GeV"%(obj.GetBinWidth(1)) )
+    # obj.SetMaximum(1.2*obj_max)
+    # obj.GetXaxis().SetTitle( "#sigma i#eta i#eta" )
+    # obj.SetTitle( hname )
   
-     obj.Draw("hist,GOFF")
-     #leg.Draw('sames')
-     time.sleep(1)
-     c.Print(path+"/"+pdfname+".pdf")
+    # obj.Draw("hist,GOFF")
+    # #leg.Draw('sames')
+    # time.sleep(1)
+    # c.Print(path+"/"+pdfname+".pdf")
+    # c.Print(wwwpath+"/"+pdfname+".pdf")
   
     obj.Write()
   

@@ -13,33 +13,50 @@ import cmsPrelim as cpr
 
 import argparse
 parser = argparse.ArgumentParser()
-parser.add_argument("-v","--version",        help="version name")
-parser.add_argument("-id","--inpdir",        help="/full/path/to/input/directory")
-parser.add_argument("-mn","--mc_filename",   help="mc filename (.root)")
-parser.add_argument("-dn","--data_filename", help="data filename (.root)")
-parser.add_argument("-od","--outdir",        help="/path/to/output/directory")
-parser.add_argument("-on","--out_filename",  help="output name (no .root)")
-parser.add_argument("-var","--variable",     help="variable name")
-parser.add_argument("-rng","--ptrange",      help="pT range (ex. 250to400")
+parser.add_argument("-v","--version",            help="version name")
+parser.add_argument("-id","--inpdir",            help="/full/path/to/input/directory")
+parser.add_argument("-mn","--mc_filename",       help="mc filename (.root)")
+parser.add_argument("-qn","--qcd_filename",      help="qcd filename (.root)")
+parser.add_argument("-dn","--data_filename",     help="data filename (.root)")
+parser.add_argument("-en","--data_ele_filename", help="electron data filename (.root)")
+parser.add_argument("-od","--outdir",            help="/path/to/output/directory")
+parser.add_argument("-on","--out_filename",      help="output name (no .root)")
+parser.add_argument("-var","--variable",         help="variable name")
+parser.add_argument("-rng","--ptrange",          help="pT range (ex. 250to400")
 parser.add_argument("-log","--do_log",  action='store_true', help="Set Log Scale")
 args = parser.parse_args()
 
-version        = args.version
-inpdir         = args.inpdir        
-mc_filename    = args.mc_filename   
-data_filename  = args.data_filename   
-outdir         = args.outdir  
-out_filename   = args.out_filename  
-variable       = args.variable
-ptrange        = args.ptrange
-do_log         = args.do_log
+version            = args.version
+inpdir             = args.inpdir        
+mc_filename        = args.mc_filename   
+qcd_filename       = args.qcd_filename   
+data_filename      = args.data_filename   
+data_ele_filename  = args.data_ele_filename   
+outdir             = args.outdir  
+out_filename       = args.out_filename  
+variable           = args.variable
+ptrange            = args.ptrange
+do_log             = args.do_log
 webdir = "/afs/hep.wisc.edu/user/tperry/www/MonoPhoton/qcdPlots/%s"%(version)
+
+import errno
+import os
+
+try:
+ os.mkdir(webdir)
+except OSError as exc:
+ if exc.errno != errno.EEXIST:
+  raise exc
+ pass
+
 
 xn = ""
 if(do_log): out_filename+="_log"
 
 m_file = TFile("%s/%s"%(inpdir,mc_filename))
+q_file = TFile("%s/%s"%(inpdir,qcd_filename))
 d_file = TFile("%s/%s"%(inpdir,data_filename))
+e_file = TFile("%s/%s"%(inpdir,data_ele_filename))
 
 #canvas attributes
 canx = 1200
@@ -50,13 +67,16 @@ gStyle.SetPadTickY(1)
 
 #color scheme
 c_ntot = ROOT.kBlack
+c_etot = 14 #ROOT.kBlack-2
 c_nsig = ROOT.kRed
 c_nbkg = ROOT.kBlue
 c_deno = ROOT.kGreen+1
+c_qden = ROOT.kCyan+2
 fs = 0
 # line style
 n_ls = 1
-d_ls = 7
+d_ls = 9
+q_ls = 7
 
 # TLatex
 tex = ROOT.TLatex()
@@ -83,6 +103,18 @@ h_ntot.SetLineStyle(n_ls)
 h_ntot.Draw("GOFF")
 h_ntot.Scale( 1. / max(h_ntot.Integral(-1,-1),1.) )
 themax = h_ntot.GetMaximum()
+
+# Numerator (electron shape)  Total (Data Ele, Signal Selection)
+h_etot = e_file.Get("h_sig_%s_%s"%(variable,ptrange))
+h_etot.SetName("h_etot")
+h_etot.SetTitle("")
+h_etot.SetLineColor(c_etot)
+h_etot.SetLineWidth(3)
+h_etot.SetFillStyle(fs)
+h_etot.SetLineStyle(n_ls)
+h_etot.Draw("GOFF")
+h_etot.Scale( 1. / max(h_etot.Integral(-1,-1),1.) )
+themax = max( themax, h_etot.GetMaximum() )
 
 # Numerator Background (Data, 5 < chIso < 10 sideband)
 h_nbkg = d_file.Get("h_bkg_%s_%s"%(variable,ptrange))
@@ -118,14 +150,28 @@ h_deno.SetFillStyle(fs)
 h_deno.SetLineStyle(d_ls)
 h_deno.Draw("GOFF")
 h_deno.Scale( 0.5 / max(h_deno.Integral(-1,-1),1.) )
-themax = max( themax, h_nsig.GetMaximum() )
+themax = max( themax, h_deno.GetMaximum() )
+
+# QCD Denominator (QCD MC, Inv. Iso / Pass V.Loose ID/ Fail Loose ID)
+h_qden = q_file.Get("h_den_%s_%s"%(variable,ptrange))
+h_qden.SetName("h_qden")
+h_qden.SetTitle("")
+h_qden.SetLineColor(c_qden)
+h_qden.SetLineWidth(2)
+h_qden.SetFillStyle(fs)
+h_qden.SetLineStyle(q_ls)
+h_qden.Draw("GOFF")
+h_qden.Scale( 0.5 / max(h_qden.Integral(-1,-1),1.) )
+themax = max( themax, h_qden.GetMaximum() )
 
 # fill legend
 leg=TLegend(0.5,0.55,0.88,0.88)
-leg.AddEntry(h_ntot,"Numerator (total)")
-leg.AddEntry(h_nsig,"Numerator (signal)")
-leg.AddEntry(h_nbkg,"Numerator (background)")
-leg.AddEntry(h_deno,"Denominator")
+leg.AddEntry(h_ntot,"Numerator (photon data)")
+leg.AddEntry(h_etot,"Numerator (electron data)")
+leg.AddEntry(h_nsig,"Numerator Sig. (GJ MC)")
+leg.AddEntry(h_nbkg,"Numerator Bkg. (data)")
+leg.AddEntry(h_deno,"Denominator (data)")
+leg.AddEntry(h_qden,"Denominator (QCD MC)")
 leg.SetFillColor(0)
 leg.SetBorderSize(0)
 
@@ -141,12 +187,14 @@ h_ntot.GetXaxis().SetTitle("#sigma(i#eta,i#eta) Full 5x5")
 if(do_log):  h_ntot.SetMaximum( 11 ) 
 c.cd()
 h_ntot.Draw('hist,GOFF')
+h_etot.Draw('hist,GOFF,sames')
 h_nbkg.Draw('hist,GOFF,sames')
 h_nsig.Draw('hist,GOFF,sames')
+h_qden.Draw('hist,GOFF,sames')
 h_deno.Draw('hist,GOFF,sames')
 leg.Draw('sames,GOFF')
 
-cpr.prelim_tdr(lumi=2260,hor=0.17)
+cpr.prelim_tdr(lumi=2320,hor=0.17)
 tex.SetTextSize(0.03)
 tex.SetTextAlign(11) #left, bottom
 tex.DrawLatex(0.13,0.75,"pT Range [GeV]: %s"%(ptrange))
@@ -159,5 +207,5 @@ time.sleep(1)
 #c.SaveAs("%s/%s.C"%(outdir,out_filename))
 c.SaveAs("%s/%s.pdf"%(outdir,out_filename))
 c.SaveAs("%s/%s.pdf"%(webdir,out_filename))
-print(  "%s/%s.png"%(outdir,out_filename))
+print(  "%s/%s.pdf"%(outdir,out_filename))
 

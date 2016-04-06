@@ -2,9 +2,9 @@
 
 #voms-proxy-init --voms cms --valid 100:00
 
-domc=true
+domc=false
 dodata=true
-dosubmit=false
+dosubmit=true
 
 START=$(date +%s);
 printf "Started at `date`"
@@ -12,10 +12,15 @@ printf "Started at `date`"
 mkdir -p "${submitbase}/${version}/lists"
 mkdir -p "${submitbase}/${version}/submit"
 
-lumi=2260. # /pb
+lumi=2320. # /pb
 
 if [ ${domc} = true ]
 then
+
+ initevents="${submitbase}/${version}/lists/initialEvents.txt"
+ echo " " >> ${initevents}
+ touch ${initevents}
+
  for mc_samplename in \
   "GJets_HT" \
   "QCD_Pt"
@@ -41,9 +46,6 @@ then
    fi
 
   submitname="${mc_samplename}${bin}"
-
-  initevents="${submitbase}/${version}/lists/initialEvents.txt"
-  touch ${initevents}
 
  # count the total number of events, put in a file if it's not there
  if ! grep -F "${submitname} " ${initevents}
@@ -124,22 +126,31 @@ fi # ${domc} = true
 
 ######## Data ################################
 
+  #"SinglePhoton" 
 if [ ${dodata} = true ]
 then
  for data_samplename in \
-  "SinglePhoton"
+  "DoubleElectron"
 
  do
   printf "\n${data_samplename}\n"
-  
   printf " making list of files\n"
 
-  #find /hdfs/store/user/jjbuch/SinglePhoton/crab_ggNtuplizer_spring15_SinglePhoton_Run2015D_PromptReco_v3_try5/151212_080518/0000/*root > \
-  find /hdfs/store/user/gomber/SinglePhoton_Crab_2015D_v3_226fb/SinglePhoton/crab_job_single_photon_13TeV_v3_226fb/160109_082344/0000/*root > \
-   ${submitbase}/${version}/lists/hdfslist_${data_samplename}.txt
-  #find /hdfs/store/user/jjbuch/SinglePhoton/crab_ggNtuplizer_spring15_SinglePhoton_Run2015D_PromptReco_v4_try5/151212_080439/0000/*root >> \
-  find /hdfs/store/user/gomber/SinglePhoton_Crab_2015D_v4_226fb/SinglePhoton/crab_job_single_photon_13TeV_v4_226fb/160109_082133/000*/*root >> \
-   ${submitbase}/${version}/lists/hdfslist_${data_samplename}.txt
+  if [ "$data_samplename" = "SinglePhoton" ]
+  then 
+   find /hdfs/store/user/gomber/SinglePhoton_Crab_2015D_v3_226fb/SinglePhoton/crab_job_single_photon_13TeV_v3_226fb/160109_082344/0000/*root > \
+    ${submitbase}/${version}/lists/hdfslist_${data_samplename}.txt
+   find /hdfs/store/user/gomber/SinglePhoton_Crab_2015D_v4_226fb/SinglePhoton/crab_job_single_photon_13TeV_v4_226fb/160109_082133/000*/*root >> \
+    ${submitbase}/${version}/lists/hdfslist_${data_samplename}.txt
+  fi
+
+  if [ "$data_samplename" = "DoubleElectron" ]
+  then
+   find /hdfs/store/user/gomber/DoubleElectron_Crab_2015D_v3_226fb/*/crab_job_*_13TeV_v3_226fb/160216_*/0000/*root > \
+    ${submitbase}/${version}/lists/hdfslist_${data_samplename}.txt
+   find /hdfs/store/user/gomber/DoubleElectron_Crab_2015D_v4_226fb/*/crab_job_*_13TeV_v4_226fb/160216_*/000*/*root >> \
+    ${submitbase}/${version}/lists/hdfslist_${data_samplename}.txt
+  fi
 
   # format as xrootd
   cp ${submitbase}/${version}/lists/hdfslist_${data_samplename}.txt \

@@ -95,6 +95,7 @@ public :
    TString sysname;
 
    TFile* datafile;
+   TFile* edatafile;
    TFile* mcfile;
    TFile* qcdfile;
    TFile* outfile;
@@ -126,6 +127,7 @@ public :
    virtual void Loop();
    //My functions
    void  getFraction(TFile* datafile, 
+                     TFile* edatafile,
                      TFile* mcfile,
                      TFile* qcdfile,
                      TFile* outfile,
@@ -149,11 +151,13 @@ public :
                                std::vector<double> qcderr,
                                std::vector<Double_t>& ratios,
                                std::vector<Double_t>& ratioerrors,
-                               int sn);
+                               int sn,
+                               TString extraname
+                              );
 
-   void drawAllRates();
-   void drawAllRatesRelative();
-   void drawAllRatesRelativeHist();
+   void drawAllRates(TString extraname);
+   void drawAllRatesRelative(TString extraname);
+   void drawAllRatesRelativeHist(TString extraname);
 
 };
 #endif

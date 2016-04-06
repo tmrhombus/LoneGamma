@@ -22,6 +22,7 @@ void plot::Loop()
  sysnames.push_back("_binUp");
  sysnames.push_back("_binDown");
  sysnames.push_back("_noPiso");
+ sysnames.push_back("_eleTmpl");
 
  ptbinbounds.push_back(175);
  ptbinbounds.push_back(190);
@@ -47,11 +48,12 @@ void plot::Loop()
  outpath = TString(Tsubmitbase+"/"+Tversion+"/plots");
  wwwpath = TString("/afs/hep.wisc.edu/user/tperry/www/MonoPhoton/qcdPlots/"+Tversion);
  
- datafile = new TFile(inpath+"/mrg4bins_SinglePhoton.root","READ");
- mcfile   = new TFile(inpath+"/mrg4bins_GJets.root","READ");
- //qcdfile  = new TFile(inpath+"/mrg4bins_GJets.root","READ");
- qcdfile  = new TFile(inpath+"/mrg4bins_QCD.root","READ");
- outfile  = new TFile(outpath+"/Fitted.root","RECREATE");
+ datafile  = new TFile(inpath+"/mrg4bins_SinglePhoton.root","READ");
+ edatafile = new TFile(inpath+"/mrg4bins_DoubleElectron.root","READ");
+ mcfile    = new TFile(inpath+"/mrg4bins_GJets.root","READ");
+ //qcdfile   = new TFile(inpath+"/mrg4bins_GJets.root","READ");
+ qcdfile   = new TFile(inpath+"/mrg4bins_QCD.root","READ");
+ outfile   = new TFile(outpath+"/Fitted.root","RECREATE");
 
  ofstream log;
  log.open (outpath+"/log.txt");
@@ -88,6 +90,7 @@ void plot::Loop()
 
   getFraction(
    datafile,
+   edatafile,
    mcfile,
    qcdfile,
    outfile,
@@ -115,8 +118,8 @@ void plot::Loop()
    qcdFracErr,
    ratios,
    ratioerrors,
-   sn
-   //sysname
+   sn,
+   extraname
   );
 
  ratioss.push_back(ratios);
@@ -135,9 +138,9 @@ void plot::Loop()
     log<<boost::format(" y = (%0.3d +- %0.3d)x + (%0.3d +- %0.3d) \n") % ms[sn] % mes[sn] % bs[sn] % bes[sn] ;
  }
 
- drawAllRates();
- drawAllRatesRelative();
- drawAllRatesRelativeHist();
+ drawAllRates(extraname);
+// drawAllRatesRelative(extraname);
+ drawAllRatesRelativeHist(extraname);
 
  log.close();
 
@@ -149,6 +152,7 @@ void plot::Loop()
 //------------------------------------
 void plot::getFraction(
  TFile* datafile,  
+ TFile* edatafile,  
  TFile* mcfile,    
  TFile* qcdfile,    
  TFile* outfile,   
@@ -195,6 +199,11 @@ void plot::getFraction(
     fullhistname = "h_sig_sieieF5x5_"+binrange+sysname; //phojet histos with tight ID cut but without sigIetaIeta
     qcdhistname  = "h_bkg_sieieF5x5_"+binrange+sysname; //data histos with very loose id and  sideband of track iso
 
+    if(sysname.EqualTo("_eleTmpl")){ 
+     datahistname = "h_sig_sieieF5x5_"+binrange; //data histos with tigh ID and without sigIetaIeta cut
+     fullhistname = "h_sig_sieieF5x5_"+binrange; //phojet histos with tight ID cut but without sigIetaIeta
+     qcdhistname  = "h_bkg_sieieF5x5_"+binrange; //data histos with very loose id and  sideband of track iso
+    }
 
     //// for closure test
     ////get "Data" template = MC (GJ + QCD) 
@@ -207,7 +216,14 @@ void plot::getFraction(
     //  used and good
     //get Data template and QCD template from data
     datafile->cd();
-    hdata = (TH1D*)datafile->Get(datahistname)->Clone();
+    if(sysname.EqualTo("_eleTmpl")){ 
+     hdata = (TH1D*)edatafile->Get(datahistname)->Clone();
+     //hqcd  = (TH1D*)edatafile->Get(qcdhistname)->Clone();
+    }
+    else{ 
+     hdata = (TH1D*)datafile->Get(datahistname)->Clone(); 
+     //hqcd  = (TH1D*)datafile->Get(qcdhistname)->Clone();
+    }
     //QCD histo
     hqcd  = (TH1D*)datafile->Get(qcdhistname)->Clone();
 
@@ -454,7 +470,7 @@ void plot::getFraction(
   model.plotOn(xframe);
   model.plotOn(xframe,Components(extpdfsig),LineColor(2),LineStyle(kDashed));
   model.plotOn(xframe,Components(extpdffake),LineColor(8),LineStyle(kDashed));
-  xframe->SetMinimum(9.);
+  xframe->SetMinimum(.9);
   xframe->Draw();     
   xframe->Print();                 
   canvas->cd();
@@ -525,10 +541,11 @@ void plot::getFraction(
    sflabel->DrawTextNDC(0.450,0.38,sfrQCD+" +- "+sfrQCDerr);
    xframe->addObject(sflabel);
 
-   canvas->SaveAs(outpath+"/Fitted_"+datahistname+sysname+extraname+".pdf");
-   //canvas->SaveAs(outpath+"/Fitted_"+datahistname+sysname+extraname+".C");
-   //canvas->SaveAs(outpath+"/Fitted_"+datahistname+sysname+extraname+".eps");
-   //canvas->SaveAs(wwwpath+"/Fitted_"+datahistname+extraname+".pdf");
+   if(sysname.EqualTo("_eleTmpl")){ 
+    datahistname = "h_sig_sieieF5x5_"+binrange+sysname;
+   }
+   canvas->SaveAs(outpath+"/Fitted_"+datahistname+extraname+".pdf");
+   canvas->SaveAs(wwwpath+"/Fitted_"+datahistname+extraname+".pdf");
 
   delete xframe;
   
@@ -574,7 +591,10 @@ void plot::getBinCenters(
    binrange = ptbinnames[ptb];
  
    //set template histo names
-   datahistname = "h_sig_et_"+binrange+sysname; //data histos with tigh ID and without sigIetaIeta cut
+   if(sysname.EqualTo("_eleTmpl")){ 
+    datahistname = "h_sig_et_"+binrange; //data histos with tigh ID and without sigIetaIeta cut
+   }
+   else {datahistname = "h_sig_et_"+binrange+sysname; } //data histos with tigh ID and without sigIetaIeta cut
 
    //// for closure test
    ////get "Data" template = MC (GJ + QCD) 
@@ -585,11 +605,18 @@ void plot::getBinCenters(
    //  used and good
    //get Data template and QCD template from data
    datafile->cd();
-   hdata = (TH1D*)datafile->Get(datahistname)->Clone();
+   if(sysname.EqualTo("_eleTmpl")){ 
+    hdata = (TH1D*)edatafile->Get(datahistname)->Clone();
+   }
+   else { 
+    hdata = (TH1D*)datafile->Get(datahistname)->Clone();
+   }
 
    bcenters.push_back(hdata->GetMean());
    //berrors.push_back(hdata->GetMeanError());
    berrors.push_back(hdata->GetRMS());
+   //std::cout<<" aaaa "<<sysname<<std::endl;
+   //std::cout<<"aaaaaaaa bincenter: "<<hdata->GetMean()<<std::endl;
   }
 }
 
@@ -602,8 +629,8 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
                                  vector<double> corrErr,    //<--input error
                                  vector<Double_t>& ratios,
                                  vector<Double_t>& ratioerrors,
-                                 int sn
-                                 //TString sysname
+                                 int sn,
+                                 TString extraname
                                 ){
 
 
@@ -639,15 +666,22 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
    logg<<boost::format("pT Range:  %s \n\n") % binrange;
 
   //set template histo names
-  numhistname = "h_sig_sieieF5x5_"+binrange+sysname; //data histos with tight ID cut but without sigIetaIeta
-  denhistname = "h_den_sieieF5x5_"+binrange+sysname; //data histos fail loose ID and pass Vloose ID
+  if(sysname.EqualTo("_eleTmpl")){ 
+   numhistname = "h_sig_sieieF5x5_"+binrange; //data histos with tight ID cut but without sigIetaIeta
+   denhistname = "h_den_sieieF5x5_"+binrange; //data histos fail loose ID and pass Vloose ID
+  }
+  else{
+   numhistname = "h_sig_sieieF5x5_"+binrange+sysname; //data histos with tight ID cut but without sigIetaIeta
+   denhistname = "h_den_sieieF5x5_"+binrange+sysname; //data histos fail loose ID and pass Vloose ID
+  }
 
   //get the numerator and denominator
   datafile->cd();
   //num
-  hdatanum = (TH1D*)datafile->Get(numhistname)->Clone();    
+  hdatanum = (TH1D*)edatafile->Get(numhistname)->Clone();    
   //deno
-  hdataden = (TH1D*)datafile->Get(denhistname)->Clone();
+  hdataden = (TH1D*)edatafile->Get(denhistname)->Clone();
+
    
   // bin corresponding to medium wp sieie cut
   double sieiebin;
@@ -680,7 +714,7 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
   for(unsigned int k=0; k<nptbins; ++k){
    mid[k]=bincenterss[sn][k];
    miderr[k]=binerrorss[sn][k];
-   //std::cout<<bincenterss[sn][k]<<std::endl;
+   //std::cout<<"xxxxxxxxxxxxxxxxxxxxxxx "<<bincenterss[sn][k]<<std::endl;
   }
 
   ////std::vector<double> mid;
@@ -720,7 +754,7 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
   gr_den->SetLineColor(3);
   gr_den->SetMarkerStyle(23);
 
-  TH1F *hr = canvas->DrawFrame(175.,10.,1000.,10000000.,"");
+  TH1F *hr = canvas->DrawFrame(175.,0.1,1000.,1000000.,"");
   hr->SetXTitle("photon pT [GeV]");
   hr->SetYTitle("Events"); 
 
@@ -760,9 +794,7 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
   gr_den->Draw("P");
 
   canvas->SaveAs(outpath+"/Graph_NuNcD"+sysname+".pdf");
-  //canvas->SaveAs(outpath+"/Graph_NuNcD.C");
-  //canvas->SaveAs(outpath+"/Graph_NuNcD.eps");
-  //canvas->SaveAs(wwwpath+"/Graph_NuNcD.pdf");
+  canvas->SaveAs(wwwpath+"/Graph_NuNcD"+sysname+".pdf");
 
   canvas->Clear();
 
@@ -872,10 +904,8 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
 
   c2->Update();
   
-  c2->SaveAs(outpath+"/Graph_FakeRatio"+sysname+".pdf");
-  //c2->SaveAs(outpath+"/Graph_FakeRatio"+sysname+".C");
-  //c2->SaveAs(outpath+"/Graph_FakeRatio"+sysname+".eps");
-  //c2->SaveAs(wwwpath+"/Graph_FakeRatio"+sysname+".pdf");
+  c2->SaveAs(outpath+"/Graph_FakeRatio"+sysname+extraname+".pdf");
+  c2->SaveAs(wwwpath+"/Graph_FakeRatio"+sysname+extraname+".pdf");
 
   c2->Clear();
 
@@ -885,7 +915,7 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
 
 
 
-void plot::drawAllRates(){
+void plot::drawAllRates(TString extraname){
 
   TCanvas* c3 = new TCanvas("c3","c3",900,100,500,500);   
 
@@ -942,6 +972,7 @@ void plot::drawAllRates(){
   Double_t *mid5 = new Double_t[nptbins];
   Double_t *mid6 = new Double_t[nptbins];
   Double_t *mid7 = new Double_t[nptbins];
+  Double_t *mid8 = new Double_t[nptbins];
   for(unsigned int k=0; k<nptbins; ++k){ mid0[k]=bincenterss[0][k]; }
   for(unsigned int k=0; k<nptbins; ++k){ mid1[k]=bincenterss[1][k]; }
   for(unsigned int k=0; k<nptbins; ++k){ mid2[k]=bincenterss[2][k]; }
@@ -950,6 +981,7 @@ void plot::drawAllRates(){
   for(unsigned int k=0; k<nptbins; ++k){ mid5[k]=bincenterss[5][k]; }
   for(unsigned int k=0; k<nptbins; ++k){ mid6[k]=bincenterss[6][k]; }
   for(unsigned int k=0; k<nptbins; ++k){ mid7[k]=bincenterss[7][k]; }
+  for(unsigned int k=0; k<nptbins; ++k){ mid8[k]=bincenterss[8][k]; }
 
   Double_t *miderr0 = new Double_t[nptbins];
   Double_t *miderr1 = new Double_t[nptbins];
@@ -959,6 +991,7 @@ void plot::drawAllRates(){
   Double_t *miderr5 = new Double_t[nptbins];
   Double_t *miderr6 = new Double_t[nptbins];
   Double_t *miderr7 = new Double_t[nptbins];
+  Double_t *miderr8 = new Double_t[nptbins];
   for(unsigned int k=0; k<nptbins; ++k){ miderr0[k]=binerrorss[0][k]; }
   for(unsigned int k=0; k<nptbins; ++k){ miderr1[k]=binerrorss[1][k]; }
   for(unsigned int k=0; k<nptbins; ++k){ miderr2[k]=binerrorss[2][k]; }
@@ -967,6 +1000,7 @@ void plot::drawAllRates(){
   for(unsigned int k=0; k<nptbins; ++k){ miderr5[k]=binerrorss[5][k]; }
   for(unsigned int k=0; k<nptbins; ++k){ miderr6[k]=binerrorss[6][k]; }
   for(unsigned int k=0; k<nptbins; ++k){ miderr7[k]=binerrorss[7][k]; }
+  for(unsigned int k=0; k<nptbins; ++k){ miderr8[k]=binerrorss[8][k]; }
   
   // y
   Double_t *points0 = new Double_t[4];
@@ -977,6 +1011,7 @@ void plot::drawAllRates(){
   Double_t *points5 = new Double_t[4];
   Double_t *points6 = new Double_t[4];
   Double_t *points7 = new Double_t[4];
+  Double_t *points8 = new Double_t[4];
   for(unsigned int p=0; p<4; ++p){ points0[p]=ratioss[0][p]; }
   for(unsigned int p=0; p<4; ++p){ points1[p]=ratioss[1][p]; }
   for(unsigned int p=0; p<4; ++p){ points2[p]=ratioss[2][p]; }
@@ -985,6 +1020,7 @@ void plot::drawAllRates(){
   for(unsigned int p=0; p<4; ++p){ points5[p]=ratioss[5][p]; }
   for(unsigned int p=0; p<4; ++p){ points6[p]=ratioss[6][p]; }
   for(unsigned int p=0; p<4; ++p){ points7[p]=ratioss[7][p]; }
+  for(unsigned int p=0; p<4; ++p){ points8[p]=ratioss[8][p]; }
 
   Double_t *pointerrors0 = new Double_t[4];
   Double_t *pointerrors1 = new Double_t[4];
@@ -994,6 +1030,7 @@ void plot::drawAllRates(){
   Double_t *pointerrors5 = new Double_t[4];
   Double_t *pointerrors6 = new Double_t[4];
   Double_t *pointerrors7 = new Double_t[4];
+  Double_t *pointerrors8 = new Double_t[4];
   for(unsigned int p=0; p<4; ++p){ pointerrors0[p]=ratioerrorss[0][p]; }
   for(unsigned int p=0; p<4; ++p){ pointerrors1[p]=ratioerrorss[1][p]; }
   for(unsigned int p=0; p<4; ++p){ pointerrors2[p]=ratioerrorss[2][p]; }
@@ -1002,6 +1039,7 @@ void plot::drawAllRates(){
   for(unsigned int p=0; p<4; ++p){ pointerrors5[p]=ratioerrorss[5][p]; }
   for(unsigned int p=0; p<4; ++p){ pointerrors6[p]=ratioerrorss[6][p]; }
   for(unsigned int p=0; p<4; ++p){ pointerrors7[p]=ratioerrorss[7][p]; }
+  for(unsigned int p=0; p<4; ++p){ pointerrors8[p]=ratioerrorss[8][p]; }
 
   // fill the graphs
   TGraphErrors *gr_points0 = new TGraphErrors(4,mid0,points0,miderr0,pointerrors0);
@@ -1012,25 +1050,59 @@ void plot::drawAllRates(){
   TGraphErrors *gr_points5 = new TGraphErrors(4,mid5,points5,miderr5,pointerrors5);
   TGraphErrors *gr_points6 = new TGraphErrors(4,mid6,points6,miderr6,pointerrors6);
   TGraphErrors *gr_points7 = new TGraphErrors(4,mid7,points7,miderr7,pointerrors7);
+  TGraphErrors *gr_points8 = new TGraphErrors(4,mid8,points8,miderr8,pointerrors8);
 
   // set colors
-  gr_points0->SetLineColor(kBlack                     );                          
-  gr_points2->SetLineColor(TColor::GetColor("#33a02c"));
-  gr_points1->SetLineColor(TColor::GetColor("#b2df8a"));
-  gr_points4->SetLineColor(TColor::GetColor("#e31a1c"));
-  gr_points3->SetLineColor(TColor::GetColor("#fb9a99"));
-  gr_points6->SetLineColor(TColor::GetColor("#1f78b4"));
-  gr_points5->SetLineColor(TColor::GetColor("#a6cee3"));
-  gr_points7->SetLineColor(TColor::GetColor("#b15928"));
+  //  
+  //  _sbUp
+  //  _sbDown
+  //  _metUp
+  //  _metDown
+  //  _binUp
+  //  _binDown
+  //  _noPiso
+  //  _eleTmpl
+  Int_t ci1  = 1001;
+  Int_t ci2  = 1002;
+  Int_t ci3  = 1003;
+  Int_t ci4  = 1004;
+  Int_t ci5  = 1005;
+  Int_t ci6  = 1006;
+  Int_t ci7  = 1007;
+  Int_t ci8  = 1008;
+  Int_t ci9  = 1009;
+  Int_t ci10 = 1010;
+  //Color_t mycolor = new TColor(ci, 0.1,0.2,0.3,"mycolor");
+  TColor *color1  = new TColor( ci1,178./255,223./255,138./255);
+  TColor *color2  = new TColor( ci2, 51./255,160./255, 44./255);
+  TColor *color3  = new TColor( ci3,251./255,154./255,153./255);
+  TColor *color4  = new TColor( ci4,227./255, 26./255, 28./255);
+  TColor *color5  = new TColor( ci5,166./255,206./255,227./255);
+  TColor *color6  = new TColor( ci6, 31./255,120./255,180./255);
+  TColor *color7  = new TColor( ci7,177./255, 89./255, 40./255);
+  TColor *color8  = new TColor( ci8,236./255,208./255,120./255);
+  TColor *color9  = new TColor( ci9,253./255,191./255,111./255);
+  TColor *color10 = new TColor(ci10,255./255,127./255,  0./255);
+  //TColor *mycolor = gROOT->GetColor(kOrange);
+  gr_points0->SetLineColor(kBlack);                          
+  gr_points1->SetLineColor(ci1);
+  gr_points2->SetLineColor(ci2);
+  gr_points3->SetLineColor(ci3);
+  gr_points4->SetLineColor(ci4);
+  gr_points5->SetLineColor(ci5);
+  gr_points6->SetLineColor(ci6);
+  gr_points7->SetLineColor(ci7);
+  gr_points8->SetLineColor(ci8);
 
   gr_points0->SetMarkerColor(kBlack                     );                          
-  gr_points2->SetMarkerColor(TColor::GetColor("#33a02c"));
-  gr_points1->SetMarkerColor(TColor::GetColor("#b2df8a"));
-  gr_points4->SetMarkerColor(TColor::GetColor("#e31a1c"));
-  gr_points3->SetMarkerColor(TColor::GetColor("#fb9a99"));
-  gr_points6->SetMarkerColor(TColor::GetColor("#1f78b4"));
-  gr_points5->SetMarkerColor(TColor::GetColor("#a6cee3"));
-  gr_points7->SetMarkerColor(TColor::GetColor("#b15928"));
+  gr_points2->SetMarkerColor(ci1);
+  gr_points1->SetMarkerColor(ci2);
+  gr_points4->SetMarkerColor(ci3);
+  gr_points3->SetMarkerColor(ci4);
+  gr_points6->SetMarkerColor(ci5);
+  gr_points5->SetMarkerColor(ci6);
+  gr_points7->SetMarkerColor(ci7);
+  gr_points8->SetMarkerColor(ci8);
 
   gr_points0->SetLineWidth(2); //         Color(color0);
   gr_points1->SetLineWidth(2); //         Color(color1);
@@ -1041,7 +1113,6 @@ void plot::drawAllRates(){
   gr_points6->SetLineWidth(2); //         Color(color6);
   gr_points7->SetLineWidth(2); //         Color(color7);
 
-
   gr_points1->Draw("P");
   gr_points2->Draw("P,same");
   gr_points3->Draw("P,same");
@@ -1049,6 +1120,7 @@ void plot::drawAllRates(){
   gr_points5->Draw("P,same");
   gr_points6->Draw("P,same");
   gr_points7->Draw("P,same");
+  gr_points8->Draw("P,same");
   gr_points0->Draw("P,same");
 
   TLegend *leg4 = new TLegend(0.12,0.4,0.88,0.75 );
@@ -1101,6 +1173,12 @@ void plot::drawAllRates(){
     % ms[6] % mes[6] % bs[6] % bes[6])),
    "L");
 
+  leg4->AddEntry( gr_points8,"ele template: y = "
+   +TString(boost::lexical_cast<string>(boost::format(
+    "(%0.5f +- %0.5f) x + (%0.3f +- %0.3f)")
+    % ms[8] % mes[8] % bs[8] % bes[8])),
+   "L");
+
   leg4->Draw("same");
 
   TLine *line0 = new TLine(xlow,xlow*ms[0]+bs[0],xhi,xhi*ms[0]+bs[0]);
@@ -1111,15 +1189,17 @@ void plot::drawAllRates(){
   TLine *line5 = new TLine(xlow,xlow*ms[5]+bs[5],xhi,xhi*ms[5]+bs[5]);
   TLine *line6 = new TLine(xlow,xlow*ms[6]+bs[6],xhi,xhi*ms[6]+bs[6]);
   TLine *line7 = new TLine(xlow,xlow*ms[7]+bs[7],xhi,xhi*ms[7]+bs[7]);
+  TLine *line8 = new TLine(xlow,xlow*ms[8]+bs[8],xhi,xhi*ms[8]+bs[8]);
 
   line0->SetLineColor(kBlack                     );                          
-  line2->SetLineColor(TColor::GetColor("#33a02c"));
-  line1->SetLineColor(TColor::GetColor("#b2df8a"));
-  line4->SetLineColor(TColor::GetColor("#e31a1c"));
-  line3->SetLineColor(TColor::GetColor("#fb9a99"));
-  line6->SetLineColor(TColor::GetColor("#1f78b4"));
-  line5->SetLineColor(TColor::GetColor("#a6cee3"));
-  line7->SetLineColor(TColor::GetColor("#b15928"));
+  line1->SetLineColor(ci1);
+  line2->SetLineColor(ci2);
+  line3->SetLineColor(ci3);
+  line4->SetLineColor(ci4);
+  line5->SetLineColor(ci5);
+  line6->SetLineColor(ci6);
+  line7->SetLineColor(ci7);
+  line8->SetLineColor(ci8);
 
   line1->Draw();
   line2->Draw();
@@ -1128,16 +1208,15 @@ void plot::drawAllRates(){
   line5->Draw();
   line6->Draw();
   line7->Draw();
+  line8->Draw();
   line0->Draw();
 
   c3->Update();
   
   //gr_ratio->Draw("sames,A*");
 
-  c3->SaveAs(outpath+"/Graph_FakeRatios.pdf");
-  //c2->SaveAs(outpath+"/Graph_FakeRatio.C");
-  //c2->SaveAs(outpath+"/Graph_FakeRatio.eps");
-  //c2->SaveAs(wwwpath+"/Graph_FakeRatio.pdf");
+  c3->SaveAs(outpath+"/Graph_FakeRatios"+extraname+".pdf");
+  c3->SaveAs(wwwpath+"/Graph_FakeRatios"+extraname+".pdf");
 
   c3->Clear();
 
@@ -1145,7 +1224,7 @@ void plot::drawAllRates(){
 
 }
 
-void plot::drawAllRatesRelative(){
+void plot::drawAllRatesRelative(TString extraname){
 
   TCanvas* c3 = new TCanvas("c3","c3",900,100,500,500);   
 
@@ -1359,10 +1438,8 @@ void plot::drawAllRatesRelative(){
   
   //gr_ratio->Draw("sames,A*");
 
-  c3->SaveAs(outpath+"/Graph_FakeRatiosRelative.pdf");
-  //c2->SaveAs(outpath+"/Graph_FakeRatio.C");
-  //c2->SaveAs(outpath+"/Graph_FakeRatio.eps");
-  //c2->SaveAs(wwwpath+"/Graph_FakeRatio.pdf");
+  c3->SaveAs(outpath+"/Graph_FakeRatiosRelative"+extraname+".pdf");
+  c3->SaveAs(wwwpath+"/Graph_FakeRatiosRelative"+extraname+".pdf");
 
   c3->Clear();
 
@@ -1370,7 +1447,7 @@ void plot::drawAllRatesRelative(){
 
 }
 
-void plot::drawAllRatesRelativeHist(){
+void plot::drawAllRatesRelativeHist(TString extraname){
 
   TCanvas* c3 = new TCanvas("c3","c3",900,100,500,500);   
 
@@ -1439,8 +1516,7 @@ void plot::drawAllRatesRelativeHist(){
   TH1* h_sys7 = new TH1D( "h_sys7", "h_sys7", NBINS, edges );
   TH1* h_sys8 = new TH1D( "h_sys8", "h_sys8", NBINS, edges );
   TH1* h_sys9 = new TH1D( "h_sys9", "h_sys9", NBINS, edges );
- 
-
+  TH1* h_sys10 = new TH1D( "h_sys10", "h_sys10", NBINS, edges );
 
   // y
   Double_t *points0 = new Double_t[4];
@@ -1453,6 +1529,7 @@ void plot::drawAllRatesRelativeHist(){
   Double_t *points7 = new Double_t[4];
   Double_t *points8 = new Double_t[4];
   Double_t *points9 = new Double_t[4];
+  Double_t *points10 = new Double_t[4];
   for(unsigned int p=0; p<4; ++p){ h_sys0->SetBinContent( p+1, (ratioss[0][p]-ratioss[0][p])/ratioss[0][p] ); }
   for(unsigned int p=0; p<4; ++p){ h_sys1->SetBinContent( p+1, (ratioss[1][p]-ratioss[0][p])/ratioss[0][p] ); }
   for(unsigned int p=0; p<4; ++p){ h_sys2->SetBinContent( p+1, (ratioss[2][p]-ratioss[0][p])/ratioss[0][p] ); }
@@ -1463,30 +1540,64 @@ void plot::drawAllRatesRelativeHist(){
   for(unsigned int p=0; p<4; ++p){ h_sys7->SetBinContent( p+1, (ratioss[7][p]-ratioss[0][p])/ratioss[0][p] ); }
   for(unsigned int p=0; p<4; ++p){ h_sys8->SetBinContent( p+1, (+ratioerrorss[0][p])/ratioss[0][p] ); std::cout<<ratioerrorss[0][p]<<std::endl;}
   for(unsigned int p=0; p<4; ++p){ h_sys9->SetBinContent( p+1, (-ratioerrorss[0][p])/ratioss[0][p] ); std::cout<<ratioerrorss[0][p]<<std::endl;}
+  for(unsigned int p=0; p<4; ++p){ h_sys10->SetBinContent( p+1, (ratioss[8][p]-ratioss[0][p])/ratioss[0][p] ); }
 
 
+//TColor *mycolor = gROOT->TColor::GetColor("#33a02c");
   //// set colors
-  h_sys0->SetMarkerColor(kBlack                     );                          
-  h_sys2->SetMarkerColor(TColor::GetColor("#33a02c"));
-  h_sys1->SetMarkerColor(TColor::GetColor("#b2df8a"));
-  h_sys4->SetMarkerColor(TColor::GetColor("#e31a1c"));
-  h_sys3->SetMarkerColor(TColor::GetColor("#fb9a99"));
-  h_sys6->SetMarkerColor(TColor::GetColor("#1f78b4"));
-  h_sys5->SetMarkerColor(TColor::GetColor("#a6cee3"));
-  h_sys7->SetMarkerColor(TColor::GetColor("#b15928"));
-  h_sys8->SetMarkerColor(TColor::GetColor("#b15928"));
-  h_sys9->SetMarkerColor(TColor::GetColor("#b15928"));
+  //  
+  //  _sbUp
+  //  _sbDown
+  //  _metUp
+  //  _metDown
+  //  _binUp
+  //  _binDown
+  //  _noPiso
+  //  _eleTmpl
+  Int_t ci1  = 1001;
+  Int_t ci2  = 1002;
+  Int_t ci3  = 1003;
+  Int_t ci4  = 1004;
+  Int_t ci5  = 1005;
+  Int_t ci6  = 1006;
+  Int_t ci7  = 1007;
+  Int_t ci8  = 1008;
+  Int_t ci9  = 1009;
+  Int_t ci10 = 1010;
+  TColor *color1  = new TColor( ci1,178./255,223./255,138./255);
+  TColor *color2  = new TColor( ci2, 51./255,160./255, 44./255);
+  TColor *color3  = new TColor( ci3,251./255,154./255,153./255);
+  TColor *color4  = new TColor( ci4,227./255, 26./255, 28./255);
+  TColor *color5  = new TColor( ci5,166./255,206./255,227./255);
+  TColor *color6  = new TColor( ci6, 31./255,120./255,180./255);
+  TColor *color7  = new TColor( ci7,177./255, 89./255, 40./255);
+  TColor *color8  = new TColor( ci8,236./255,208./255,120./255);
+  TColor *color9  = new TColor( ci9,253./255,191./255,111./255);
+  TColor *color10 = new TColor(ci10,255./255,127./255,  0./255);
 
-  h_sys0->SetLineColor(kBlack                     );                          
-  h_sys2->SetLineColor(TColor::GetColor("#33a02c"));
-  h_sys1->SetLineColor(TColor::GetColor("#b2df8a"));
-  h_sys4->SetLineColor(TColor::GetColor("#e31a1c"));
-  h_sys3->SetLineColor(TColor::GetColor("#fb9a99"));
-  h_sys6->SetLineColor(TColor::GetColor("#1f78b4"));
-  h_sys5->SetLineColor(TColor::GetColor("#a6cee3"));
-  h_sys7->SetLineColor(TColor::GetColor("#b15928"));
-  h_sys8->SetLineColor(TColor::GetColor("#ff7f00"));
-  h_sys9->SetLineColor(TColor::GetColor("#fdbf6f"));
+  h_sys0 ->SetMarkerColor(kBlack                     );                          
+  h_sys1 ->SetMarkerColor(ci1);
+  h_sys2 ->SetMarkerColor(ci2);
+  h_sys3 ->SetMarkerColor(ci3);
+  h_sys4 ->SetMarkerColor(ci4);
+  h_sys5 ->SetMarkerColor(ci5);
+  h_sys6 ->SetMarkerColor(ci6);
+  h_sys7 ->SetMarkerColor(ci7);
+  h_sys8 ->SetMarkerColor(ci8);
+  h_sys9 ->SetMarkerColor(ci9);
+  h_sys10->SetMarkerColor(ci10);
+
+  h_sys0 ->SetLineColor(kBlack                     );                          
+  h_sys1 ->SetLineColor(ci1);
+  h_sys2 ->SetLineColor(ci2);
+  h_sys3 ->SetLineColor(ci3);
+  h_sys4 ->SetLineColor(ci4);
+  h_sys5 ->SetLineColor(ci5);
+  h_sys6 ->SetLineColor(ci6);
+  h_sys7 ->SetLineColor(ci7);
+  h_sys8 ->SetLineColor(ci8);
+  h_sys9 ->SetLineColor(ci9);
+  h_sys10->SetLineColor(ci10);
 
   h_sys0->SetLineWidth(3); 
   h_sys1->SetLineWidth(3); 
@@ -1498,6 +1609,7 @@ void plot::drawAllRatesRelativeHist(){
   h_sys7->SetLineWidth(3); 
   h_sys8->SetLineWidth(3); 
   h_sys9->SetLineWidth(3); 
+  h_sys10->SetLineWidth(3); 
 
 // // sideband binning met gamma
 //  TColor *color0 = new TColor( 7430, 0,0,0 ,       "color0" ); 
@@ -1519,6 +1631,7 @@ void plot::drawAllRatesRelativeHist(){
   h_sys7->Draw("hist,same");
   h_sys8->Draw("hist,same");
   h_sys9->Draw("hist,same");
+  h_sys10->Draw("hist,same");
 
   TLegend *leg4 = new TLegend(0.5,0.6,0.88,0.88 );
   leg4->SetFillColor(kWhite);
@@ -1532,6 +1645,7 @@ void plot::drawAllRatesRelativeHist(){
   leg4->AddEntry( h_sys6,"binning Down","L");
   leg4->AddEntry( h_sys8,"fit Up","L");
   leg4->AddEntry( h_sys9,"fit Down","L");
+  leg4->AddEntry( h_sys10,"ele template", "L");
   leg4->Draw("same");
 
   //TLine *line0 = new TLine(xlow,xlow*ms[0]+bs[0],xhi,xhi*ms[0]+bs[0]);
@@ -1565,10 +1679,8 @@ void plot::drawAllRatesRelativeHist(){
   
   //gr_ratio->Draw("sames,A*");
 
-  c3->SaveAs(outpath+"/Graph_FakeRatiosRelativeHist.pdf");
-  //c2->SaveAs(outpath+"/Graph_FakeRatio.C");
-  //c2->SaveAs(outpath+"/Graph_FakeRatio.eps");
-  //c2->SaveAs(wwwpath+"/Graph_FakeRatio.pdf");
+  c3->SaveAs(outpath+"/Graph_FakeRatiosRelativeHist"+extraname+".pdf");
+  c3->SaveAs(wwwpath+"/Graph_FakeRatiosRelativeHist"+extraname+".pdf");
 
   c3->Clear();
 
@@ -1603,6 +1715,7 @@ void plot::drawAllRatesRelativeHist(){
   h_sys7->Draw("hist,same");
   h_sys8->Draw("hist,same");
   h_sys9->Draw("hist,same");
+  h_sys10->Draw("hist,same");
 
   leg4->Draw("same");
 
@@ -1637,10 +1750,8 @@ void plot::drawAllRatesRelativeHist(){
   
   //gr_ratio->Draw("sames,A*");
 
-  c4->SaveAs(outpath+"/Graph_FakeRatiosRelativeHist_175to400.pdf");
-  //c2->SaveAs(outpath+"/Graph_FakeRatio.C");
-  //c2->SaveAs(outpath+"/Graph_FakeRatio.eps");
-  //c2->SaveAs(wwwpath+"/Graph_FakeRatio.pdf");
+  c4->SaveAs(outpath+"/Graph_FakeRatiosRelativeHist_175to400"+extraname+".pdf");
+  c4->SaveAs(wwwpath+"/Graph_FakeRatiosRelativeHist_175to400"+extraname+".pdf");
 
   c4->Clear();
 

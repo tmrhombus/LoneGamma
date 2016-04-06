@@ -15,7 +15,7 @@ void callPurityAnalyzer(void)
  TChain *theChain = new TChain("ggNtuplizer/EventTree"); ;
  theChain->Reset();
  
- Double_t lumi=2.24;
+ Double_t lumi=2.32;
  Double_t nrEvents=10000;
  Double_t crossSec=40000;
  
