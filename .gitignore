@@ -7,3 +7,5 @@
 *.pyc
 *.out
 *.root
+**/gitignore
+*.txt
