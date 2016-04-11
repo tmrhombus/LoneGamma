@@ -44,8 +44,8 @@ void plot::Loop()
   ptbinnames.push_back(TString(boost::lexical_cast<string>( boost::format("%ito%i") % ptbinbounds[i] % ptbinbounds[i+1] )));
  }
  
- inpath = TString(Tsubmitbase+"/"+Tversion+"/analyzed");
- outpath = TString(Tsubmitbase+"/"+Tversion+"/plots");
+ inpath = TString(Tsubmitbase+"/gitignore/"+Tversion+"/analyzed");
+ outpath = TString(Tsubmitbase+"/gitignore/"+Tversion+"/plots");
  wwwpath = TString("/afs/hep.wisc.edu/user/tperry/www/MonoPhoton/qcdPlots/"+Tversion);
  
  datafile  = new TFile(inpath+"/mrg4bins_SinglePhoton.root","READ");
@@ -164,6 +164,12 @@ void plot::getFraction(
  TString extraname
  )
 {
+  //printf("Starting %15s  %15s");
+  std::cout<<"------------------------------------xxxxxxxxxxxxx"<<std::endl;
+  std::cout<<"------------------------------------xxxxxxxxxxxxx"<<std::endl;
+  std::cout<<"------------------------------------xxxxxxxxxxxxx"<<std::endl;
+  std::cout<<"------------------------------------xxxxxxxxxxxxx"<<std::endl;
+  std::cout<<"Starting "<<sysname<<" "<<extraname<<std::endl;
 
   TCanvas* canvas = new TCanvas("canvas","canvas",900,100,500,500);   
   gStyle->SetOptStat(0);
