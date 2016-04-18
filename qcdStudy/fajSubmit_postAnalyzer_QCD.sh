@@ -2,22 +2,28 @@
 
 #voms-proxy-init --voms cms --valid 100:00
 
-domc=false
+domc=true
 dodata=true
 dosubmit=true
+grablists=true
 
 START=$(date +%s);
 printf "Started at `date`"
 
-mkdir -p "${submitbase}/${version}/lists"
-mkdir -p "${submitbase}/${version}/submit"
+mkdir -p "${submitbase}/gitignore/${version}/lists"
+mkdir -p "${submitbase}/gitignore/${version}/submit"
 
 lumi=2320. # /pb
+
+if [ ${grablists} = true ]
+then
+ cp "${submitbase}/gitignore/Domb/lists/"*txt "${submitbase}/gitignore/${version}/lists/"
+fi
 
 if [ ${domc} = true ]
 then
 
- initevents="${submitbase}/${version}/lists/initialEvents.txt"
+ initevents="${submitbase}/gitignore/${version}/lists/initialEvents.txt"
  echo " " >> ${initevents}
  touch ${initevents}
 
@@ -68,38 +74,40 @@ then
    # /hdfs/store/user/jjbuch/${mc_samplename}-${bin}_*TuneCUETP8M1_13TeV*pythia8/crab_ggNtuplizer_spring15_${mc_samplename}-${${bin}_try${trynr}/
 
    find /hdfs/store/user/jjbuch/${mc_samplename}-${bin}_*TuneCUETP8M1_13TeV*pythia8/crab_ggNtuplizer_spring15_${mc_samplename}-*_try${trynr}/151212_*/0000/*root > \
-    ${submitbase}/${version}/lists/hdfslist_${submitname}.txt
+    ${submitbase}/gitignore/${version}/lists/hdfslist_${submitname}.txt
 
    # format as xrootd
-   cp ${submitbase}/${version}/lists/hdfslist_${submitname}.txt \
-      ${submitbase}/${version}/lists/xrdlist_${submitname}.txt 
-   xrdlist="${submitbase}/${version}/lists/xrdlist_${submitname}.txt"
+   cp ${submitbase}/gitignore/${version}/lists/hdfslist_${submitname}.txt \
+      ${submitbase}/gitignore/${version}/lists/xrdlist_${submitname}.txt 
+   xrdlist="${submitbase}/gitignore/${version}/lists/xrdlist_${submitname}.txt"
    sed -i 's@/hdfs/@root://cmsxrootd.hep.wisc.edu//@g' $xrdlist #
 
    echo "                    .. counting events"
    python ./eventCounter.py ${submitname} \
-      ${submitbase}/${version}/lists/hdfslist_${submitname}.txt \
+      ${submitbase}/gitignore/${version}/lists/hdfslist_${submitname}.txt \
       ${initevents}
    echo "                    .. counted events"
    
   fi
-  xrdlist="${submitbase}/${version}/lists/xrdlist_${submitname}.txt"
+  xrdlist="${submitbase}/gitignore/${version}/lists/xrdlist_${submitname}.txt"
 
   # sample specific parameters..
   treename="ggNtuplizer/EventTree"
   isMC="kTRUE"
+  isELE="kFALSE"
   nrE="$(grep -P ${submitname} ${initevents} | sed -n -e "s@${submitname} Events: @@p")"
   xc="$(grep -P ${submitname}  ${initevents} | sed -n -e "s@${submitname} XC: @@p")"
    #printf "\nxc is ${xc}\n"
 
   # make correct executable xx_callpostAnalyzer_QCD
-  cp template_callpostAnalyzer_QCD.cc    "${submitbase}/${version}/submit/${submitname}_callpostAnalyzer_QCD.cc"
-  sed -i "s@SAMPLENAME@${submitname}@g"  "${submitbase}/${version}/submit/${submitname}_callpostAnalyzer_QCD.cc"
-  sed -i "s@TREENAME@${treename}@g"      "${submitbase}/${version}/submit/${submitname}_callpostAnalyzer_QCD.cc"
-  sed -i "s@ISMC@${isMC}@g"              "${submitbase}/${version}/submit/${submitname}_callpostAnalyzer_QCD.cc"
-  sed -i "s@CROSSSEC@${xc}@g"            "${submitbase}/${version}/submit/${submitname}_callpostAnalyzer_QCD.cc"
-  sed -i "s@NREVENTS@${nrE}@g"           "${submitbase}/${version}/submit/${submitname}_callpostAnalyzer_QCD.cc"
-  sed -i "s@LUMI@${lumi}@g"              "${submitbase}/${version}/submit/${submitname}_callpostAnalyzer_QCD.cc"
+  cp template_callpostAnalyzer_QCD.cc    "${submitbase}/gitignore/${version}/submit/${submitname}_callpostAnalyzer_QCD.cc"
+  sed -i "s@SAMPLENAME@${submitname}@g"  "${submitbase}/gitignore/${version}/submit/${submitname}_callpostAnalyzer_QCD.cc"
+  sed -i "s@TREENAME@${treename}@g"      "${submitbase}/gitignore/${version}/submit/${submitname}_callpostAnalyzer_QCD.cc"
+  sed -i "s@ISMC@${isMC}@g"              "${submitbase}/gitignore/${version}/submit/${submitname}_callpostAnalyzer_QCD.cc"
+  sed -i "s@ISELE@${isELE}@g"            "${submitbase}/gitignore/${version}/submit/${submitname}_callpostAnalyzer_QCD.cc"
+  sed -i "s@CROSSSEC@${xc}@g"            "${submitbase}/gitignore/${version}/submit/${submitname}_callpostAnalyzer_QCD.cc"
+  sed -i "s@NREVENTS@${nrE}@g"           "${submitbase}/gitignore/${version}/submit/${submitname}_callpostAnalyzer_QCD.cc"
+  sed -i "s@LUMI@${lumi}@g"              "${submitbase}/gitignore/${version}/submit/${submitname}_callpostAnalyzer_QCD.cc"
 
   printf "  done making submit template\n"
 
@@ -115,7 +123,7 @@ then
    --use-hdfs \
    --extra-inputs=${submitbase}/postAnalyzer_QCD.C,${submitbase}/postAnalyzer_QCD.h \
    ${version} \
-   "${submitbase}/${version}/submit/${submitname}_callpostAnalyzer_QCD.cc"
+   "${submitbase}/gitignore/${version}/submit/${submitname}_callpostAnalyzer_QCD.cc"
 
   fi # ${dosubmit} = true
 
@@ -126,10 +134,10 @@ fi # ${domc} = true
 
 ######## Data ################################
 
-  #"SinglePhoton" 
 if [ ${dodata} = true ]
 then
  for data_samplename in \
+  "SinglePhoton" \
   "DoubleElectron"
 
  do
@@ -139,23 +147,27 @@ then
   if [ "$data_samplename" = "SinglePhoton" ]
   then 
    find /hdfs/store/user/gomber/SinglePhoton_Crab_2015D_v3_226fb/SinglePhoton/crab_job_single_photon_13TeV_v3_226fb/160109_082344/0000/*root > \
-    ${submitbase}/${version}/lists/hdfslist_${data_samplename}.txt
+    ${submitbase}/gitignore/${version}/lists/hdfslist_${data_samplename}.txt
    find /hdfs/store/user/gomber/SinglePhoton_Crab_2015D_v4_226fb/SinglePhoton/crab_job_single_photon_13TeV_v4_226fb/160109_082133/000*/*root >> \
-    ${submitbase}/${version}/lists/hdfslist_${data_samplename}.txt
+    ${submitbase}/gitignore/${version}/lists/hdfslist_${data_samplename}.txt
+
+   isELE="kFALSE"
   fi
 
   if [ "$data_samplename" = "DoubleElectron" ]
   then
    find /hdfs/store/user/gomber/DoubleElectron_Crab_2015D_v3_226fb/*/crab_job_*_13TeV_v3_226fb/160216_*/0000/*root > \
-    ${submitbase}/${version}/lists/hdfslist_${data_samplename}.txt
+    ${submitbase}/gitignore/${version}/lists/hdfslist_${data_samplename}.txt
    find /hdfs/store/user/gomber/DoubleElectron_Crab_2015D_v4_226fb/*/crab_job_*_13TeV_v4_226fb/160216_*/000*/*root >> \
-    ${submitbase}/${version}/lists/hdfslist_${data_samplename}.txt
+    ${submitbase}/gitignore/${version}/lists/hdfslist_${data_samplename}.txt
+
+   isELE="kTRUE"
   fi
 
   # format as xrootd
-  cp ${submitbase}/${version}/lists/hdfslist_${data_samplename}.txt \
-     ${submitbase}/${version}/lists/xrdlist_${data_samplename}.txt 
-  xrdlist="${submitbase}/${version}/lists/xrdlist_${data_samplename}.txt"
+  cp ${submitbase}/gitignore/${version}/lists/hdfslist_${data_samplename}.txt \
+     ${submitbase}/gitignore/${version}/lists/xrdlist_${data_samplename}.txt 
+  xrdlist="${submitbase}/gitignore/${version}/lists/xrdlist_${data_samplename}.txt"
   sed -i 's@/hdfs/@root://cmsxrootd.hep.wisc.edu//@g' $xrdlist #
 
   printf "  done making list of files\n"
@@ -168,13 +180,14 @@ then
   nrE="2260."
 
   # make correct executable xx_callpostAnalyzer_QCD
-  cp template_callpostAnalyzer_QCD.cc         "${submitbase}/${version}/submit/${data_samplename}_callpostAnalyzer_QCD.cc"
-  sed -i "s@SAMPLENAME@${data_samplename}@g"  "${submitbase}/${version}/submit/${data_samplename}_callpostAnalyzer_QCD.cc"
-  sed -i "s@TREENAME@${treename}@g"           "${submitbase}/${version}/submit/${data_samplename}_callpostAnalyzer_QCD.cc"
-  sed -i "s@ISMC@${isMC}@g"                   "${submitbase}/${version}/submit/${data_samplename}_callpostAnalyzer_QCD.cc"
-  sed -i "s@CROSSSEC@${xc}@g"                 "${submitbase}/${version}/submit/${data_samplename}_callpostAnalyzer_QCD.cc"
-  sed -i "s@NREVENTS@${nrE}@g"                "${submitbase}/${version}/submit/${data_samplename}_callpostAnalyzer_QCD.cc"
-  sed -i "s@LUMI@${lumi}@g"                   "${submitbase}/${version}/submit/${data_samplename}_callpostAnalyzer_QCD.cc"
+  cp template_callpostAnalyzer_QCD.cc         "${submitbase}/gitignore/${version}/submit/${data_samplename}_callpostAnalyzer_QCD.cc"
+  sed -i "s@SAMPLENAME@${data_samplename}@g"  "${submitbase}/gitignore/${version}/submit/${data_samplename}_callpostAnalyzer_QCD.cc"
+  sed -i "s@TREENAME@${treename}@g"           "${submitbase}/gitignore/${version}/submit/${data_samplename}_callpostAnalyzer_QCD.cc"
+  sed -i "s@ISMC@${isMC}@g"                   "${submitbase}/gitignore/${version}/submit/${data_samplename}_callpostAnalyzer_QCD.cc"
+  sed -i "s@ISELE@${isELE}@g"                 "${submitbase}/gitignore/${version}/submit/${data_samplename}_callpostAnalyzer_QCD.cc"
+  sed -i "s@CROSSSEC@${xc}@g"                 "${submitbase}/gitignore/${version}/submit/${data_samplename}_callpostAnalyzer_QCD.cc"
+  sed -i "s@NREVENTS@${nrE}@g"                "${submitbase}/gitignore/${version}/submit/${data_samplename}_callpostAnalyzer_QCD.cc"
+  sed -i "s@LUMI@${lumi}@g"                   "${submitbase}/gitignore/${version}/submit/${data_samplename}_callpostAnalyzer_QCD.cc"
 
   printf "  done making submit template\n"
 
@@ -190,7 +203,7 @@ then
     --use-hdfs \
     --extra-inputs=${submitbase}/postAnalyzer_QCD.C,${submitbase}/postAnalyzer_QCD.h \
     ${version} \
-    "${submitbase}/${version}/submit/${data_samplename}_callpostAnalyzer_QCD.cc"
+    "${submitbase}/gitignore/${version}/submit/${data_samplename}_callpostAnalyzer_QCD.cc"
 
   fi # ${dosubmit} = true
 
