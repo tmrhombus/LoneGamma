@@ -171,9 +171,9 @@ void postAnalyzerMC_purity::Loop(TString outfilename, Bool_t isMC, Double_t lumi
     if( mchPCvint.size()>0 ){ // if any photon indexes passed sig selection
      for(unsigned int k=0; k<mchPCvint.size(); ++k){ // go through each photon passing sel
       int phonr = mchPCvint.at(k);
-      passTriggers = ((HLTPho>>12&1) == 1   && ( (phoFiredSingleTrgs->at(phonr)>>7)!=1 ) ) ;
-      passTriggers175 = ((HLTPho>>7&1) == 1 && ( (phoFiredSingleTrgs->at(phonr)>>8)!=1 ) ) ;
-      passTriggers250 = ((HLTPho>>8&1) == 1 && ( (phoFiredSingleTrgs->at(phonr)>>9)!=1 ) ) ;
+      passTriggers = ((HLTPho>>12&1) == 1   ) ; //&& ( (phoFiredSingleTrgs->at(phonr)>>7)!=1 ) ) ;
+      passTriggers175 = ((HLTPho>>7&1) == 1 ) ; //&& ( (phoFiredSingleTrgs->at(phonr)>>8)!=1 ) ) ;
+      passTriggers250 = ((HLTPho>>8&1) == 1 ) ; //&& ( (phoFiredSingleTrgs->at(phonr)>>9)!=1 ) ) ;
       // pt bins
       for(unsigned int ptb=0; ptb<lstptbin; ++ptb){
        if(
@@ -335,9 +335,9 @@ printf("Matched    i  ---  %i:%i:%lli \n", run, lumis, event );
     if( nmhPCvint.size()>0 ){ // if any photon indexes passed sig selection
      for(unsigned int k=0; k<nmhPCvint.size(); ++k){ // go through each photon passing sel
       int phonr = nmhPCvint.at(k);
-      passTriggers = ((HLTPho>>12&1) == 1   && ( (phoFiredSingleTrgs->at(phonr)>>7)!=1 ) ) ;
-      passTriggers175 = ((HLTPho>>7&1) == 1 && ( (phoFiredSingleTrgs->at(phonr)>>8)!=1 ) ) ;
-      passTriggers250 = ((HLTPho>>8&1) == 1 && ( (phoFiredSingleTrgs->at(phonr)>>9)!=1 ) ) ;
+      passTriggers = ((HLTPho>>12&1) == 1   ) ; // && ( (phoFiredSingleTrgs->at(phonr)>>7)!=1 ) ) ;
+      passTriggers175 = ((HLTPho>>7&1) == 1 ) ; // && ( (phoFiredSingleTrgs->at(phonr)>>8)!=1 ) ) ;
+      passTriggers250 = ((HLTPho>>8&1) == 1 ) ; // && ( (phoFiredSingleTrgs->at(phonr)>>9)!=1 ) ) ;
       // pt bins
       for(unsigned int ptb=0; ptb<lstptbin; ++ptb){
        if(
@@ -498,9 +498,9 @@ printf("Unmatched  i  ---  %i:%i:%lli \n", run, lumis, event );
     if( mchDenPCvint.size()>0 ){ // if any photon indexes passed sig selection
      for(unsigned int k=0; k<mchDenPCvint.size(); ++k){ // go through each photon passing sel
       int phonr = mchDenPCvint.at(k);
-      passTriggers = ((HLTPho>>12&1) == 1   && ( (phoFiredSingleTrgs->at(phonr)>>7)!=1 ) ) ;
-      passTriggers175 = ((HLTPho>>7&1) == 1 && ( (phoFiredSingleTrgs->at(phonr)>>8)!=1 ) ) ;
-      passTriggers250 = ((HLTPho>>8&1) == 1 && ( (phoFiredSingleTrgs->at(phonr)>>9)!=1 ) ) ;
+      passTriggers = ((HLTPho>>12&1) == 1   ) ; // && ( (phoFiredSingleTrgs->at(phonr)>>7)!=1 ) ) ;
+      passTriggers175 = ((HLTPho>>7&1) == 1 ) ; // && ( (phoFiredSingleTrgs->at(phonr)>>8)!=1 ) ) ;
+      passTriggers250 = ((HLTPho>>8&1) == 1 ) ; // && ( (phoFiredSingleTrgs->at(phonr)>>9)!=1 ) ) ;
       // pt bins
       for(unsigned int ptb=0; ptb<lstptbin; ++ptb){
        if(
@@ -631,9 +631,9 @@ printf("Unmatched  i  ---  %i:%i:%lli \n", run, lumis, event );
     if( nmhDenPCvint.size()>0 ){ // if any photon indexes passed sig selection
      for(unsigned int k=0; k<nmhDenPCvint.size(); ++k){ // go through each photon passing sel
       int phonr = nmhDenPCvint.at(k);
-      passTriggers = ((HLTPho>>12&1) == 1   && ( (phoFiredSingleTrgs->at(phonr)>>7)!=1 ) ) ;
-      passTriggers175 = ((HLTPho>>7&1) == 1 && ( (phoFiredSingleTrgs->at(phonr)>>8)!=1 ) ) ;
-      passTriggers250 = ((HLTPho>>8&1) == 1 && ( (phoFiredSingleTrgs->at(phonr)>>9)!=1 ) ) ;
+      passTriggers = ((HLTPho>>12&1) == 1   ) ; // && ( (phoFiredSingleTrgs->at(phonr)>>7)!=1 ) ) ;
+      passTriggers175 = ((HLTPho>>7&1) == 1 ) ; // && ( (phoFiredSingleTrgs->at(phonr)>>8)!=1 ) ) ;
+      passTriggers250 = ((HLTPho>>8&1) == 1 ) ; // && ( (phoFiredSingleTrgs->at(phonr)>>9)!=1 ) ) ;
       // pt bins
       for(unsigned int ptb=0; ptb<lstptbin; ++ptb){
        if(
