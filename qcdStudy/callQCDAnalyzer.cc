@@ -26,20 +26,20 @@ void callQCDAnalyzer(void)
 // TString outfilename=path+"/QCDs_GJMC.root";
 // TString inputListName=path+"/filenames_GJMC_10.txt";
 
- // // QCDMC
- //Bool_t isMC=kTRUE;  Bool_t isEle=kFALSE;
- //TString outfilename=path+"/QCDs_QCDMC.root";
- //TString inputListName=path+"/filenames_MC_QCD_5.txt";
+  // QCDMC
+ Bool_t isMC=kTRUE;  Bool_t isEle=kFALSE;
+ TString outfilename=path+"/QCDs_QCDMC.root";
+ TString inputListName=path+"/filenames_MC_QCD_5.txt";
 
 //  // Data Mu
 // Bool_t isMC=kFALSE;  Bool_t isEle=kFALSE;
 // TString outfilename=path+"/QCDs_Data.root";
 // TString inputListName=path+"/filenames_Data2015D_20.txt";
 
-  // Data Ele
- Bool_t isMC=kFALSE;  Bool_t isEle=kTRUE;
- TString outfilename=path+"/QCDs_EleData.root";
- TString inputListName=path+"/filenames_DataDoubleE_5.txt";
+//  // Data Ele
+// Bool_t isMC=kFALSE;  Bool_t isEle=kTRUE;
+// TString outfilename=path+"/QCDs_EleData.root";
+// TString inputListName=path+"/filenames_DataDoubleE_5.txt";
 
  std::cout << "Output File Name: " << outfilename << std::endl;
  

@@ -8,6 +8,7 @@ void SAMPLENAME_callpostAnalyzer_QCD(void)
  theChain->Reset();
 
  Bool_t isMC = ISMC ;
+ Bool_t isEle = ISELE ;
  Double_t lumi = LUMI ;
  Double_t nrEvents = NREVENTS ;
  Double_t crossSec = CROSSSEC ;
@@ -42,7 +43,7 @@ void SAMPLENAME_callpostAnalyzer_QCD(void)
 
  postAnalyzer_QCD m;
  m.Init(theChain, isMC);
- m.Loop(outfilename,isMC,lumi,nrEvents,crossSec);
+ m.Loop(outfilename,isMC,isEle,lumi,nrEvents,crossSec);
 }
 
 #if !defined(__CINT__) && !defined(__ACLIC__)
