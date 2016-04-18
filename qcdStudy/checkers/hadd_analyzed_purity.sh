@@ -1,11 +1,11 @@
 echo
 echo "version: ${version}"
 
-mkdir -p ${submitbase}/${version}/analyzed
-mkdir -p ${submitbase}/${version}/plots
+mkdir -p ${submitbase}/gitignore/${version}/analyzed
+mkdir -p ${submitbase}/gitignore/${version}/plots
 
-printf "${submitbase}/${version}/analyzed \n"
-printf "${submitbase}/${version}/plots \n"
+printf "${submitbase}/gitignore/${version}/analyzed \n"
+printf "${submitbase}/gitignore/${version}/plots \n"
 
 for samplename in \
  "QCD_Pt15to20" \
@@ -24,15 +24,15 @@ for samplename in \
 
 do
  hadd \
-  ${submitbase}/${version}/analyzed/purity_${samplename}.root \
+  ${submitbase}/gitignore/${version}/analyzed/purity_${samplename}.root \
   ${hdfs}/${version}-${samplename}_callpostAnalyzerMC_purity/*root
 done
 
 hadd \
- ${submitbase}/${version}/analyzed/purity_GJets_Merged.root \
- ${submitbase}/${version}/analyzed/purity_GJets_HT*root
+ ${submitbase}/gitignore/${version}/analyzed/purity_GJets_Merged.root \
+ ${submitbase}/gitignore/${version}/analyzed/purity_GJets_HT*root
 
 hadd \
- ${submitbase}/${version}/analyzed/purity_QCD_Merged.root \
- ${submitbase}/${version}/analyzed/purity_QCD_Pt*root
+ ${submitbase}/gitignore/${version}/analyzed/purity_QCD_Merged.root \
+ ${submitbase}/gitignore/${version}/analyzed/purity_QCD_Pt*root
 
