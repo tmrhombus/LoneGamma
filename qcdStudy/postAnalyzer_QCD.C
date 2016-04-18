@@ -34,114 +34,195 @@ void postAnalyzer_QCD::Loop(TString outfilename, Bool_t isMC, Bool_t isEle, Doub
   event_weight=1.0;
   if(isMC){ event_weight=lumi*crossSec/nrEvents; }
   
-  // if event passes MonoPhoton triggers
-  if( 
-   ((HLTPho>>7&1) == 1) ||
-   ((HLTPho>>8&1) == 1) ||
-   ((HLTPho>>9&1) == 1) ||
-   ((HLTPho>>10&1) == 1) ||
-   ((HLTPho>>11&1) == 1) ||
-   ((HLTPho>>12&1) == 1) ||
-   ((HLTPho>>22&1) == 1) )
-  {   
-
-   // sysbinnames = "" "_sbUP" "_sbDown" "_metUP" "_metDown" "_binUP" "_binDown" "_noPiso"
-   // ptbins = 175, 190, 250, 400, 700, 1000
-   // ptbinnames = "175to190" "190to250" "250to400" "400to700" "700to1000" "175to1000" "allpt"
-
-   // vector of ints, each int corresponds to location in vector of photons of photon passing cut
-   // one such vector for each systematic bin
-
    int inclptbin = ptbins.size()-1;
    int lastptbin = ptbinnames.size()-1;
    int lastsysbin = sysbinnames.size();
 
+   // vector of ints, each int corresponds to location in vector of photons of photon passing cut
+   // one such vector for each systematic bin
    for(unsigned int sysb=0; sysb<lastsysbin; ++sysb){
     sigPCvint[sysb] = pcPassSel(0,sysb,175,5000,1.4442,isMC,isEle); // passes signal selection (no sieie cut)
     bkgPCvint[sysb] = pcPassSel(1,sysb,175,5000,1.4442,isMC,isEle); // passes background selection (no sieie cut)
     denPCvint[sysb] = pcPassSel(2,sysb,175,5000,1.4442,isMC,isEle); // passes denominator selection (no sieie cut)
    }
 
+   // MET requirements
+   bool passMETfilters =  ( metFilters==0 || metFilters==4 ) ;
+
+   // some more filters
+   bool passTriggers;
+   bool passTriggers175;
+   bool passTriggers250;
+   bool passMET;
+
 // fill histograms
    for(unsigned int sysb=0; sysb<lastsysbin; ++sysb){
-    // Fill Numerator Signal Histograms
+    passMET = pfMET < 30. && passMETfilters ;
+    if(sysb==3){ passMET = pfMET < 45. && passMETfilters ;}
+    if(sysb==4){ passMET = pfMET < 15. && passMETfilters ;}
+    //passMET = pfMET < 75. && passMETfilters ;
+    //if(sysb==3){ passMET = pfMET < 90. && passMETfilters ;}
+    //if(sysb==4){ passMET = pfMET < 60. && passMETfilters ;}
+
+    // Fill Numerator Signal Histograms ------------------------------------------
     if( sigPCvint[sysb].size()>0 ){ // if any photon indexes passed sig selection
      for(unsigned int k=0; k<sigPCvint[sysb].size(); ++k){ // go through each photon passing sel
+      int phonr = sigPCvint[sysb].at(k);
+      passTriggers = ((HLTPho>>12&1) == 1   && ( (phoFiredSingleTrgs->at(phonr)>>7)!=1 ) ) ;
+      passTriggers175 = ((HLTPho>>7&1) == 1 && ( (phoFiredSingleTrgs->at(phonr)>>8)!=1 ) ) ;
+      passTriggers250 = ((HLTPho>>8&1) == 1 && ( (phoFiredSingleTrgs->at(phonr)>>9)!=1 ) ) ;
       for(unsigned int ptb=0; ptb<lastptbin-2; ++ptb){ // break into pT bins
        if(
-          (phoEt->at(sigPCvint[sysb].at(k)) > ptbins[ptb]) &&
-          (phoEt->at(sigPCvint[sysb].at(k)) < ptbins[ptb+1])
+          (phoEt->at(phonr) > ptbins[ptb]) &&
+          (phoEt->at(phonr) < ptbins[ptb+1])
          ){
            if( sysb==0 && ptb==0 ) {
             nc++;
            }
-        FillSigHistograms(ptb, sysb, sigPCvint[sysb].at(k), event_weight);
+        FillSigHistograms(ptb, sysb, 0, phonr, event_weight);
+if(passMET){                                                       FillSigHistograms(ptb, sysb, 1, phonr, event_weight); }
+if(passTriggers){                                                  FillSigHistograms(ptb, sysb, 2, phonr, event_weight); }
+if(passTriggers && passMET){                                       FillSigHistograms(ptb, sysb, 3, phonr, event_weight); }
+if(passTriggers175){                                               FillSigHistograms(ptb, sysb, 4, phonr, event_weight); }
+if(passTriggers175 && passMET){                                    FillSigHistograms(ptb, sysb, 5, phonr, event_weight); }
+if(passTriggers250){                                               FillSigHistograms(ptb, sysb, 6, phonr, event_weight); }
+if(passTriggers250 && passMET){                                    FillSigHistograms(ptb, sysb, 7, phonr, event_weight); }
+if(passTriggers && passTriggers175 && passTriggers250 && passMET){ FillSigHistograms(ptb, sysb, 8, phonr, event_weight); }
        }
       }
       if(  // do an inclusive pT plot from bins
-         (phoEt->at(sigPCvint[sysb].at(k)) > ptbins[0]) &&
-         (phoEt->at(sigPCvint[sysb].at(k)) < ptbins[inclptbin])
+         (phoEt->at(phonr) > ptbins[0]) &&
+         (phoEt->at(phonr) < ptbins[inclptbin])
         ){
-       FillSigHistograms(lastptbin-1, sysb, sigPCvint[sysb].at(k), event_weight);
+       FillSigHistograms(lastptbin-1, sysb, 0, phonr, event_weight);
+if(passMET){                                                       FillSigHistograms(lastptbin-1, sysb, 1, phonr, event_weight); }
+if(passTriggers){                                                  FillSigHistograms(lastptbin-1, sysb, 2, phonr, event_weight); }
+if(passTriggers && passMET){                                       FillSigHistograms(lastptbin-1, sysb, 3, phonr, event_weight); }
+if(passTriggers175){                                               FillSigHistograms(lastptbin-1, sysb, 4, phonr, event_weight); }
+if(passTriggers175 && passMET){                                    FillSigHistograms(lastptbin-1, sysb, 5, phonr, event_weight); }
+if(passTriggers250){                                               FillSigHistograms(lastptbin-1, sysb, 6, phonr, event_weight); }
+if(passTriggers250 && passMET){                                    FillSigHistograms(lastptbin-1, sysb, 7, phonr, event_weight); }
+if(passTriggers && passTriggers175 && passTriggers250 && passMET){ FillSigHistograms(lastptbin-1, sysb, 8, phonr, event_weight); }
       }
       // and one fully inclusive in pT
-      FillSigHistograms(lastptbin, sysb, sigPCvint[sysb].at(k), event_weight);
+      FillSigHistograms(lastptbin, sysb, 0, phonr, event_weight);
+if(passMET){                                                       FillSigHistograms(lastptbin, sysb, 1, phonr, event_weight); }
+if(passTriggers){                                                  FillSigHistograms(lastptbin, sysb, 2, phonr, event_weight); }
+if(passTriggers && passMET){                                       FillSigHistograms(lastptbin, sysb, 3, phonr, event_weight); }
+if(passTriggers175){                                               FillSigHistograms(lastptbin, sysb, 4, phonr, event_weight); }
+if(passTriggers175 && passMET){                                    FillSigHistograms(lastptbin, sysb, 5, phonr, event_weight); }
+if(passTriggers250){                                               FillSigHistograms(lastptbin, sysb, 6, phonr, event_weight); }
+if(passTriggers250 && passMET){                                    FillSigHistograms(lastptbin, sysb, 7, phonr, event_weight); }
+if(passTriggers && passTriggers175 && passTriggers250 && passMET){ FillSigHistograms(lastptbin, sysb, 8, phonr, event_weight); }
      }
     }
 
-    // Fill Numerator Background Histograms
+    // Fill Numerator Background Histograms -----------------------------------------
     if( bkgPCvint[sysb].size()>0 ){ // if any photon indexes passed sig selection
-     if( sysb==0 ) {
-     }
      for(unsigned int k=0; k<bkgPCvint[sysb].size(); ++k){ // go through each photon passing sel
+      int phonr = bkgPCvint[sysb].at(k);
+      passTriggers = ((HLTPho>>12&1) == 1   && ( (phoFiredSingleTrgs->at(phonr)>>7)!=1 ) ) ;
+      passTriggers175 = ((HLTPho>>7&1) == 1 && ( (phoFiredSingleTrgs->at(phonr)>>8)!=1 ) ) ;
+      passTriggers250 = ((HLTPho>>8&1) == 1 && ( (phoFiredSingleTrgs->at(phonr)>>9)!=1 ) ) ;
       for(unsigned int ptb=0; ptb<lastptbin-2; ++ptb){ // break into pT bins
        if(
-          (phoEt->at(bkgPCvint[sysb].at(k)) > ptbins[ptb]) &&
-          (phoEt->at(bkgPCvint[sysb].at(k)) < ptbins[ptb+1])
+          (phoEt->at(phonr) > ptbins[ptb]) &&
+          (phoEt->at(phonr) < ptbins[ptb+1])
          ){
-        FillBkgHistograms(ptb, sysb, bkgPCvint[sysb].at(k), event_weight);
+        FillBkgHistograms(ptb, sysb, 0, phonr, event_weight);
+if(passMET){                                                       FillBkgHistograms(ptb, sysb, 1, phonr, event_weight); }
+if(passTriggers){                                                  FillBkgHistograms(ptb, sysb, 2, phonr, event_weight); }
+if(passTriggers && passMET){                                       FillBkgHistograms(ptb, sysb, 3, phonr, event_weight); }
+if(passTriggers175){                                               FillBkgHistograms(ptb, sysb, 4, phonr, event_weight); }
+if(passTriggers175 && passMET){                                    FillBkgHistograms(ptb, sysb, 5, phonr, event_weight); }
+if(passTriggers250){                                               FillBkgHistograms(ptb, sysb, 6, phonr, event_weight); }
+if(passTriggers250 && passMET){                                    FillBkgHistograms(ptb, sysb, 7, phonr, event_weight); }
+if(passTriggers && passTriggers175 && passTriggers250 && passMET){ FillBkgHistograms(ptb, sysb, 8, phonr, event_weight); }
        }
       }
       if(  // do an inclusive pT plot from bins
-         (phoEt->at(bkgPCvint[sysb].at(k)) > ptbins[0]) &&
-         (phoEt->at(bkgPCvint[sysb].at(k)) < ptbins[inclptbin])
+         (phoEt->at(phonr) > ptbins[0]) &&
+         (phoEt->at(phonr) < ptbins[inclptbin])
         ){
-       FillBkgHistograms(lastptbin-1, sysb, bkgPCvint[sysb].at(k), event_weight);
+       FillBkgHistograms(lastptbin-1, sysb, 0, phonr, event_weight);
+if(passMET){                                                       FillBkgHistograms(lastptbin-1, sysb, 1, phonr, event_weight); }
+if(passTriggers){                                                  FillBkgHistograms(lastptbin-1, sysb, 2, phonr, event_weight); }
+if(passTriggers && passMET){                                       FillBkgHistograms(lastptbin-1, sysb, 3, phonr, event_weight); }
+if(passTriggers175){                                               FillBkgHistograms(lastptbin-1, sysb, 4, phonr, event_weight); }
+if(passTriggers175 && passMET){                                    FillBkgHistograms(lastptbin-1, sysb, 5, phonr, event_weight); }
+if(passTriggers250){                                               FillBkgHistograms(lastptbin-1, sysb, 6, phonr, event_weight); }
+if(passTriggers250 && passMET){                                    FillBkgHistograms(lastptbin-1, sysb, 7, phonr, event_weight); }
+if(passTriggers && passTriggers175 && passTriggers250 && passMET){ FillBkgHistograms(lastptbin-1, sysb, 8, phonr, event_weight); }
       }
       // and one fully inclusive in pT
-      FillBkgHistograms(lastptbin, sysb, bkgPCvint[sysb].at(k), event_weight);
+      FillBkgHistograms(lastptbin, sysb, 0, phonr, event_weight);
+if(passMET){                                                       FillBkgHistograms(lastptbin, sysb, 1, phonr, event_weight); }
+if(passTriggers){                                                  FillBkgHistograms(lastptbin, sysb, 2, phonr, event_weight); }
+if(passTriggers && passMET){                                       FillBkgHistograms(lastptbin, sysb, 3, phonr, event_weight); }
+if(passTriggers175){                                               FillBkgHistograms(lastptbin, sysb, 4, phonr, event_weight); }
+if(passTriggers175 && passMET){                                    FillBkgHistograms(lastptbin, sysb, 5, phonr, event_weight); }
+if(passTriggers250){                                               FillBkgHistograms(lastptbin, sysb, 6, phonr, event_weight); }
+if(passTriggers250 && passMET){                                    FillBkgHistograms(lastptbin, sysb, 7, phonr, event_weight); }
+if(passTriggers && passTriggers175 && passTriggers250 && passMET){ FillBkgHistograms(lastptbin, sysb, 8, phonr, event_weight); }
      }
     }
 
     // Fill Denominator Histograms
     if( denPCvint[sysb].size()>0 ){ // if any photon indexes passed sig selection
      for(unsigned int k=0; k<denPCvint[sysb].size(); ++k){ // go through each photon passing sel
+      int phonr = denPCvint[sysb].at(k);
+      passTriggers = ((HLTPho>>12&1) == 1   && ( (phoFiredSingleTrgs->at(phonr)>>7)!=1 ) ) ;
+      passTriggers175 = ((HLTPho>>7&1) == 1 && ( (phoFiredSingleTrgs->at(phonr)>>8)!=1 ) ) ;
+      passTriggers250 = ((HLTPho>>8&1) == 1 && ( (phoFiredSingleTrgs->at(phonr)>>9)!=1 ) ) ;
       for(unsigned int ptb=0; ptb<lastptbin-2; ++ptb){ // break into pT bins
        if(
-          (phoEt->at(denPCvint[sysb].at(k)) > ptbins[ptb]) &&
-          (phoEt->at(denPCvint[sysb].at(k)) < ptbins[ptb+1])
+          (phoEt->at(phonr) > ptbins[ptb]) &&
+          (phoEt->at(phonr) < ptbins[ptb+1])
          ){
            if( sysb==0 && ptb==0 ) {
             dc++;
            }
-        FillDenHistograms(ptb, sysb, denPCvint[sysb].at(k), event_weight);
+        FillDenHistograms(ptb, sysb, 0, phonr, event_weight);
+if(passMET){                                                       FillDenHistograms(ptb, sysb, 1, phonr, event_weight); }
+if(passTriggers){                                                  FillDenHistograms(ptb, sysb, 2, phonr, event_weight); }
+if(passTriggers && passMET){                                       FillDenHistograms(ptb, sysb, 3, phonr, event_weight); }
+if(passTriggers175){                                               FillDenHistograms(ptb, sysb, 4, phonr, event_weight); }
+if(passTriggers175 && passMET){                                    FillDenHistograms(ptb, sysb, 5, phonr, event_weight); }
+if(passTriggers250){                                               FillDenHistograms(ptb, sysb, 6, phonr, event_weight); }
+if(passTriggers250 && passMET){                                    FillDenHistograms(ptb, sysb, 7, phonr, event_weight); }
+if(passTriggers && passTriggers175 && passTriggers250 && passMET){ FillDenHistograms(ptb, sysb, 8, phonr, event_weight); }
        }
       }
       if(  // do an inclusive pT plot from bins
-         (phoEt->at(denPCvint[sysb].at(k)) > ptbins[0]) &&
-         (phoEt->at(denPCvint[sysb].at(k)) < ptbins[inclptbin])
+         (phoEt->at(phonr) > ptbins[0]) &&
+         (phoEt->at(phonr) < ptbins[inclptbin])
         ){
-       FillDenHistograms(lastptbin-1, sysb, denPCvint[sysb].at(k), event_weight);
+       FillDenHistograms(lastptbin-1, sysb, 0, phonr, event_weight);
+if(passMET){                                                       FillDenHistograms(lastptbin-1, sysb, 1, phonr, event_weight); }
+if(passTriggers){                                                  FillDenHistograms(lastptbin-1, sysb, 2, phonr, event_weight); }
+if(passTriggers && passMET){                                       FillDenHistograms(lastptbin-1, sysb, 3, phonr, event_weight); }
+if(passTriggers175){                                               FillDenHistograms(lastptbin-1, sysb, 4, phonr, event_weight); }
+if(passTriggers175 && passMET){                                    FillDenHistograms(lastptbin-1, sysb, 5, phonr, event_weight); }
+if(passTriggers250){                                               FillDenHistograms(lastptbin-1, sysb, 6, phonr, event_weight); }
+if(passTriggers250 && passMET){                                    FillDenHistograms(lastptbin-1, sysb, 7, phonr, event_weight); }
+if(passTriggers && passTriggers175 && passTriggers250 && passMET){ FillDenHistograms(lastptbin-1, sysb, 8, phonr, event_weight); }
       }
       // and one fully inclusive in pT
-      FillDenHistograms(lastptbin, sysb, denPCvint[sysb].at(k), event_weight);
+      FillDenHistograms(lastptbin, sysb, 0, phonr, event_weight);
+if(passMET){                                                       FillDenHistograms(lastptbin, sysb, 1, phonr, event_weight); }
+if(passTriggers){                                                  FillDenHistograms(lastptbin, sysb, 2, phonr, event_weight); }
+if(passTriggers && passMET){                                       FillDenHistograms(lastptbin, sysb, 3, phonr, event_weight); }
+if(passTriggers175){                                               FillDenHistograms(lastptbin, sysb, 4, phonr, event_weight); }
+if(passTriggers175 && passMET){                                    FillDenHistograms(lastptbin, sysb, 5, phonr, event_weight); }
+if(passTriggers250){                                               FillDenHistograms(lastptbin, sysb, 6, phonr, event_weight); }
+if(passTriggers250 && passMET){                                    FillDenHistograms(lastptbin, sysb, 7, phonr, event_weight); }
+if(passTriggers && passTriggers175 && passTriggers250 && passMET){ FillDenHistograms(lastptbin, sysb, 8, phonr, event_weight); }
      }
     }
 
    } // for each sysb in sysbins
 // end fill histograms
 
-  } //end if passes MonoPhoton triggers
  } //end loop through entries
 
  // write these histograms to file
@@ -153,7 +234,9 @@ void postAnalyzer_QCD::Loop(TString outfilename, Bool_t isMC, Bool_t isEle, Doub
  outfile->cd();
  for(unsigned int i=0; i<ptbinnames.size(); ++i){
   for(unsigned int j=0; j<sysbinnames.size(); ++j){
-   WriteHistograms(i,j);
+   for(unsigned int k=0; k<cuts.size(); ++k){
+    WriteHistograms(i,j,k);
+   }
   }
  }
  outfile->Close();
@@ -207,11 +290,6 @@ std::vector<int> postAnalyzer_QCD::pcPassSel(int sel, int sys, double phoPtLo, d
                        ( fabs((*phoSCEta)[p]) < phoEtaMax)
                       );
 
-     // QCD 
-     passMET = pfMET < 30.;
-     if(sys==3){ passMET = pfMET < 45.;}
-     if(sys==4){ passMET = pfMET < 15.;}
-
      // nsig, nbkg, deno
      passHoE = ( (*phoHoverE)[p] < 0.05 );
      passPSeed = false;
@@ -231,26 +309,25 @@ std::vector<int> postAnalyzer_QCD::pcPassSel(int sel, int sys, double phoPtLo, d
      passCHMedIso = ( TMath::Max( ( (*phoPFChWorstIso)[p] - rho*EAcharged((*phoSCEta)[p]) ), 0.0) < 1.37 );
 
      // nbkg
-     if( (*phoEt)[p] <= 190 ){
-      chIsoLB = 9.;
-      chIsoUB = 20.;
-     }
-     if( (*phoEt)[p] > 190 && (*phoEt)[p] <= 250 ){
-      chIsoLB = 6.;
-      chIsoUB = 15.;
-     }
-     if( (*phoEt)[p] > 250 ){
-      chIsoLB = 6.;
-      chIsoUB = 13.;
-     }
+     //if( (*phoEt)[p] <= 190 ){
+     // chIsoLB = 9.;
+     // chIsoUB = 20.;
+     //}
+     //if( (*phoEt)[p] > 190 && (*phoEt)[p] <= 250 ){
+     // chIsoLB = 6.;
+     // chIsoUB = 15.;
+     //}
+     //if( (*phoEt)[p] > 250 ){
+     // chIsoLB = 6.;
+     // chIsoUB = 13.;
+     //}
+     //if(sys==1){chIsoUB = chIsoUB+2.;}
+     //if(sys==2){chIsoUB = chIsoLB-2.;}
 
-     if(sys==1){chIsoUB = chIsoUB+2.;}
-     if(sys==2){chIsoUB = chIsoLB-2.;}
-//     chIsoLB = 5.;
-//     chIsoUB = 10.;
-//     if(sys==1){chIsoUB = 12.;}
-//     if(sys==2){chIsoUB = 8.;}
-
+     chIsoLB = 9.;
+     chIsoUB = 24.;
+     if(sys==1){chIsoUB = 26.;}
+     if(sys==2){chIsoUB = 22.;}
 
      //passCHBkgIso = (
      //                ( TMath::Max( ( (*phoPFChWorstIso)[p] - rho*EAcharged((*phoSCEta)[p]) ), 0.0) > chIsoLB )  &&
@@ -282,13 +359,13 @@ std::vector<int> postAnalyzer_QCD::pcPassSel(int sel, int sys, double phoPtLo, d
                     );
 
      if(sel==0){  // numerator signal
-      passPhotonID = passMET && passHoE && passPSeed && passPhoNHMedIso && passCHMedIso;
+      passPhotonID = passHoE && passPSeed && passPhoNHMedIso && passCHMedIso;
      }
      else if(sel==1){ // numerator background
-      passPhotonID = passMET && passHoE && passPSeed && passPhoNHMedIso && passCHBkgIso;
+      passPhotonID = passHoE && passPSeed && passPhoNHMedIso && passCHBkgIso;
      }
      else if(sel==2){ // denominator
-      passPhotonID = passMET && passHoE && passPSeed && !passLooseIso && passVLooseIso;
+      passPhotonID = passHoE && passPSeed && !passLooseIso && passVLooseIso;
      }
      if(noncoll && passPhotonID && passKinematics){
       // std::cout<<" Found a photon, pfMET="<<pfMET<<" pT="<<phoEt->at(p)<<" sel: "<<sel<<" sys: "<<sys<<std::endl;
