@@ -21,14 +21,29 @@ void callPurityAnalyzer(void)
  
  Bool_t isMC=kTRUE;
  TString path = "../../test";
+
+// TString outfilename=path+"/Purity_synchfull_GJ.root";
+// TString inputListName="/afs/hep.wisc.edu/cms/tperry/LoneG_slc6_491_CMSSW_7_4_14/src/LoneGamma/qcdStudy/gitignore/Madrid/lists/hdfslist_GJets_HT200To400.txt";
+
+// TString outfilename=path+"/Purity_synch_QCD.root";
+// TString inputListName=path+"/filenames_synch_QCD.txt";
+
+ TString outfilename=path+"/Purity_GJ.root";
+ TString inputListName=path+"/filenames_GJMC_10.txt";
+
+ //TString outfilename=path+"/Purity_synch_GJ.root";
+ //TString inputListName=path+"/filenames_synch_GJ.txt";
+ //TString inputListName=path+"/GJets_HT100To200_callpostAnalyzerMC_purity-ggtree_mc_280.inputs";
+
  //TString outfilename=path+"/QCDs_QCDMC.root";
- TString outfilename=path+"/Purity_GJMC.root";
+ //TString inputListName=path+"/filenames_MC_QCD_5.txt";
+
+ //TString outfilename=path+"/Purity_GJMC.root";
  //TString outfilename=path+"/Purity_EleData.root";
  std::cout << "Output File Name: " << outfilename << std::endl;
  
  // get each filename from list and add it to TChain
- //TString inputListName=path+"/filenames_MC_QCD_5.txt";
- TString inputListName=path+"/filenames_GJMC_10.txt";
+ //TString inputListName=path+"/filenames_GJMC_10.txt";
  std::vector<TString> infilename_dump;
   
  // open file_name_list.txt
