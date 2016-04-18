@@ -127,19 +127,65 @@ void plot::Loop()
 
  }
 
+
+// calculate fake ratio error from fit up/down
+sysnames.push_back("_errup");
+sysnames.push_back("_errdn");
+for(unsigned int sn=0; sn<2; ++sn){
+ ratios.clear();
+ ratioerrors.clear();
+
+ //Using RooFit result
+ getCorrectedFakeRatioErrUpDown(
+  datafile,
+  outfile,
+  qcd_frac[0],
+  qcd_frac_err[0],
+  //qcdFrac,
+  //qcdFracErr,
+  ratios,
+  ratioerrors,
+  sn,
+  extraname
+ );
+
+ // put in by hand frac err up/down
+ qcdFrac.clear();
+ qcdFracErr.clear();
+ for(unsigned int pp=0; pp<nptbins; ++pp){
+  double frqcd = qcd_frac[0].at(pp);
+  if(sn==0){frqcd = frqcd + qcd_frac_err[0].at(pp);}
+  if(sn==1){frqcd = frqcd - qcd_frac_err[0].at(pp);}
+  qcdFrac.push_back(frqcd);
+  qcdFracErr.push_back(qcd_frac_err[0].at(pp));
+ }
+
+ qcd_frac.push_back(qcdFrac);
+ qcd_frac_err.push_back(qcdFracErr);
+ 
+ ratioss.push_back(ratios);
+ ratioerrorss.push_back(ratioerrors);
+
+ getBinCenters(datafile, bincenters, binerrors, "");
+
+ bincenterss.push_back(bincenters);
+ binerrorss.push_back(binerrors);
+}
+
+
  for(unsigned int sn=0; sn<sysnames.size(); ++sn){
    log<<boost::format("\nSysname: %s \n") % sysnames[sn];
   for(unsigned int j=0; j<nptbins; ++j){
     log<<boost::format(" %s\n") % ptbinnames[j];
-    //log<<boost::format("  QCD Fraction: %0.3d +- %0.3d \n") % qcd_frac[sn][j] % qcd_frac_err[sn][j];
+    log<<boost::format("  QCD Fraction: %0.3d +- %0.3d \n") % qcd_frac[sn][j] % qcd_frac_err[sn][j];
     log<<boost::format("  Bin Center: %0.3d +- %0.3d \n") % bincenterss[sn][j] % binerrorss[sn][j];
     log<<boost::format("  Ratio: %0.3d +- %0.3d \n") % ratioss[sn][j] % ratioerrorss[sn][j];
   }
     log<<boost::format(" y = (%0.3d +- %0.3d)x + (%0.3d +- %0.3d) \n") % ms[sn] % mes[sn] % bs[sn] % bes[sn] ;
  }
 
- drawAllRates(extraname);
-// drawAllRatesRelative(extraname);
+// drawAllRates(extraname);
+//// drawAllRatesRelative(extraname);
  drawAllRatesRelativeHist(extraname);
 
  log.close();
@@ -401,6 +447,8 @@ void plot::getFraction(
   cout<<boost::format("i_sgnl_realpdf->getVal()  %0.3d \n") % i_sgnl_realpdf->getVal()<<endl;
 
   logg<<" Fitted Fraction of pdf in 0<sieie<0.025  |  0<sieie<0.0102 \n";
+ // logg<<boost::format("  QCD  %0.3d +- %0.3d | %0.3d +- %0.3d \n") % i_full_fakepdf->getVal() % i_full_fakepdf->getVal() % i_sgnl_fakepdf->getVal() % i_sgnl_fakepdf->getVal() ;
+ // logg<<boost::format("  PHO  %0.3d +- %0.3d | %0.3d +- %0.3d \n") % i_full_realpdf->getVal() % i_full_realpdf->getVal() % i_sgnl_realpdf->getVal() % i_sgnl_realpdf->getVal() ;
   logg<<boost::format("  QCD  %0.3d | %0.3d \n") % i_full_fakepdf->getVal() % i_sgnl_fakepdf->getVal() ;
   logg<<boost::format("  PHO  %0.3d | %0.3d \n") % i_full_realpdf->getVal() % i_sgnl_realpdf->getVal() ;
 
@@ -527,7 +575,7 @@ void plot::getFraction(
    lumi->SetTextColor(kBlack);
    lumi->SetTextAlign(31);
    lumi->SetTextFont(42);
-   lumi->DrawTextNDC(0.9,0.91,"2.24 /fb (13 TeV)");
+   lumi->DrawTextNDC(0.9,0.91,"2.32 /fb (13 TeV)");
    xframe->addObject(lumi);
 
    TText* ptrange = new TText(1,1,"") ;
@@ -684,15 +732,21 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
   //get the numerator and denominator
   datafile->cd();
   //num
-  hdatanum = (TH1D*)edatafile->Get(numhistname)->Clone();    
+  hdatanum = (TH1D*)datafile->Get(numhistname)->Clone();    
   //deno
-  hdataden = (TH1D*)edatafile->Get(denhistname)->Clone();
+  hdataden = (TH1D*)datafile->Get(denhistname)->Clone();
+  ////num
+  //hdatanum = (TH1D*)edatafile->Get(numhistname)->Clone();    
+  ////deno
+  //hdataden = (TH1D*)edatafile->Get(denhistname)->Clone();
 
    
   // bin corresponding to medium wp sieie cut
   double sieiebin;
   //sieiebin = hdatanum->FindBin(0.025);
   sieiebin = hdatanum->FindBin(0.0102);
+
+  std::cout<< double((corrFactor[ptb]))<<std::endl;
   size_num_uncor[ptb] = double(hdatanum->Integral(1,sieiebin));
   size_num_corr[ptb] = double((corrFactor[ptb])) * double(hdatanum->Integral(1,sieiebin));
   size_den[ptb] = double(hdataden->Integral(1,sieiebin));
@@ -784,7 +838,7 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
   lumi->SetTextColor(kBlack);
   lumi->SetTextAlign(31);
   lumi->SetTextFont(42);
-  lumi->DrawTextNDC(0.9,0.91,"2.24 /fb (13 TeV)");
+  lumi->DrawTextNDC(0.9,0.91,"2.32 /fb (13 TeV)");
   //xframe->addObject(lumi);
 
   TLegend *leg2 = new TLegend(0.55,0.6,0.88,0.88 );
@@ -864,7 +918,310 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
 
   title->DrawTextNDC(0.17,0.87,"CMS");
   extra->DrawTextNDC(0.17,0.81,"Preliminary");
-  lumi->DrawTextNDC(0.9,0.91,"2.24 /fb (13 TeV)");
+  lumi->DrawTextNDC(0.9,0.91,"2.32 /fb (13 TeV)");
+
+  TLegend *leg3 = new TLegend(0.55,0.6,0.88,0.88 );
+  leg3->SetFillColor(kWhite);
+  leg3->AddEntry( gr_ratio,"Num./Den.", "L");
+  leg3->Draw("same");
+
+  gr_ratio->Draw("P");
+  gr_ratio_noe->Draw("P,sames");
+  gr_ratio_noe->Fit("pol1");
+  TF1 *fit_ratio = gr_ratio_noe->GetFunction("pol1");
+  fit_ratio->SetLineColor(1);
+  fit_ratio->SetLineWidth(3);
+  Double_t chi2 = fit_ratio->GetChisquare();
+  Double_t p0 = fit_ratio->GetParameter(0);
+  Double_t p1 = fit_ratio->GetParameter(1);
+  Double_t e0 = fit_ratio->GetParError(0);
+  Double_t e1 = fit_ratio->GetParError(1);
+
+  ms.push_back(p1); mes.push_back(e1);
+  bs.push_back(p0); bes.push_back(e0);
+
+  fit_ratio->Draw("sames");
+
+  TLatex tex;
+  tex.SetTextSize(0.07);
+  tex.SetTextColor(kBlack);
+  tex.SetTextAlign(11);
+  tex.SetTextFont(42);
+  tex.DrawLatexNDC(0.45,0.47,"y = m x + b");
+  tex.SetTextSize(0.05);
+  tex.DrawLatexNDC(0.35,0.40,TString(boost::lexical_cast<string>(boost::format("m = %0.5f +- %0.5f") % p1 % e1))); 
+  tex.DrawLatexNDC(0.45,0.35,TString(boost::lexical_cast<string>(boost::format("b = %0.3f +- %0.3f") % p0 % e0))); 
+  tex.DrawLatexNDC(0.45,0.30,"#chi^{2}"+TString(boost::lexical_cast<string>(boost::format(" = %0.5f") % chi2))); 
+
+  //std::cout<<"Npoints: "<<gr_ratio->GetN()<<std::endl;
+  //Double_t thex;
+  //Double_t they;
+  //for(unsigned int b=0; b<gr_ratio->GetN(); ++b){
+  // gr_ratio->GetPoint(b,thex,they);
+  // std::cout<<"Point "<<b<<": "<<thex<<" "<<they<<std::endl;
+  //}
+  //std::cout<<"Fit : "<<chi2<<" "<<p0<<" "<<p1<<std::endl;
+
+  c2->Update();
+  
+  c2->SaveAs(outpath+"/Graph_FakeRatio"+sysname+extraname+".pdf");
+  c2->SaveAs(wwwpath+"/Graph_FakeRatio"+sysname+extraname+".pdf");
+
+  c2->Clear();
+
+  return;
+
+}
+
+
+
+//----------------------------------------------
+//   Get the Corrected Fake Ratio
+//--------------------------------------------
+void plot::getCorrectedFakeRatioErrUpDown(TFile* datafile,  //<----data file
+                                 TFile* outfile,   //<---output file
+                                 vector<double> corrFactor, //<--input corr. factor = QCD fraction
+                                 vector<double> corrErr,    //<--input error
+                                 vector<Double_t>& ratios,
+                                 vector<Double_t>& ratioerrors,
+                                 int sn,
+                                 TString extraname
+                                ){
+
+
+  if(sn==0){sysname = "_errup";}
+  if(sn==1){sysname = "_errdn";}
+
+  ofstream logg;
+  logg.open (outpath+"/logs"+sysname+".txt", ios::out | ios::app );
+
+
+  //define histo and root files  
+  TH1D  *hdataden;
+  TH1D  *hdatanum;
+
+  string shistname;
+  TString binrange;
+  TString denhistname;
+  TString numhistname;
+
+  Double_t size_num_uncor[nptbins];
+  Double_t err_num_uncor[nptbins];
+  Double_t size_num_corr[nptbins];
+  Double_t err_num_corr[nptbins];
+  Double_t size_den[nptbins];
+  Double_t err_den[nptbins];
+  
+  // temp variables to to in vectors above
+  double snu,enu,snc,enc,sd,ed;
+
+  //TString binrange;
+  for(unsigned int ptb=0; ptb<ptbinnames.size(); ++ptb){
+   binrange = ptbinnames[ptb];
+   logg<<boost::format("pT Range:  %s \n\n") % binrange;
+
+  //set template histo names
+  numhistname = "h_sig_sieieF5x5_"+binrange; //data histos with tight ID cut but without sigIetaIeta
+  denhistname = "h_den_sieieF5x5_"+binrange; //data histos fail loose ID and pass Vloose ID
+
+  //get the numerator and denominator
+  datafile->cd();
+  //num
+  hdatanum = (TH1D*)datafile->Get(numhistname)->Clone();    
+  //deno
+  hdataden = (TH1D*)datafile->Get(denhistname)->Clone();
+
+   
+  // bin corresponding to medium wp sieie cut
+  double sieiebin;
+  //sieiebin = hdatanum->FindBin(0.025);
+  sieiebin = hdatanum->FindBin(0.0102);
+
+  double cf;
+  if(sn==0){cf = corrFactor[ptb] + corrErr[ptb];}
+  if(sn==1){cf = corrFactor[ptb] - corrErr[ptb];}
+  //cf = corrFactor[ptb];
+  std::cout<<"------------------------------------xddddddddxxxx"<<std::endl;
+  std::cout<<"------------------------------------xddddddddxxxx"<<std::endl;
+  std::cout<<"------------------------------------xddddddddxxxx"<<std::endl;
+  std::cout<<"------------------------------------xddddddddxxxx"<<std::endl;
+  std::cout<<"Starting "<<sysname<<" "<<extraname<<std::endl;
+  std::cout<<corrFactor[ptb]<<std::endl;
+  std::cout<<corrErr[ptb]<<std::endl;
+  std::cout<<cf<<std::endl;
+
+  size_num_uncor[ptb] = double(hdatanum->Integral(1,sieiebin));
+  size_num_corr[ptb] = double(cf) * double(hdatanum->Integral(1,sieiebin));
+  size_den[ptb] = double(hdataden->Integral(1,sieiebin));
+  logg<<boost::format(" Sizes:   Num(uncorr): %0.1f  Num(corr): %0.1f  Den: %0.1f \n\n")
+    % size_num_uncor[ptb] % size_num_corr[ptb] % size_den[ptb] ;
+
+  double tmp_err_num_corr;
+  //hdatanum->IntegralAndError(1, sieiebin, err_num_uncor[ptb]);
+  hdatanum->IntegralAndError(1, sieiebin, tmp_err_num_corr);
+  //err_num_corr[varcounter] = sqrt( err_num_corr[varcounter]*err_num_corr[varcounter] + 
+  err_num_corr[ptb] = sqrt( tmp_err_num_corr*tmp_err_num_corr + 
+                              corrErr[ptb]*corrErr[ptb] );
+  hdataden->IntegralAndError(1, sieiebin, err_den[ptb]);
+  //err_den[ptb]=0;
+
+  }
+
+  logg.close();
+
+  TCanvas* canvas = new TCanvas("canvas","canvas",900,100,500,500);   
+
+  Double_t *mid = new Double_t[nptbins]; //{182.5, 220., 325., 700. };
+  Double_t *miderr = new Double_t[nptbins];
+
+  for(unsigned int k=0; k<nptbins; ++k){
+   mid[k]=bincenterss[sn][k];
+   miderr[k]=binerrorss[sn][k];
+   //std::cout<<"xxxxxxxxxxxxxxxxxxxxxxx "<<bincenterss[sn][k]<<std::endl;
+  }
+
+  ////std::vector<double> mid;
+  //mid[0]=182.5;
+  //mid[1]=220.;
+  //mid[2]=325.;
+  //mid[3]=700.;
+  //miderr[0]=mid[0]-lower[0];
+  //miderr[1]=mid[1]-lower[1];
+  //miderr[2]=mid[2]-lower[2];
+  //miderr[3]=mid[3]-lower[3];
+
+  TGraphErrors *gr_num_uncor = new TGraphErrors(4,mid,size_num_uncor,miderr,err_num_uncor);
+  TGraphErrors *gr_num_corr  = new TGraphErrors(4,mid,size_num_corr,miderr,err_num_corr);
+  TGraphErrors *gr_den       = new TGraphErrors(4,mid,size_den,miderr,err_den);
+
+  // c1[xvariable] = new TCanvas(("c"+xvariable).c_str(), "transparent pad",179,30,698,498);
+  gStyle->SetOptStat(0);
+  //gStyle->SetPadGridX(3);
+  //gStyle->SetPadGridY(3);
+  //gStyle->SetGridStyle(3);
+  gPad->SetLogy();
+  gPad->SetTickx();
+  gPad->SetTicky();
+  gStyle->SetLineWidth(3);
+
+  gr_num_uncor->SetTitle("");
+  gr_num_uncor->SetMarkerColor(1);
+  gr_num_uncor->SetLineColor(1);
+  gr_num_uncor->SetMarkerStyle(21);
+
+  gr_num_corr->SetMarkerColor(2);
+  gr_num_corr->SetLineColor(2);
+  gr_num_corr->SetMarkerStyle(22);
+
+  gr_den->SetMarkerColor(3);
+  gr_den->SetLineColor(3);
+  gr_den->SetMarkerStyle(23);
+
+  TH1F *hr = canvas->DrawFrame(175.,0.1,1000.,1000000.,"");
+  hr->SetXTitle("photon pT [GeV]");
+  hr->SetYTitle("Events"); 
+
+  TText* title = new TText(1,1,"") ;
+  title->SetTextSize(0.07);
+  title->SetTextColor(kBlack);
+  title->SetTextAlign(13);
+  title->SetTextFont(62);
+  title->DrawTextNDC(0.17,0.87,"CMS");
+
+  TText* extra = new TText(1,1,"") ;
+  extra->SetTextSize(0.05);
+  extra->SetTextColor(kBlack);
+  extra->SetTextAlign(13);
+  extra->SetTextFont(52);
+  extra->DrawTextNDC(0.17,0.81,"Preliminary");
+  //xframe->addObject(extra);
+
+  TText* lumi = new TText(1,1,"") ;
+  lumi->SetTextSize(0.05);
+  lumi->SetTextColor(kBlack);
+  lumi->SetTextAlign(31);
+  lumi->SetTextFont(42);
+  lumi->DrawTextNDC(0.9,0.91,"2.32 /fb (13 TeV)");
+  //xframe->addObject(lumi);
+
+  TLegend *leg2 = new TLegend(0.55,0.6,0.88,0.88 );
+  leg2->SetFillColor(kWhite);
+  //leg2->AddEntry( gr_num_uncor,"Numerator", "L");
+  leg2->AddEntry( gr_num_uncor,"Numerator (uncorrected)", "L");
+  leg2->AddEntry( gr_num_corr,"Numerator (corrected)", "L");
+  leg2->AddEntry( gr_den,"Denominator", "L");
+  leg2->Draw("same");
+
+  gr_num_uncor->Draw("P");
+  gr_num_corr->Draw("P"); //
+  gr_den->Draw("P");
+
+  canvas->SaveAs(outpath+"/Graph_NuNcD"+sysname+".pdf");
+  canvas->SaveAs(wwwpath+"/Graph_NuNcD"+sysname+".pdf");
+
+  canvas->Clear();
+
+  // Ratio Plot
+  //////////////////////////////////////////////////////////////////////////////
+  TCanvas* c2 = new TCanvas("c2","c2",900,100,500,500);   
+
+  gStyle->SetOptStat(0);
+  //gPad->SetLogy();
+  gPad->SetTickx();
+  gPad->SetTicky();
+  gStyle->SetLineWidth(3);
+
+  //Double_t ratio[3];
+  Double_t *ratio = new Double_t[4];
+  ratio[0] = size_num_corr[0]/size_den[0];
+  ratio[1] = size_num_corr[1]/size_den[1];
+  ratio[2] = size_num_corr[2]/size_den[2];
+  ratio[3] = size_num_corr[3]/size_den[3];
+
+  Double_t *ratioerr = new Double_t[4];
+  ratioerr[0]= ratio[0] * pow( pow(err_num_corr[0]/size_num_corr[0] + pow(err_den[0]/size_den[0] ,2) ,2) ,0.5); //0.005;
+  ratioerr[1]= ratio[1] * pow( pow(err_num_corr[1]/size_num_corr[1] + pow(err_den[1]/size_den[1] ,2) ,2) ,0.5); //0.005;
+  ratioerr[2]= ratio[2] * pow( pow(err_num_corr[2]/size_num_corr[2] + pow(err_den[2]/size_den[2] ,2) ,2) ,0.5); //0.005;
+  ratioerr[3]= ratio[3] * pow( pow(err_num_corr[3]/size_num_corr[3] + pow(err_den[3]/size_den[3] ,2) ,2) ,0.5); //0.005;
+
+  ratios.push_back(ratio[0]);
+  ratios.push_back(ratio[1]);
+  ratios.push_back(ratio[2]);
+  ratios.push_back(ratio[3]);
+
+  ratioerrors.push_back(ratioerr[0]);
+  ratioerrors.push_back(ratioerr[1]);
+  ratioerrors.push_back(ratioerr[2]);
+  ratioerrors.push_back(ratioerr[3]);
+
+  TGraph *gr_ratio_noe = new TGraph(4,mid,ratio);
+  TGraphErrors *gr_ratio = new TGraphErrors(4,mid,ratio,miderr,ratioerr);
+
+  //for(int i=0; i<9; i++){std::cout<<"mid:  "<<mid[i]<<std::endl;}
+  //for(int i=0; i<4; i++){std::cout<<"ratio:  "<<ratio[i]<<std::endl;}
+  //for(int i=0; i<4; i++){std::cout<<"miderr:  "<<miderr[i]<<std::endl;}
+  //for(int i=0; i<4; i++){std::cout<<"ratioerr:  "<<ratioerr[i]<<std::endl;}
+
+  //gr_ratio->Set(4);
+  //TF1 *fit_ratio = new TF1("fit_ratio","[0]+[1]*x", 175, 1000);
+  //fit_ratio->SetParameter(0,0.05);
+  //fit_ratio->SetParameter(1,0.);
+  //TF1 *fit_ratio = new TF1("fit_ratio","pol1", 175, 1000);
+  //TF1 *fit_ratio = new TF1("fit_ratio","pol0(0)", 175, 1000);
+  //TF1 *fit_ratio = new TF1("fit_ratio","pol0", 175, 1000);
+
+  gr_ratio->SetMarkerColor(2);
+  gr_ratio->SetLineColor(2);
+  gr_ratio->SetMarkerStyle(22);
+
+  //TH1F *hs = c2->DrawFrame(0.,0.,1000.,0.5,"");
+  TH1F *hs = c2->DrawFrame(175.,0.,1000.,0.5,"");
+  hs->SetXTitle("photon pT [GeV]");
+  hs->SetYTitle("Fake Ratio"); 
+
+  title->DrawTextNDC(0.17,0.87,"CMS");
+  extra->DrawTextNDC(0.17,0.81,"Preliminary");
+  lumi->DrawTextNDC(0.9,0.91,"2.32 /fb (13 TeV)");
 
   TLegend *leg3 = new TLegend(0.55,0.6,0.88,0.88 );
   leg3->SetFillColor(kWhite);
@@ -960,12 +1317,12 @@ void plot::drawAllRates(TString extraname){
   lumi->SetTextColor(kBlack);
   lumi->SetTextAlign(31);
   lumi->SetTextFont(42);
-  //lumi->DrawTextNDC(0.9,0.91,"2.24 /fb (13 TeV)");
+  //lumi->DrawTextNDC(0.9,0.91,"2.32 /fb (13 TeV)");
   //xframe->addObject(lumi);
 
   title->DrawTextNDC(0.17,0.87,"CMS");
   extra->DrawTextNDC(0.17,0.81,"Preliminary");
-  lumi->DrawTextNDC(0.9,0.91,"2.24 /fb (13 TeV)");
+  lumi->DrawTextNDC(0.9,0.91,"2.32 /fb (13 TeV)");
 
   ////////// Draw points first, then lines
 
@@ -1275,12 +1632,12 @@ void plot::drawAllRatesRelative(TString extraname){
   lumi->SetTextColor(kBlack);
   lumi->SetTextAlign(31);
   lumi->SetTextFont(42);
-  //lumi->DrawTextNDC(0.9,0.91,"2.24 /fb (13 TeV)");
+  //lumi->DrawTextNDC(0.9,0.91,"2.32 /fb (13 TeV)");
   //xframe->addObject(lumi);
 
   title->DrawTextNDC(0.17,0.87,"CMS");
   extra->DrawTextNDC(0.17,0.81,"Preliminary");
-  lumi->DrawTextNDC(0.9,0.91,"2.24 /fb (13 TeV)");
+  lumi->DrawTextNDC(0.9,0.91,"2.32 /fb (13 TeV)");
 
   ////////// Draw points first, then lines
 
@@ -1474,8 +1831,8 @@ void plot::drawAllRatesRelativeHist(TString extraname){
   Double_t xhi = 1000.;
   //TH1F *hs = c2->DrawFrame(0.,0.,1000.,0.5,"");
   //TH1F *hs = c3->DrawFrame(175.,0.,1000.,0.5,"");
-  TH1F *hs = c3->DrawFrame(xlow,-2.,xhi,2.,"");
-  //TH1F *hs = c3->DrawFrame(xlow,-0.3,xhi,0.8,"");
+  //TH1F *hs = c3->DrawFrame(xlow,-2.,xhi,2.,"");
+  TH1F *hs = c3->DrawFrame(xlow,-0.3,xhi,0.8,"");
   hs->SetXTitle("photon pT [GeV]");
   hs->SetYTitle("Relative Fake Ratio"); 
 
@@ -1499,12 +1856,12 @@ void plot::drawAllRatesRelativeHist(TString extraname){
   lumi->SetTextColor(kBlack);
   lumi->SetTextAlign(31);
   lumi->SetTextFont(42);
-  //lumi->DrawTextNDC(0.9,0.91,"2.24 /fb (13 TeV)");
+  //lumi->DrawTextNDC(0.9,0.91,"2.32 /fb (13 TeV)");
   //xframe->addObject(lumi);
 
   title->DrawTextNDC(0.17,0.87,"CMS");
   extra->DrawTextNDC(0.17,0.81,"Preliminary");
-  lumi->DrawTextNDC(0.9,0.91,"2.24 /fb (13 TeV)");
+  lumi->DrawTextNDC(0.9,0.91,"2.32 /fb (13 TeV)");
 
   ////////// Draw points first, then lines
 
@@ -1544,9 +1901,13 @@ void plot::drawAllRatesRelativeHist(TString extraname){
   for(unsigned int p=0; p<4; ++p){ h_sys5->SetBinContent( p+1, (ratioss[5][p]-ratioss[0][p])/ratioss[0][p] ); }
   for(unsigned int p=0; p<4; ++p){ h_sys6->SetBinContent( p+1, (ratioss[6][p]-ratioss[0][p])/ratioss[0][p] ); }
   for(unsigned int p=0; p<4; ++p){ h_sys7->SetBinContent( p+1, (ratioss[7][p]-ratioss[0][p])/ratioss[0][p] ); }
-  for(unsigned int p=0; p<4; ++p){ h_sys8->SetBinContent( p+1, (+ratioerrorss[0][p])/ratioss[0][p] ); std::cout<<ratioerrorss[0][p]<<std::endl;}
-  for(unsigned int p=0; p<4; ++p){ h_sys9->SetBinContent( p+1, (-ratioerrorss[0][p])/ratioss[0][p] ); std::cout<<ratioerrorss[0][p]<<std::endl;}
-  for(unsigned int p=0; p<4; ++p){ h_sys10->SetBinContent( p+1, (ratioss[8][p]-ratioss[0][p])/ratioss[0][p] ); }
+
+  for(unsigned int p=0; p<4; ++p){ h_sys8->SetBinContent( p+1, (ratioss[8][p]-ratioss[0][p])/ratioss[0][p] ); }
+  for(unsigned int p=0; p<4; ++p){ h_sys9->SetBinContent( p+1, (ratioss[9][p]-ratioss[0][p])/ratioss[0][p] ); }
+
+//  for(unsigned int p=0; p<4; ++p){ h_sys8->SetBinContent( p+1, (+ratioerrorss[0][p])/ratioss[0][p] ); std::cout<<ratioerrorss[0][p]<<std::endl;}
+//  for(unsigned int p=0; p<4; ++p){ h_sys9->SetBinContent( p+1, (-ratioerrorss[0][p])/ratioss[0][p] ); std::cout<<ratioss[0][p]<<std::endl;}
+  for(unsigned int p=0; p<4; ++p){ h_sys10->SetBinContent( p+1, (ratioss[10][p]-ratioss[0][p])/ratioss[0][p] ); }
 
 
 //TColor *mycolor = gROOT->TColor::GetColor("#33a02c");
@@ -1635,7 +1996,7 @@ void plot::drawAllRatesRelativeHist(TString extraname){
   h_sys5->Draw("hist,same");
   h_sys6->Draw("hist,same");
   h_sys7->Draw("hist,same");
-  h_sys8->Draw("hist,same");
+//  h_sys8->Draw("hist,same");
   h_sys9->Draw("hist,same");
   h_sys10->Draw("hist,same");
 
@@ -1649,9 +2010,9 @@ void plot::drawAllRatesRelativeHist(TString extraname){
   leg4->AddEntry( h_sys4,"MET Down", "L");
   leg4->AddEntry( h_sys5,"binning Up", "L");
   leg4->AddEntry( h_sys6,"binning Down","L");
-  leg4->AddEntry( h_sys8,"fit Up","L");
-  leg4->AddEntry( h_sys9,"fit Down","L");
-  leg4->AddEntry( h_sys10,"ele template", "L");
+//  leg4->AddEntry( h_sys8,"ele template", "L");
+  leg4->AddEntry( h_sys9,"fit Up","L");
+  leg4->AddEntry( h_sys10,"fit Down","L");
   leg4->Draw("same");
 
   //TLine *line0 = new TLine(xlow,xlow*ms[0]+bs[0],xhi,xhi*ms[0]+bs[0]);
@@ -1709,7 +2070,7 @@ void plot::drawAllRatesRelativeHist(TString extraname){
 
   title->DrawTextNDC(0.17,0.87,"CMS");
   extra->DrawTextNDC(0.17,0.81,"Preliminary");
-  lumi->DrawTextNDC(0.9,0.91,"2.24 /fb (13 TeV)");
+  lumi->DrawTextNDC(0.9,0.91,"2.32 /fb (13 TeV)");
 
   h_sys0->Draw("hist,same");
   h_sys1->Draw("hist,same");

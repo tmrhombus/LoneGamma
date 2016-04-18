@@ -155,6 +155,16 @@ public :
                                TString extraname
                               );
 
+   void getCorrectedFakeRatioErrUpDown(TFile* datafile,  //<----data file
+                                 TFile* outfile,   //<---output file
+                                 vector<double> corrFactor, //<--input corr. factor = QCD fraction
+                                 vector<double> corrErr,    //<--input error
+                                 vector<Double_t>& ratios,
+                                 vector<Double_t>& ratioerrors,
+                                 int sn,
+                                 TString extraname
+                                );
+
    void drawAllRates(TString extraname);
    void drawAllRatesRelative(TString extraname);
    void drawAllRatesRelativeHist(TString extraname);
