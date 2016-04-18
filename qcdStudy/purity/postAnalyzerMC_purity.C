@@ -13,13 +13,48 @@ void postAnalyzerMC_purity::Loop(TString outfilename, Bool_t isMC, Double_t lumi
  Int_t nc = 0;
  Int_t dc = 0;
 
+ int ntot=0;
+
+ int n_mch_all = 0;
+ int n_mch_met = 0;
+ int n_mch_trg = 0;
+ int n_mch_met_trg = 0;
+ int n_mch_t175 = 0;
+ int n_mch_met_t175 = 0;
+ int n_mch_t250 = 0;
+ int n_mch_met_t250 = 0;
+ int n_mch_allt = 0;
+ int n_mch_met_allt = 0;
+
+ int n_nmh_all = 0;
+ int n_nmh_met = 0;
+ int n_nmh_trg = 0;
+ int n_nmh_met_trg = 0;
+ int n_nmh_t175 = 0;
+ int n_nmh_met_t175 = 0;
+ int n_nmh_t250 = 0;
+ int n_nmh_met_t250 = 0;
+ int n_nmh_allt = 0;
+ int n_nmh_met_allt = 0;
+
  if (fChain == 0) return;
  //std::cout<<"Numerator/Denominator : run : lumis : event : photonindex "<<std::endl;
+
+ printf(" a: Photon ID only (pT > 175) \n");
+ printf(" b: ID + MET<30 \n");
+ printf(" c: ID + T165_he10 \n");
+ printf(" d: ID + MET + T165 \n");
+ printf(" e: ID + T175 \n");
+ printf(" f: ID + MET + T175 \n");
+ printf(" g: ID + T250 \n");
+ printf(" h: ID + MET + T250 \n");
+ printf(" i: ID + MET + All Triggers \n");
 
  Long64_t nentries = fChain->GetEntriesFast();
 
  Long64_t nbytes = 0, nb = 0;
  for (Long64_t jentry=0; jentry<nentries;jentry++) {
+  ntot++;
   if (jentry%20000 == 0)
     {
       std::cout<<"Starting entry "<<jentry<<"/"<<(nentries)<<" at "<<sw.RealTime()<<" RealTime, "<<sw.CpuTime()<<" CpuTime"<<std::endl;
@@ -49,14 +84,8 @@ void postAnalyzerMC_purity::Loop(TString outfilename, Bool_t isMC, Double_t lumi
    mchDenPCvint.clear(); 
    nmhDenPCvint.clear(); 
 
-   // old cuts from james' code
-   orecPCvint.clear(); 
-   omchPCvint.clear(); 
-   onmhPCvint.clear(); 
-
    // Find all reco photons passing selections
    recPCvint = pcPassSel(175.,2000.,1.4442);
-   orecPCvint = pcPassOldSel(175.,2000.,1.4442);
    recDenPCvint = pcPassDenSel(175.,2000.,1.4442);
 
     // Denominator
@@ -90,23 +119,6 @@ void postAnalyzerMC_purity::Loop(TString outfilename, Bool_t isMC, Double_t lumi
     if(dRmin > 0.1) { nmhPCvint.push_back(phonr); }
    }
 
-   //Loop over all    orec    photons to find (GEN)matched and nonmatched photons
-   for(int i = 0; i < orecPCvint.size(); i++)
-   {
-    int phonr = orecPCvint[i];
-    //std::cout<<" photon number: "<<phonr<<std::endl;
-    double dRmin = 99.99;
-    double dRtemp = 99.99;
-    // technically a gen photon could be matched to more than one RECO photon in this method..
-    for(int k = 0; k < genPCvint.size(); k++) 
-    {
-     int gennr = genPCvint[k];
-     dRtemp = dR(mcEta->at(gennr),mcPhi->at(gennr),phoEta->at(phonr),phoPhi->at(phonr));
-     if(dRtemp < dRmin) { dRmin = dRtemp; }
-    }
-    if(dRmin < 0.1) { omchPCvint.push_back(phonr); }
-    if(dRmin > 0.1) { onmhPCvint.push_back(phonr); }
-   }
 
    //Loop over all    den    photons to find (GEN)matched and nonmatched photons
    for(int i = 0; i < recDenPCvint.size(); i++)
@@ -126,144 +138,356 @@ void postAnalyzerMC_purity::Loop(TString outfilename, Bool_t isMC, Double_t lumi
     if(dRmin > 0.1) { nmhDenPCvint.push_back(phonr); }
    }
 
+   //   // lepton rejection
+   //   std::vector<int> elelist = electron_passLooseID(candphotonindex, 10.);
+   //   std::vector<int> mulist = muon_passLooseID(candphotonindex, 10.);
+   //   bool passLepRej = false;
+   //   if( elelist.size()==0 && mulist.size()==0 ){ passLepRej = true; }
+
+      // MET requirements
+      bool passMETfilters = kTRUE; // ( metFilters==0 ) ; //|| metFilters==4 ) ;
+
+   //   // dPhi( Jets, MET )
+   //   std::vector<int>  jetindexvector = selectedJets(candphotonindex);
+   //   bool passdPhiJM = passdphiJetMET(&jetindexvector, pfMETPhi);
+
+   //   // dPhi( photon, MET )
+   //   bool passdPhiPhoMET = ( DeltaPhi(phoPhi->at(candphotonindex),pfMETPhi)>2.0 ) ;
+
+   //   // spike cleaning
+   //   int iphi = 41;
+   //   int ieta = 5;
+   //   bool passSpike = !(phoIPhi->at(candphotonindex) == iphi && phoIEta->at(candphotonindex) == ieta) ;
+
    // some more filters
    bool passTriggers;
+   bool passTriggers175;
+   bool passTriggers250;
    bool passMET;
-   passTriggers = ((HLTPho>>12&1) == 1) ;
-   passMET = pfMET < 30.;
+   passMET = pfMET < 30. && passMETfilters ;
 
 // fill histograms
     // Fill Numerator (matched) Signal Histograms
     if( mchPCvint.size()>0 ){ // if any photon indexes passed sig selection
      for(unsigned int k=0; k<mchPCvint.size(); ++k){ // go through each photon passing sel
+      int phonr = mchPCvint.at(k);
+      passTriggers = ((HLTPho>>12&1) == 1   && ( (phoFiredSingleTrgs->at(phonr)>>7)!=1 ) ) ;
+      passTriggers175 = ((HLTPho>>7&1) == 1 && ( (phoFiredSingleTrgs->at(phonr)>>8)!=1 ) ) ;
+      passTriggers250 = ((HLTPho>>8&1) == 1 && ( (phoFiredSingleTrgs->at(phonr)>>9)!=1 ) ) ;
       // pt bins
       for(unsigned int ptb=0; ptb<lstptbin; ++ptb){
        if(
-          (phoEt->at(mchPCvint.at(k)) > ptbins[ptb]) &&
-          (phoEt->at(mchPCvint.at(k)) < ptbins[ptb+1])
+          (phoEt->at(phonr) > ptbins[ptb]) &&
+          (phoEt->at(phonr) < ptbins[ptb+1])
          ){
             //std::cout<<"found event"<<std::endl;
             // idnc, idnc_mL30, idnc_trig, idnc_mL30_trig, oldj
             //nc++;
-            FillSigHistograms(ptb, 0, mchPCvint.at(k), event_weight);
-            FillDenHistograms(ptb, 0, mchPCvint.at(k), event_weight);
+            FillSigHistograms(ptb, 0, phonr, event_weight);
+            FillDenHistograms(ptb, 0, phonr, event_weight);
             if(passMET){
-             FillSigHistograms(ptb, 1, mchPCvint.at(k), event_weight);
-             FillDenHistograms(ptb, 1, mchPCvint.at(k), event_weight);
+             FillSigHistograms(ptb, 1, phonr, event_weight);
+             FillDenHistograms(ptb, 1, phonr, event_weight);
             }
             if(passTriggers){
-             FillSigHistograms(ptb, 2, mchPCvint.at(k), event_weight);
-             FillDenHistograms(ptb, 2, mchPCvint.at(k), event_weight);
+             FillSigHistograms(ptb, 2, phonr, event_weight);
+             FillDenHistograms(ptb, 2, phonr, event_weight);
             }
             if(passTriggers && passMET){
-             FillSigHistograms(ptb, 3, mchPCvint.at(k), event_weight);
-             FillDenHistograms(ptb, 3, mchPCvint.at(k), event_weight);
+             FillSigHistograms(ptb, 3, phonr, event_weight);
+             FillDenHistograms(ptb, 3, phonr, event_weight);
+            }
+            if(passTriggers175){
+             FillSigHistograms(ptb, 4, phonr, event_weight);
+             FillDenHistograms(ptb, 4, phonr, event_weight);
+            }
+            if(passTriggers175 && passMET){
+             FillSigHistograms(ptb, 5, phonr, event_weight);
+             FillDenHistograms(ptb, 5, phonr, event_weight);
+            }
+            if(passTriggers250){
+             FillSigHistograms(ptb, 6, phonr, event_weight);
+             FillDenHistograms(ptb, 6, phonr, event_weight);
+            }
+            if(passTriggers250 && passMET){
+             FillSigHistograms(ptb, 7, phonr, event_weight);
+             FillDenHistograms(ptb, 7, phonr, event_weight);
+            }
+            if(passTriggers && passTriggers175 && passTriggers250 && passMET){
+             FillSigHistograms(ptb, 8, phonr, event_weight);
+             FillDenHistograms(ptb, 8, phonr, event_weight);
             }
            }
        }
       // inclusive from pT bins
+
       if(  
-         (phoEt->at(mchPCvint.at(k)) > 175. ) && //ptbins[0]) &&
-         (phoEt->at(mchPCvint.at(k)) < ptbins[ptbins.size()-1])
+         (phoEt->at(phonr) > 175. ) && //ptbins[0]) &&
+         (phoEt->at(phonr) < ptbins[ptbins.size()-1])
         ){
-          FillSigHistograms(selptbin, 0, mchPCvint.at(k), event_weight);
-          FillDenHistograms(selptbin, 0, mchPCvint.at(k), event_weight);
+printf("Matched    a  ---  %i:%i:%lli \n", run, lumis, event );
+printf("  nVtx                %i  \n", nVtx );
+printf("  rho                 %f  \n", rho );
+printf("  metFilters          %i  \n", metFilters );
+printf("  nPho                %i  \n", nPho );
+printf("  phoE                %f  \n", phoE->at(phonr) );
+printf("  phoEt               %f  \n", phoEt->at(phonr) );
+printf("  phoPhi              %f  \n", phoPhi->at(phonr) );
+printf("  sieie               %f  \n", phoSigmaIEtaIEtaFull5x5->at(phonr) );
+printf("  sieip               %f  \n", phoSigmaIEtaIPhiFull5x5->at(phonr) );
+printf("  sipip               %f  \n", phoSigmaIPhiIPhiFull5x5->at(phonr) );
+printf("  phoSCEta            %f  \n", phoSCEta->at(phonr) );
+printf("  phoHoverE           %f  \n", phoHoverE->at(phonr) );
+printf("  phohasPixelSeed     %i  \n", phohasPixelSeed->at(phonr) );
+printf("  phosPFNeuIso        %f  \n", phoPFNeuIso->at(phonr) );
+printf("  phoPFPhoIso         %f  \n", phoPFPhoIso->at(phonr) );
+printf("  phoPFChIso          %f  \n", phoPFChIso->at(phonr) );
+printf("  phoPFChWorstIso     %f  \n", phoPFChWorstIso->at(phonr) );
+
+ n_mch_all++;
+          FillSigHistograms(selptbin, 0, phonr, event_weight);
+          FillDenHistograms(selptbin, 0, phonr, event_weight);
           if(passMET){
-           FillSigHistograms(selptbin, 1, mchPCvint.at(k), event_weight);
-           FillDenHistograms(selptbin, 1, mchPCvint.at(k), event_weight);
+           FillSigHistograms(selptbin, 1, phonr, event_weight);
+           FillDenHistograms(selptbin, 1, phonr, event_weight);
+printf("Matched    b  ---  %i:%i:%lli \n", run, lumis, event );
+ n_mch_met++;
           }
           if(passTriggers){
-           FillSigHistograms(selptbin, 2, mchPCvint.at(k), event_weight);
-           FillDenHistograms(selptbin, 2, mchPCvint.at(k), event_weight);
+           FillSigHistograms(selptbin, 2, phonr, event_weight);
+           FillDenHistograms(selptbin, 2, phonr, event_weight);
+printf("Matched    c  ---  %i:%i:%lli \n", run, lumis, event );
+ n_mch_trg++;
           }
           if(passTriggers && passMET){
-           FillSigHistograms(selptbin, 3, mchPCvint.at(k), event_weight);
-           FillDenHistograms(selptbin, 3, mchPCvint.at(k), event_weight);
+           FillSigHistograms(selptbin, 3, phonr, event_weight);
+           FillDenHistograms(selptbin, 3, phonr, event_weight);
+printf("Matched    d  ---  %i:%i:%lli \n", run, lumis, event );
+ n_mch_met_trg++;
+          }
+          if(passTriggers175){
+           FillSigHistograms(selptbin, 4, phonr, event_weight);
+           FillDenHistograms(selptbin, 4, phonr, event_weight);
+printf("Matched    e  ---  %i:%i:%lli \n", run, lumis, event );
+          }
+          if(passTriggers175 && passMET){
+           FillSigHistograms(selptbin, 5, phonr, event_weight);
+           FillDenHistograms(selptbin, 5, phonr, event_weight);
+printf("Matched    f  ---  %i:%i:%lli \n", run, lumis, event );
+          }
+          if(passTriggers250){
+           FillSigHistograms(selptbin, 6, phonr, event_weight);
+           FillDenHistograms(selptbin, 6, phonr, event_weight);
+printf("Matched    g  ---  %i:%i:%lli \n", run, lumis, event );
+          }
+          if(passTriggers250 && passMET){
+           FillSigHistograms(selptbin, 7, phonr, event_weight);
+           FillDenHistograms(selptbin, 7, phonr, event_weight);
+printf("Matched    h  ---  %i:%i:%lli \n", run, lumis, event );
+          }
+          if(passTriggers && passTriggers175 && passTriggers250 && passMET){
+           FillSigHistograms(selptbin, 8, phonr, event_weight);
+           FillDenHistograms(selptbin, 8, phonr, event_weight);
+printf("Matched    i  ---  %i:%i:%lli \n", run, lumis, event );
           }
          }
 
       // fully inclusive in pT (depending only on selections for mchPCvint)
-      FillSigHistograms(incptbin, 0, mchPCvint.at(k), event_weight);
-      FillDenHistograms(incptbin, 0, mchPCvint.at(k), event_weight);
+      FillSigHistograms(incptbin, 0, phonr, event_weight);
+      FillDenHistograms(incptbin, 0, phonr, event_weight);
       if(passMET){
-       FillSigHistograms(incptbin, 1, mchPCvint.at(k), event_weight);
-       FillDenHistograms(incptbin, 1, mchPCvint.at(k), event_weight);
+       FillSigHistograms(incptbin, 1, phonr, event_weight);
+       FillDenHistograms(incptbin, 1, phonr, event_weight);
       }
       if(passTriggers){
-       FillSigHistograms(incptbin, 2, mchPCvint.at(k), event_weight);
-       FillDenHistograms(incptbin, 2, mchPCvint.at(k), event_weight);
+       FillSigHistograms(incptbin, 2, phonr, event_weight);
+       FillDenHistograms(incptbin, 2, phonr, event_weight);
       }
       if(passTriggers && passMET){
-       FillSigHistograms(incptbin, 3, mchPCvint.at(k), event_weight);
-       FillDenHistograms(incptbin, 3, mchPCvint.at(k), event_weight);
+       FillSigHistograms(incptbin, 3, phonr, event_weight);
+       FillDenHistograms(incptbin, 3, phonr, event_weight);
+      }
+      if(passTriggers175){
+       FillSigHistograms(incptbin, 4, phonr, event_weight);
+       FillDenHistograms(incptbin, 4, phonr, event_weight);
+      }
+      if(passTriggers175 && passMET){
+       FillSigHistograms(incptbin, 5, phonr, event_weight);
+       FillDenHistograms(incptbin, 5, phonr, event_weight);
+      }
+      if(passTriggers250){
+       FillSigHistograms(incptbin, 6, phonr, event_weight);
+       FillDenHistograms(incptbin, 6, phonr, event_weight);
+      }
+      if(passTriggers250 && passMET){
+       FillSigHistograms(incptbin, 7, phonr, event_weight);
+       FillDenHistograms(incptbin, 7, phonr, event_weight);
+      }
+      if(passTriggers && passTriggers175 && passTriggers250 && passMET){
+       FillSigHistograms(incptbin, 8, phonr, event_weight);
+       FillDenHistograms(incptbin, 8, phonr, event_weight);
       }
 
      }
     }
 
-
     // Fill Numerator (unmatched) Bkgnal Histograms
     if( nmhPCvint.size()>0 ){ // if any photon indexes passed sig selection
      for(unsigned int k=0; k<nmhPCvint.size(); ++k){ // go through each photon passing sel
+      int phonr = nmhPCvint.at(k);
+      passTriggers = ((HLTPho>>12&1) == 1   && ( (phoFiredSingleTrgs->at(phonr)>>7)!=1 ) ) ;
+      passTriggers175 = ((HLTPho>>7&1) == 1 && ( (phoFiredSingleTrgs->at(phonr)>>8)!=1 ) ) ;
+      passTriggers250 = ((HLTPho>>8&1) == 1 && ( (phoFiredSingleTrgs->at(phonr)>>9)!=1 ) ) ;
       // pt bins
       for(unsigned int ptb=0; ptb<lstptbin; ++ptb){
        if(
-          (phoEt->at(nmhPCvint.at(k)) > ptbins[ptb]) &&
-          (phoEt->at(nmhPCvint.at(k)) < ptbins[ptb+1])
+          (phoEt->at(phonr) > ptbins[ptb]) &&
+          (phoEt->at(phonr) < ptbins[ptb+1])
          ){
             // idnc, idnc_mL30, idnc_trig, idnc_mL30_trig, oldj
             //nc++;
-            FillBkgHistograms(ptb, 0, nmhPCvint.at(k), event_weight);
-            FillDenHistograms(ptb, 0, nmhPCvint.at(k), event_weight);
+            FillBkgHistograms(ptb, 0, phonr, event_weight);
+            FillDenHistograms(ptb, 0, phonr, event_weight);
             if(passMET){
-             FillBkgHistograms(ptb, 1, nmhPCvint.at(k), event_weight);
-             FillDenHistograms(ptb, 1, nmhPCvint.at(k), event_weight);
+             FillBkgHistograms(ptb, 1, phonr, event_weight);
+             FillDenHistograms(ptb, 1, phonr, event_weight);
             }
             if(passTriggers){
-             FillBkgHistograms(ptb, 2, nmhPCvint.at(k), event_weight);
-             FillDenHistograms(ptb, 2, nmhPCvint.at(k), event_weight);
+             FillBkgHistograms(ptb, 2, phonr, event_weight);
+             FillDenHistograms(ptb, 2, phonr, event_weight);
             }
             if(passTriggers && passMET){
-             FillBkgHistograms(ptb, 3, nmhPCvint.at(k), event_weight);
-             FillDenHistograms(ptb, 3, nmhPCvint.at(k), event_weight);
+             FillBkgHistograms(ptb, 3, phonr, event_weight);
+             FillDenHistograms(ptb, 3, phonr, event_weight);
+            }
+            if(passTriggers175){
+             FillSigHistograms(ptb, 4, phonr, event_weight);
+             FillDenHistograms(ptb, 4, phonr, event_weight);
+            }
+            if(passTriggers175 && passMET){
+             FillSigHistograms(ptb, 5, phonr, event_weight);
+             FillDenHistograms(ptb, 5, phonr, event_weight);
+            }
+            if(passTriggers250){
+             FillSigHistograms(ptb, 6, phonr, event_weight);
+             FillDenHistograms(ptb, 6, phonr, event_weight);
+            }
+            if(passTriggers250 && passMET){
+             FillSigHistograms(ptb, 7, phonr, event_weight);
+             FillDenHistograms(ptb, 7, phonr, event_weight);
+            }
+            if(passTriggers && passTriggers175 && passTriggers250 && passMET){
+             FillSigHistograms(ptb, 8, phonr, event_weight);
+             FillDenHistograms(ptb, 8, phonr, event_weight);
             }
            }
        }
       // inclusive from pT bins
       if(  
-         (phoEt->at(nmhPCvint.at(k)) > 175. ) && // ptbins[0]) &&
-         (phoEt->at(nmhPCvint.at(k)) < ptbins[ptbins.size()-1])
+         (phoEt->at(phonr) > 175. ) && // ptbins[0]) &&
+         (phoEt->at(phonr) < ptbins[ptbins.size()-1])
         ){
-          FillBkgHistograms(selptbin, 0, nmhPCvint.at(k), event_weight);
-          FillDenHistograms(selptbin, 0, nmhPCvint.at(k), event_weight);
+n_nmh_all++;
+printf("Unmatched  a  ---  %i:%i:%lli \n", run, lumis, event );
+printf("  nVtx                %i  \n", nVtx );
+printf("  rho                 %f  \n", rho );
+printf("  metFilters          %i  \n", metFilters );
+printf("  nPho                %i  \n", nPho );
+printf("  phoE                %f  \n", phoE->at(phonr) );
+printf("  phoEt               %f  \n", phoEt->at(phonr) );
+printf("  phoPhi              %f  \n", phoPhi->at(phonr) );
+printf("  sieie               %f  \n", phoSigmaIEtaIEtaFull5x5->at(phonr) );
+printf("  sieip               %f  \n", phoSigmaIEtaIPhiFull5x5->at(phonr) );
+printf("  sipip               %f  \n", phoSigmaIPhiIPhiFull5x5->at(phonr) );
+printf("  phoSCEta            %f  \n", phoSCEta->at(phonr) );
+printf("  phoHoverE           %f  \n", phoHoverE->at(phonr) );
+printf("  phohasPixelSeed     %i  \n", phohasPixelSeed->at(phonr) );
+printf("  phoPFNeuIso         %f  \n", phoPFNeuIso->at(phonr) );
+printf("  phoPFPhoIso         %f  \n", phoPFPhoIso->at(phonr) );
+printf("  phoPFChIso          %f  \n", phoPFChIso->at(phonr) );
+printf("  phoPFChWorstIso     %f  \n", phoPFChWorstIso->at(phonr) );
+          FillBkgHistograms(selptbin, 0, phonr, event_weight);
+          FillDenHistograms(selptbin, 0, phonr, event_weight);
           if(passMET){
-           FillBkgHistograms(selptbin, 1, nmhPCvint.at(k), event_weight);
-           FillDenHistograms(selptbin, 1, nmhPCvint.at(k), event_weight);
+printf("Unmatched  b  ---  %i:%i:%lli \n", run, lumis, event );
+           FillBkgHistograms(selptbin, 1, phonr, event_weight);
+           FillDenHistograms(selptbin, 1, phonr, event_weight);
+n_nmh_met++;
           }
           if(passTriggers){
-           FillBkgHistograms(selptbin, 2, nmhPCvint.at(k), event_weight);
-           FillDenHistograms(selptbin, 2, nmhPCvint.at(k), event_weight);
+printf("Unmatched  c  ---  %i:%i:%lli \n", run, lumis, event );
+           FillBkgHistograms(selptbin, 2, phonr, event_weight);
+           FillDenHistograms(selptbin, 2, phonr, event_weight);
+n_nmh_trg++;
           }
           if(passTriggers && passMET){
-           FillBkgHistograms(selptbin, 3, nmhPCvint.at(k), event_weight);
-           FillDenHistograms(selptbin, 3, nmhPCvint.at(k), event_weight);
+printf("Unmatched  d  ---  %i:%i:%lli \n", run, lumis, event );
+           FillBkgHistograms(selptbin, 3, phonr, event_weight);
+           FillDenHistograms(selptbin, 3, phonr, event_weight);
+n_nmh_met_trg++;
+          if(passTriggers175){
+printf("Unmatched  e  ---  %i:%i:%lli \n", run, lumis, event );
+           FillSigHistograms(selptbin, 4, phonr, event_weight);
+           FillDenHistograms(selptbin, 4, phonr, event_weight);
+          }
+          if(passTriggers175 && passMET){
+printf("Unmatched  f  ---  %i:%i:%lli \n", run, lumis, event );
+           FillSigHistograms(selptbin, 5, phonr, event_weight);
+           FillDenHistograms(selptbin, 5, phonr, event_weight);
+          }
+          if(passTriggers250){
+printf("Unmatched  g  ---  %i:%i:%lli \n", run, lumis, event );
+           FillSigHistograms(selptbin, 6, phonr, event_weight);
+           FillDenHistograms(selptbin, 6, phonr, event_weight);
+          }
+          if(passTriggers250 && passMET){
+printf("Unmatched  h  ---  %i:%i:%lli \n", run, lumis, event );
+           FillSigHistograms(selptbin, 7, phonr, event_weight);
+           FillDenHistograms(selptbin, 7, phonr, event_weight);
+          }
+          if(passTriggers && passTriggers175 && passTriggers250 && passMET){
+printf("Unmatched  i  ---  %i:%i:%lli \n", run, lumis, event );
+           FillSigHistograms(selptbin, 8, phonr, event_weight);
+           FillDenHistograms(selptbin, 8, phonr, event_weight);
+          }
+
           }
          }
 
       // fully inclusive in pT (depending only on selections for nmhPCvint)
-      FillBkgHistograms(incptbin, 0, nmhPCvint.at(k), event_weight);
-      FillDenHistograms(incptbin, 0, nmhPCvint.at(k), event_weight);
+      FillBkgHistograms(incptbin, 0, phonr, event_weight);
+      FillDenHistograms(incptbin, 0, phonr, event_weight);
       if(passMET){
-       FillBkgHistograms(incptbin, 1, nmhPCvint.at(k), event_weight);
-       FillDenHistograms(incptbin, 1, nmhPCvint.at(k), event_weight);
+       FillBkgHistograms(incptbin, 1, phonr, event_weight);
+       FillDenHistograms(incptbin, 1, phonr, event_weight);
       }
       if(passTriggers){
-       FillBkgHistograms(incptbin, 2, nmhPCvint.at(k), event_weight);
-       FillDenHistograms(incptbin, 2, nmhPCvint.at(k), event_weight);
+       FillBkgHistograms(incptbin, 2, phonr, event_weight);
+       FillDenHistograms(incptbin, 2, phonr, event_weight);
       }
       if(passTriggers && passMET){
-       FillBkgHistograms(incptbin, 3, nmhPCvint.at(k), event_weight);
-       FillDenHistograms(incptbin, 3, nmhPCvint.at(k), event_weight);
+       FillBkgHistograms(incptbin, 3, phonr, event_weight);
+       FillDenHistograms(incptbin, 3, phonr, event_weight);
+      }
+      if(passTriggers175){
+       FillSigHistograms(incptbin, 4, phonr, event_weight);
+       FillDenHistograms(incptbin, 4, phonr, event_weight);
+      }
+      if(passTriggers175 && passMET){
+       FillSigHistograms(incptbin, 5, phonr, event_weight);
+       FillDenHistograms(incptbin, 5, phonr, event_weight);
+      }
+      if(passTriggers250){
+       FillSigHistograms(incptbin, 6, phonr, event_weight);
+       FillDenHistograms(incptbin, 6, phonr, event_weight);
+      }
+      if(passTriggers250 && passMET){
+       FillSigHistograms(incptbin, 7, phonr, event_weight);
+       FillDenHistograms(incptbin, 7, phonr, event_weight);
+      }
+      if(passTriggers && passTriggers175 && passTriggers250 && passMET){
+       FillSigHistograms(incptbin, 8, phonr, event_weight);
+       FillDenHistograms(incptbin, 8, phonr, event_weight);
       }
 
      }
@@ -273,67 +497,131 @@ void postAnalyzerMC_purity::Loop(TString outfilename, Bool_t isMC, Double_t lumi
     // Fill Numerator (matched) Denom Histograms
     if( mchDenPCvint.size()>0 ){ // if any photon indexes passed sig selection
      for(unsigned int k=0; k<mchDenPCvint.size(); ++k){ // go through each photon passing sel
+      int phonr = mchDenPCvint.at(k);
+      passTriggers = ((HLTPho>>12&1) == 1   && ( (phoFiredSingleTrgs->at(phonr)>>7)!=1 ) ) ;
+      passTriggers175 = ((HLTPho>>7&1) == 1 && ( (phoFiredSingleTrgs->at(phonr)>>8)!=1 ) ) ;
+      passTriggers250 = ((HLTPho>>8&1) == 1 && ( (phoFiredSingleTrgs->at(phonr)>>9)!=1 ) ) ;
       // pt bins
       for(unsigned int ptb=0; ptb<lstptbin; ++ptb){
        if(
-          (phoEt->at(mchDenPCvint.at(k)) > ptbins[ptb]) &&
-          (phoEt->at(mchDenPCvint.at(k)) < ptbins[ptb+1])
+          (phoEt->at(phonr) > ptbins[ptb]) &&
+          (phoEt->at(phonr) < ptbins[ptb+1])
          ){
             //std::cout<<"found event"<<std::endl;
             // idnc, idnc_mL30, idnc_trig, idnc_mL30_trig, oldj
             //nc++;
-            FillDenSigHistograms(ptb, 0, mchDenPCvint.at(k), event_weight);
-            FillDenDenHistograms(ptb, 0, mchDenPCvint.at(k), event_weight);
+            FillDenSigHistograms(ptb, 0, phonr, event_weight);
+            FillDenDenHistograms(ptb, 0, phonr, event_weight);
             if(passMET){
-             FillDenSigHistograms(ptb, 1, mchDenPCvint.at(k), event_weight);
-             FillDenDenHistograms(ptb, 1, mchDenPCvint.at(k), event_weight);
+             FillDenSigHistograms(ptb, 1, phonr, event_weight);
+             FillDenDenHistograms(ptb, 1, phonr, event_weight);
             }
             if(passTriggers){
-             FillDenSigHistograms(ptb, 2, mchDenPCvint.at(k), event_weight);
-             FillDenDenHistograms(ptb, 2, mchDenPCvint.at(k), event_weight);
+             FillDenSigHistograms(ptb, 2, phonr, event_weight);
+             FillDenDenHistograms(ptb, 2, phonr, event_weight);
             }
             if(passTriggers && passMET){
-             FillDenSigHistograms(ptb, 3, mchDenPCvint.at(k), event_weight);
-             FillDenDenHistograms(ptb, 3, mchDenPCvint.at(k), event_weight);
+             FillDenSigHistograms(ptb, 3, phonr, event_weight);
+             FillDenDenHistograms(ptb, 3, phonr, event_weight);
+            }
+            if(passTriggers175){
+             FillDenSigHistograms(ptb, 4, phonr, event_weight);
+             FillDenDenHistograms(ptb, 4, phonr, event_weight);
+            }
+            if(passTriggers175 && passMET){
+             FillDenSigHistograms(ptb, 5, phonr, event_weight);
+             FillDenDenHistograms(ptb, 5, phonr, event_weight);
+            }
+            if(passTriggers250){
+             FillDenSigHistograms(ptb, 6, phonr, event_weight);
+             FillDenDenHistograms(ptb, 6, phonr, event_weight);
+            }
+            if(passTriggers250 && passMET){
+             FillDenSigHistograms(ptb, 7, phonr, event_weight);
+             FillDenDenHistograms(ptb, 7, phonr, event_weight);
+            }
+            if(passTriggers && passTriggers175 && passTriggers250 && passMET){
+             FillDenSigHistograms(ptb, 8, phonr, event_weight);
+             FillDenDenHistograms(ptb, 8, phonr, event_weight);
             }
            }
        }
       // inclusive from pT bins
       if(  
-         (phoEt->at(mchDenPCvint.at(k)) > 175. ) && //ptbins[0]) &&
-         (phoEt->at(mchDenPCvint.at(k)) < ptbins[ptbins.size()-1])
+         (phoEt->at(phonr) > 175. ) && //ptbins[0]) &&
+         (phoEt->at(phonr) < ptbins[ptbins.size()-1])
         ){
-          FillDenSigHistograms(selptbin, 0, mchDenPCvint.at(k), event_weight);
-          FillDenDenHistograms(selptbin, 0, mchDenPCvint.at(k), event_weight);
+          FillDenSigHistograms(selptbin, 0, phonr, event_weight);
+          FillDenDenHistograms(selptbin, 0, phonr, event_weight);
           if(passMET){
-           FillDenSigHistograms(selptbin, 1, mchDenPCvint.at(k), event_weight);
-           FillDenDenHistograms(selptbin, 1, mchDenPCvint.at(k), event_weight);
+           FillDenSigHistograms(selptbin, 1, phonr, event_weight);
+           FillDenDenHistograms(selptbin, 1, phonr, event_weight);
           }
           if(passTriggers){
-           FillDenSigHistograms(selptbin, 2, mchDenPCvint.at(k), event_weight);
-           FillDenDenHistograms(selptbin, 2, mchDenPCvint.at(k), event_weight);
+           FillDenSigHistograms(selptbin, 2, phonr, event_weight);
+           FillDenDenHistograms(selptbin, 2, phonr, event_weight);
           }
           if(passTriggers && passMET){
-           FillDenSigHistograms(selptbin, 3, mchDenPCvint.at(k), event_weight);
-           FillDenDenHistograms(selptbin, 3, mchDenPCvint.at(k), event_weight);
+           FillDenSigHistograms(selptbin, 3, phonr, event_weight);
+           FillDenDenHistograms(selptbin, 3, phonr, event_weight);
           }
+            if(passTriggers175){
+             FillDenSigHistograms(selptbin, 4, phonr, event_weight);
+             FillDenDenHistograms(selptbin, 4, phonr, event_weight);
+            }
+            if(passTriggers175 && passMET){
+             FillDenSigHistograms(selptbin, 5, phonr, event_weight);
+             FillDenDenHistograms(selptbin, 5, phonr, event_weight);
+            }
+            if(passTriggers250){
+             FillDenSigHistograms(selptbin, 6, phonr, event_weight);
+             FillDenDenHistograms(selptbin, 6, phonr, event_weight);
+            }
+            if(passTriggers250 && passMET){
+             FillDenSigHistograms(selptbin, 7, phonr, event_weight);
+             FillDenDenHistograms(selptbin, 7, phonr, event_weight);
+            }
+            if(passTriggers && passTriggers175 && passTriggers250 && passMET){
+             FillDenSigHistograms(selptbin, 8, phonr, event_weight);
+             FillDenDenHistograms(selptbin, 8, phonr, event_weight);
+            }
          }
 
       // fully inclusive in pT (depending only on selections for mchDenPCvint)
-      FillDenSigHistograms(incptbin, 0, mchDenPCvint.at(k), event_weight);
-      FillDenDenHistograms(incptbin, 0, mchDenPCvint.at(k), event_weight);
+      FillDenSigHistograms(incptbin, 0, phonr, event_weight);
+      FillDenDenHistograms(incptbin, 0, phonr, event_weight);
       if(passMET){
-       FillDenSigHistograms(incptbin, 1, mchDenPCvint.at(k), event_weight);
-       FillDenDenHistograms(incptbin, 1, mchDenPCvint.at(k), event_weight);
+       FillDenSigHistograms(incptbin, 1, phonr, event_weight);
+       FillDenDenHistograms(incptbin, 1, phonr, event_weight);
       }
       if(passTriggers){
-       FillDenSigHistograms(incptbin, 2, mchDenPCvint.at(k), event_weight);
-       FillDenDenHistograms(incptbin, 2, mchDenPCvint.at(k), event_weight);
+       FillDenSigHistograms(incptbin, 2, phonr, event_weight);
+       FillDenDenHistograms(incptbin, 2, phonr, event_weight);
       }
       if(passTriggers && passMET){
-       FillDenSigHistograms(incptbin, 3, mchDenPCvint.at(k), event_weight);
-       FillDenDenHistograms(incptbin, 3, mchDenPCvint.at(k), event_weight);
+       FillDenSigHistograms(incptbin, 3, phonr, event_weight);
+       FillDenDenHistograms(incptbin, 3, phonr, event_weight);
       }
+            if(passTriggers175){
+             FillDenSigHistograms(incptbin, 4, phonr, event_weight);
+             FillDenDenHistograms(incptbin, 4, phonr, event_weight);
+            }
+            if(passTriggers175 && passMET){
+             FillDenSigHistograms(incptbin, 5, phonr, event_weight);
+             FillDenDenHistograms(incptbin, 5, phonr, event_weight);
+            }
+            if(passTriggers250){
+             FillDenSigHistograms(incptbin, 6, phonr, event_weight);
+             FillDenDenHistograms(incptbin, 6, phonr, event_weight);
+            }
+            if(passTriggers250 && passMET){
+             FillDenSigHistograms(incptbin, 7, phonr, event_weight);
+             FillDenDenHistograms(incptbin, 7, phonr, event_weight);
+            }
+            if(passTriggers && passTriggers175 && passTriggers250 && passMET){
+             FillDenSigHistograms(incptbin, 8, phonr, event_weight);
+             FillDenDenHistograms(incptbin, 8, phonr, event_weight);
+            }
 
      }
     }
@@ -342,128 +630,131 @@ void postAnalyzerMC_purity::Loop(TString outfilename, Bool_t isMC, Double_t lumi
     // FillDen Numerator (unmatched) Den Histograms
     if( nmhDenPCvint.size()>0 ){ // if any photon indexes passed sig selection
      for(unsigned int k=0; k<nmhDenPCvint.size(); ++k){ // go through each photon passing sel
+      int phonr = nmhDenPCvint.at(k);
+      passTriggers = ((HLTPho>>12&1) == 1   && ( (phoFiredSingleTrgs->at(phonr)>>7)!=1 ) ) ;
+      passTriggers175 = ((HLTPho>>7&1) == 1 && ( (phoFiredSingleTrgs->at(phonr)>>8)!=1 ) ) ;
+      passTriggers250 = ((HLTPho>>8&1) == 1 && ( (phoFiredSingleTrgs->at(phonr)>>9)!=1 ) ) ;
       // pt bins
       for(unsigned int ptb=0; ptb<lstptbin; ++ptb){
        if(
-          (phoEt->at(nmhDenPCvint.at(k)) > ptbins[ptb]) &&
-          (phoEt->at(nmhDenPCvint.at(k)) < ptbins[ptb+1])
+          (phoEt->at(phonr) > ptbins[ptb]) &&
+          (phoEt->at(phonr) < ptbins[ptb+1])
          ){
             // idnc, idnc_mL30, idnc_trig, idnc_mL30_trig, oldj
             //nc++;
-            FillDenBkgHistograms(ptb, 0, nmhDenPCvint.at(k), event_weight);
-            FillDenDenHistograms(ptb, 0, nmhDenPCvint.at(k), event_weight);
+            FillDenBkgHistograms(ptb, 0, phonr, event_weight);
+            FillDenDenHistograms(ptb, 0, phonr, event_weight);
             if(passMET){
-             FillDenBkgHistograms(ptb, 1, nmhDenPCvint.at(k), event_weight);
-             FillDenDenHistograms(ptb, 1, nmhDenPCvint.at(k), event_weight);
+             FillDenBkgHistograms(ptb, 1, phonr, event_weight);
+             FillDenDenHistograms(ptb, 1, phonr, event_weight);
             }
             if(passTriggers){
-             FillDenBkgHistograms(ptb, 2, nmhDenPCvint.at(k), event_weight);
-             FillDenDenHistograms(ptb, 2, nmhDenPCvint.at(k), event_weight);
+             FillDenBkgHistograms(ptb, 2, phonr, event_weight);
+             FillDenDenHistograms(ptb, 2, phonr, event_weight);
             }
             if(passTriggers && passMET){
-             FillDenBkgHistograms(ptb, 3, nmhDenPCvint.at(k), event_weight);
-             FillDenDenHistograms(ptb, 3, nmhDenPCvint.at(k), event_weight);
+             FillDenBkgHistograms(ptb, 3, phonr, event_weight);
+             FillDenDenHistograms(ptb, 3, phonr, event_weight);
             }
+            if(passTriggers175){
+             FillDenBkgHistograms(ptb, 4, phonr, event_weight);
+             FillDenDenHistograms(ptb, 4, phonr, event_weight);
+            }
+            if(passTriggers175 && passMET){
+             FillDenBkgHistograms(ptb, 5, phonr, event_weight);
+             FillDenDenHistograms(ptb, 5, phonr, event_weight);
+            }
+            if(passTriggers250){
+             FillDenBkgHistograms(ptb, 6, phonr, event_weight);
+             FillDenDenHistograms(ptb, 6, phonr, event_weight);
+            }
+            if(passTriggers250 && passMET){
+             FillDenBkgHistograms(ptb, 7, phonr, event_weight);
+             FillDenDenHistograms(ptb, 7, phonr, event_weight);
+            }
+            if(passTriggers && passTriggers175 && passTriggers250 && passMET){
+             FillDenBkgHistograms(ptb, 8, phonr, event_weight);
+             FillDenDenHistograms(ptb, 8, phonr, event_weight);
+            }
+
            }
        }
       // inclusive from pT bins
       if(  
-         (phoEt->at(nmhDenPCvint.at(k)) > 175. ) && // ptbins[0]) &&
-         (phoEt->at(nmhDenPCvint.at(k)) < ptbins[ptbins.size()-1])
+         (phoEt->at(phonr) > 175. ) && // ptbins[0]) &&
+         (phoEt->at(phonr) < ptbins[ptbins.size()-1])
         ){
-          FillDenBkgHistograms(selptbin, 0, nmhDenPCvint.at(k), event_weight);
-          FillDenDenHistograms(selptbin, 0, nmhDenPCvint.at(k), event_weight);
+          FillDenBkgHistograms(selptbin, 0, phonr, event_weight);
+          FillDenDenHistograms(selptbin, 0, phonr, event_weight);
           if(passMET){
-           FillDenBkgHistograms(selptbin, 1, nmhDenPCvint.at(k), event_weight);
-           FillDenDenHistograms(selptbin, 1, nmhDenPCvint.at(k), event_weight);
+           FillDenBkgHistograms(selptbin, 1, phonr, event_weight);
+           FillDenDenHistograms(selptbin, 1, phonr, event_weight);
           }
           if(passTriggers){
-           FillDenBkgHistograms(selptbin, 2, nmhDenPCvint.at(k), event_weight);
-           FillDenDenHistograms(selptbin, 2, nmhDenPCvint.at(k), event_weight);
+           FillDenBkgHistograms(selptbin, 2, phonr, event_weight);
+           FillDenDenHistograms(selptbin, 2, phonr, event_weight);
           }
           if(passTriggers && passMET){
-           FillDenBkgHistograms(selptbin, 3, nmhDenPCvint.at(k), event_weight);
-           FillDenDenHistograms(selptbin, 3, nmhDenPCvint.at(k), event_weight);
+           FillDenBkgHistograms(selptbin, 3, phonr, event_weight);
+           FillDenDenHistograms(selptbin, 3, phonr, event_weight);
           }
+            if(passTriggers175){
+             FillDenBkgHistograms(selptbin, 4, phonr, event_weight);
+             FillDenDenHistograms(selptbin, 4, phonr, event_weight);
+            }
+            if(passTriggers175 && passMET){
+             FillDenBkgHistograms(selptbin, 5, phonr, event_weight);
+             FillDenDenHistograms(selptbin, 5, phonr, event_weight);
+            }
+            if(passTriggers250){
+             FillDenBkgHistograms(selptbin, 6, phonr, event_weight);
+             FillDenDenHistograms(selptbin, 6, phonr, event_weight);
+            }
+            if(passTriggers250 && passMET){
+             FillDenBkgHistograms(selptbin, 7, phonr, event_weight);
+             FillDenDenHistograms(selptbin, 7, phonr, event_weight);
+            }
+            if(passTriggers && passTriggers175 && passTriggers250 && passMET){
+             FillDenBkgHistograms(selptbin, 8, phonr, event_weight);
+             FillDenDenHistograms(selptbin, 8, phonr, event_weight);
+            }
          }
 
       // fully inclusive in pT (depending only on selections for nmhDenPCvint)
-      FillDenBkgHistograms(incptbin, 0, nmhDenPCvint.at(k), event_weight);
-      FillDenDenHistograms(incptbin, 0, nmhDenPCvint.at(k), event_weight);
+      FillDenBkgHistograms(incptbin, 0, phonr, event_weight);
+      FillDenDenHistograms(incptbin, 0, phonr, event_weight);
       if(passMET){
-       FillDenBkgHistograms(incptbin, 1, nmhDenPCvint.at(k), event_weight);
-       FillDenDenHistograms(incptbin, 1, nmhDenPCvint.at(k), event_weight);
+       FillDenBkgHistograms(incptbin, 1, phonr, event_weight);
+       FillDenDenHistograms(incptbin, 1, phonr, event_weight);
       }
       if(passTriggers){
-       FillDenBkgHistograms(incptbin, 2, nmhDenPCvint.at(k), event_weight);
-       FillDenDenHistograms(incptbin, 2, nmhDenPCvint.at(k), event_weight);
+       FillDenBkgHistograms(incptbin, 2, phonr, event_weight);
+       FillDenDenHistograms(incptbin, 2, phonr, event_weight);
       }
       if(passTriggers && passMET){
-       FillDenBkgHistograms(incptbin, 3, nmhDenPCvint.at(k), event_weight);
-       FillDenDenHistograms(incptbin, 3, nmhDenPCvint.at(k), event_weight);
+       FillDenBkgHistograms(incptbin, 3, phonr, event_weight);
+       FillDenDenHistograms(incptbin, 3, phonr, event_weight);
       }
-
-     }
-    }
-
-    /////////////////////////////// old selections
-    // Fill Numerator (matched) Signal Histograms
-    if( omchPCvint.size()>0 ){ // if any photon indexes passed sig selection
-     for(unsigned int k=0; k<omchPCvint.size(); ++k){ // go through each photon passing sel
-      // pt bins
-      for(unsigned int ptb=0; ptb<lstptbin; ++ptb){
-       if(
-          (phoEt->at(omchPCvint.at(k)) > ptbins[ptb]) &&
-          (phoEt->at(omchPCvint.at(k)) < ptbins[ptb+1])
-         ){
-            // idnc, idnc_mL30, idnc_trig, idnc_mL30_trig, oldj
-            //nc++;
-            FillSigHistograms(ptb, 4, omchPCvint.at(k), event_weight);
-            FillDenHistograms(ptb, 4, omchPCvint.at(k), event_weight);
-           }
-       }
-      // inclusive from pT bins
-      if(  
-         (phoEt->at(omchPCvint.at(k)) > 175. ) && // ptbins[0]) &&
-         (phoEt->at(omchPCvint.at(k)) < ptbins[ptbins.size()-1])
-        ){
-          FillSigHistograms(selptbin, 4, omchPCvint.at(k), event_weight);
-          FillDenHistograms(selptbin, 4, omchPCvint.at(k), event_weight);
-         }
-
-      // fully inclusive in pT (depending only on selections for omchPCvint)
-      FillSigHistograms(incptbin, 4, omchPCvint.at(k), event_weight);
-      FillDenHistograms(incptbin, 4, omchPCvint.at(k), event_weight);
-
-     }
-    }
-    // Fill Numerator (unmatched) Bkgnal Histograms
-    if( onmhPCvint.size()>0 ){ // if any photon indexes passed sig selection
-     for(unsigned int k=0; k<onmhPCvint.size(); ++k){ // go through each photon passing sel
-      // pt bins
-      for(unsigned int ptb=0; ptb<lstptbin; ++ptb){
-       if(
-          (phoEt->at(onmhPCvint.at(k)) > ptbins[ptb]) &&
-          (phoEt->at(onmhPCvint.at(k)) < ptbins[ptb+1])
-         ){
-            // idnc, idnc_mL30, idnc_trig, idnc_mL30_trig, oldj
-            //nc++;
-            FillBkgHistograms(ptb, 4, onmhPCvint.at(k), event_weight);
-            FillDenHistograms(ptb, 4, onmhPCvint.at(k), event_weight);
-           }
-       }
-      // inclusive from pT bins
-      if(  
-         (phoEt->at(onmhPCvint.at(k)) > 175. ) && // ptbins[0]) &&
-         (phoEt->at(onmhPCvint.at(k)) < ptbins[ptbins.size()-1])
-        ){
-          FillBkgHistograms(selptbin, 4, onmhPCvint.at(k), event_weight);
-          FillDenHistograms(selptbin, 4, onmhPCvint.at(k), event_weight);
-         }
-
-      // fully inclusive in pT (depending only on selections for onmhPCvint)
-      FillBkgHistograms(incptbin, 4, onmhPCvint.at(k), event_weight);
-      FillDenHistograms(incptbin, 4, onmhPCvint.at(k), event_weight);
+            if(passTriggers175){
+             FillDenBkgHistograms(incptbin, 4, phonr, event_weight);
+             FillDenDenHistograms(incptbin, 4, phonr, event_weight);
+            }
+            if(passTriggers175 && passMET){
+             FillDenBkgHistograms(incptbin, 5, phonr, event_weight);
+             FillDenDenHistograms(incptbin, 5, phonr, event_weight);
+            }
+            if(passTriggers250){
+             FillDenBkgHistograms(incptbin, 6, phonr, event_weight);
+             FillDenDenHistograms(incptbin, 6, phonr, event_weight);
+            }
+            if(passTriggers250 && passMET){
+             FillDenBkgHistograms(incptbin, 7, phonr, event_weight);
+             FillDenDenHistograms(incptbin, 7, phonr, event_weight);
+            }
+            if(passTriggers && passTriggers175 && passTriggers250 && passMET){
+             FillDenBkgHistograms(incptbin, 8, phonr, event_weight);
+             FillDenDenHistograms(incptbin, 8, phonr, event_weight);
+            }
 
      }
     }
@@ -513,6 +804,20 @@ void postAnalyzerMC_purity::Loop(TString outfilename, Bool_t isMC, Double_t lumi
  sw.Stop();
  std::cout<<"Real Time: "<<sw.RealTime()/60.0 <<" minutes"<<std::endl;
  std::cout<<"CPU Time: "<<sw.CpuTime()/60.0 <<" minutes"<<std::endl;
+
+ std::cout<<" ntot "<< ntot << std::endl;
+
+ std::cout<<" n_mch_all      "<<  n_mch_all      <<std::endl;    
+ std::cout<<" n_mch_met      "<<  n_mch_met      <<std::endl;    
+ std::cout<<" n_mch_trg      "<<  n_mch_trg      <<std::endl;    
+ std::cout<<" n_mch_met_trg  "<<  n_mch_met_trg  <<std::endl;
+
+ std::cout<<" n_nmh_all      "<<  n_nmh_all      <<std::endl;  
+ std::cout<<" n_nmh_met      "<<  n_nmh_met      <<std::endl;  
+ std::cout<<" n_nmh_trg      "<<  n_nmh_trg      <<std::endl;  
+ std::cout<<" n_nmh_met_trg  "<<  n_nmh_met_trg  <<std::endl;   
+
+
  std::cout<<"Done"<<std::endl;
 
 } //end Loop()
@@ -644,112 +949,138 @@ std::vector<int> postAnalyzerMC_purity::pcPassDenSel( double phoPtLo, double pho
 }
 
 
-// photon candidates passing signal selection in low MET region - (no sieie or (w)chiso cuts)
-std::vector<int> postAnalyzerMC_purity::pcPassOldSel( double phoPtLo, double phoPtHi, double phoEtaMax ){
-        bool HEpass = false;
-        //bool sigmaietaietapass = false;
-        //bool corrChargedIsopass = false;
-        bool corrNeutralIsopass = false;
-        bool corrPhotonIsopass = false;
+//-------------------------electron_passLooseID
+std::vector<int> postAnalyzerMC_purity::electron_passLooseID(int pho_index, float elePtCut)
+{
+  //bool veto_passed = true; //pass veto if no good electron found 
+  std::vector<int> elelist;
 
-        std::vector<int> tmpCand;
-        tmpCand.clear();
-        //Loop over photons
-        for(int p=0;p<nPho;p++)  // nPho from ntuple (should = phoE->length() )
+  bool pass_SigmaIEtaIEtaFull5x5 = false;
+  bool pass_dEtaIn = false;
+  bool pass_dPhiIn = false;
+  bool pass_HoverE = false;
+  bool pass_iso = false;
+  bool pass_ooEmooP = false;
+  bool pass_d0 = false;
+  bool pass_dz = false;
+  bool pass_missingHits = false;
+  bool pass_convVeto = false;
+  //Explicitly stating types to avoid a TMath::Max conversion issue   
+  Float_t EA = 0.0;
+  Float_t zero = 0.0;
+  Float_t EAcorrIso = 999.9;
+  for(int i = 0; i < nEle; i++)
+    {
+      //Make sure these get reset for every electron  
+      pass_SigmaIEtaIEtaFull5x5 = false;
+      pass_dEtaIn = false;
+      pass_dPhiIn = false;
+      pass_HoverE = false;
+      pass_iso = false;
+      pass_ooEmooP = false;
+      pass_d0 = false;
+      pass_dz = false;
+      pass_missingHits = false;
+      pass_convVeto = false;
+      //Find EA for corrected relative iso.  
+      if(abs(eleSCEta->at(i)) <= 1.0)
+        EA = 0.1752;
+      else if(1.0 < abs(eleSCEta->at(i)) && abs(eleSCEta->at(i)) <= 1.479)
+        EA = 0.1862;
+      else if(1.479 < abs(eleSCEta->at(i)) && abs(eleSCEta->at(i)) <= 2.0)
+        EA = 0.1411;
+      else if(2.0 < abs(eleSCEta->at(i)) && abs(eleSCEta->at(i)) <= 2.2)
+        EA = 0.1534;
+      else if(2.2 < abs(eleSCEta->at(i)) && abs(eleSCEta->at(i)) <= 2.3)
+        EA = 0.1903;
+      else if(2.3 < abs(eleSCEta->at(i)) && abs(eleSCEta->at(i)) <= 2.4)
+        EA = 0.2243;
+      else if(2.4 < abs(eleSCEta->at(i)) && abs(eleSCEta->at(i)) < 2.5)
+        EA = 0.2687;
+      EAcorrIso = (elePFChIso->at(i) + TMath::Max(zero,elePFNeuIso->at(i) + elePFPhoIso->at(i) - rho*EA))/(elePt->at(i));
+
+      if(abs(eleSCEta->at(i)) <= 1.479)
         {
-
-        float photon_pt = phoEt->at(p);
-        float SC_eta = phoSCEta->at(p);
-        float HE = phoHoverE->at(p);
-         //float sigmaietaieta = phoSigmaIEtaIEta->at(p);
-
-         bool passKinematics;
-         passKinematics = (
-                           ( photon_pt > phoPtLo  ) &&
-                           ( photon_pt <= phoPtHi ) &&
-                           ( fabs(SC_eta) < phoEtaMax)
-                          );
-      
-         //float EAcharged = 0.0;
-         float EAneutral = 0.0;
-         float EAphoton = 0.0;
-         if(abs(SC_eta) <= 1.0)
-         {   
-                 //EAcharged = 0.0157;
-                 EAneutral = 0.0143;
-                 EAphoton = 0.0725;
-         }   
-         else if(1.0 < abs(SC_eta) && abs(SC_eta) <= 1.479)
-         {   
-                 //EAcharged = 0.0143;
-                 EAneutral = 0.0210;
-                 EAphoton = 0.0604;
-         }   
-         else if(1.479 < abs(SC_eta) && abs(SC_eta) <= 2.0)
-         {   
-                 //EAcharged = 0.0115;
-                 EAneutral = 0.0147;
-                 EAphoton = 0.0320;
-         }   
-         else if(2.0 < abs(SC_eta) && abs(SC_eta) <= 2.2)
-         {   
-                 //EAcharged = 0.0094;
-                 EAneutral = 0.0082;
-                 EAphoton = 0.0512;
-         }   
-         else if(2.2 < abs(SC_eta) && abs(SC_eta) <= 2.3)
-         {   
-                 //EAcharged = 0.0095;
-                 EAneutral = 0.0124;
-                 EAphoton = 0.0766;
-         }   
-         else if(2.3 < abs(SC_eta) && abs(SC_eta) <= 2.4)
-         {   
-                 //EAcharged = 0.0068;
-                 EAneutral = 0.0186;
-                 EAphoton = 0.0949;
-         }   
-         else if(2.4 < abs(SC_eta))
-         {   
-                 //EAcharged = 0.0053;
-                 EAneutral = 0.0320;
-                 EAphoton = 0.1160;
-         }   
-
-         //Being very explicit about types here, to avoid a conversion ambiguity
-         //Float_t corrChargedIso_nonzero = phoPFChIso->at(p) - rho*EAcharged;
-         Float_t corrNeutralIso_nonzero = phoPFNeuIso->at(p)  - rho*EAneutral;
-         Float_t corrPhotonIso_nonzero = phoPFPhoIso->at(p) - rho*EAphoton;
-         Float_t zero = 0.0;
-         //Float_t corrChargedIso = TMath::Max(corrChargedIso_nonzero,zero);
-         Float_t corrNeutralIso = TMath::Max(corrNeutralIso_nonzero,zero);
-         Float_t corrPhotonIso = TMath::Max(corrPhotonIso_nonzero,zero);
-      
-         //Barrel
-         if(SC_eta < 1.4442)
-         {   
-                 HEpass = HE < 0.05;
-                 //sigmaietaietapass = sigmaietaieta < 0.0100;
-                 //corrChargedIsopass = corrChargedIso < 1.31;
-                 corrNeutralIsopass = corrNeutralIso < (0.60 + exp(0.0044*photon_pt + 0.5809));
-                 corrPhotonIsopass = corrPhotonIso < (1.33 + 0.0043*photon_pt);
-         }   
-         //Endcap
-         else if(SC_eta > 1.566)
-         {   
-                 HEpass = HE < 0.05;
-                 //sigmaietaietapass = sigmaietaieta < 0.0267;
-                 //corrChargedIsopass = corrChargedIso < 1.25;
-                 corrNeutralIsopass = corrNeutralIso < (1.65 + exp(0.0040*photon_pt + 0.9402));
-                 corrPhotonIsopass = corrPhotonIso < (1.02 + 0.0041*photon_pt);
-         }   
-      
-         if(HEpass && corrNeutralIsopass && corrPhotonIsopass && passKinematics) {
-          tmpCand.push_back(p);
-         }
-      
+          pass_SigmaIEtaIEtaFull5x5 = eleSigmaIEtaIEtaFull5x5->at(i) < 0.0103;
+          pass_dEtaIn = abs(eledEtaAtVtx->at(i)) < 0.0105;
+          pass_dPhiIn = abs(eledPhiAtVtx->at(i)) < 0.115;
+          pass_HoverE = eleHoverE->at(i) < 0.104;
+          pass_iso = EAcorrIso < 0.0893;
+          pass_ooEmooP = eleEoverPInv->at(i) < 0.102;
+          pass_d0 = abs(eleD0->at(i)) < 0.0261;
+          pass_dz = abs(eleDz->at(i)) < 0.41;
+          pass_missingHits = eleMissHits->at(i) <= 2;
+          pass_convVeto = eleConvVeto->at(i) == 1;
         }
-        return tmpCand;
+      else if(1.479 < abs(eleSCEta->at(i)) < 2.5)
+        {
+          pass_SigmaIEtaIEtaFull5x5 = eleSigmaIEtaIEtaFull5x5->at(i) < 0.0301;
+          pass_dEtaIn = abs(eledEtaAtVtx->at(i)) < 0.00814;
+          pass_dPhiIn = abs(eledPhiAtVtx->at(i)) < 0.182;
+          pass_HoverE = eleHoverE->at(i) < 0.0897;
+          pass_iso = EAcorrIso < 0.121;
+          pass_ooEmooP = eleEoverPInv->at(i) < 0.126;
+          pass_d0 = abs(eleD0->at(i)) < 0.118;
+          pass_dz = abs(eleDz->at(i)) < 0.822;
+          pass_missingHits = eleMissHits->at(i) <= 1;
+          pass_convVeto = eleConvVeto->at(i) == 1;
+        }
+
+      //Electron passes Loose Electron ID cuts 
+      if(pass_SigmaIEtaIEtaFull5x5 && pass_dEtaIn && pass_dPhiIn && pass_HoverE && pass_iso && pass_ooEmooP && pass_d0 && pass_dz && pass_missingHits && pass_convVeto)
+        {
+          //Electron passes pt cut 
+          if(elePt->at(i) > elePtCut)
+            {
+              //Electron does not overlap photon 
+              if(dR(eleSCEta->at(i),eleSCPhi->at(i),phoSCEta->at(pho_index),phoSCPhi->at(pho_index)) > 0.5)
+                {
+                  elelist.push_back(i);
+                }
+            }
+        }
+    }
+  return elelist;
+}
+
+
+//-------------------------muon_passLooseID
+std::vector<int> postAnalyzerMC_purity::muon_passLooseID(int pho_index, float muPtCut)
+{
+  std::vector<int> mulist;
+
+  bool pass_PFMuon = false;
+  bool pass_globalMuon = false;
+  bool pass_trackerMuon = false;
+  bool pass_iso = false;
+  //Explicitly stating types to avoid a TMath::Max conversion issue 
+  Float_t zero = 0.0;
+  Float_t muPhoPU = 999.9;
+  Float_t tightIso_combinedRelative = 999.9;
+  for(int i = 0; i < nMu; i++)
+    {
+
+      pass_PFMuon = muIsPFMuon->at(i);
+      pass_globalMuon = muIsGlobalMuon->at(i);
+      pass_trackerMuon = muIsTrackerMuon->at(i);
+      muPhoPU = muPFNeuIso->at(i) + muPFPhoIso->at(i) - 0.5*muPFPUIso->at(i);
+      tightIso_combinedRelative = (muPFChIso->at(i) + TMath::Max(zero,muPhoPU))/(muPt->at(i));
+      pass_iso = tightIso_combinedRelative < 0.25;
+      //if(pass_PFMuon && (pass_globalMuon || pass_trackerMuon) && pass_iso)
+      if(pass_PFMuon && (pass_globalMuon || pass_trackerMuon) )
+        {
+          //Muon passes pt cut 
+          if(muPt->at(i) > muPtCut)
+            {
+              //Muon does not overlap photon
+              if(dR(muEta->at(i),muPhi->at(i),phoSCEta->at(pho_index),phoSCPhi->at(pho_index)) > 0.5)
+                {
+                 mulist.push_back(i);
+                }
+            }
+        }
+    }
+  return mulist;
 }
 
 
@@ -808,4 +1139,30 @@ double postAnalyzerMC_purity::dR(double eta1, double phi1, double eta2, double p
         double deltar = sqrt(deltaeta*deltaeta + deltaphi*deltaphi);
         return deltar;
 }
+//-------------------------passdphiJetMET
+bool postAnalyzerMC_purity::passdphiJetMET(std::vector<int> *jets, double mephi)
+{
+
+  //pass veto if no jet is found within DeltaPhi(jet,MET) < 0.5                                                                                  
+       
+  bool passes = false;
+  int njetsMax = jets->size();
+  //Only look at first four jets                                                                                                                 
+       
+  if(njetsMax > 4)
+    njetsMax = 4;
+  int j = 0;
+  for(; j < njetsMax; j++)
+    {
+      //fail veto if a jet is found with DeltaPhi(jet,MET) < 0.5                                                                                 
+   
+      if(DeltaPhi(jetPhi->at(jets->at(j)), mephi) < 0.5)
+        break;
+    }
+  if(j==njetsMax)
+    passes = true;
+
+  return passes;
+}
+
 
