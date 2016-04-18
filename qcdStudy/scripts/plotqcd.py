@@ -22,6 +22,7 @@ parser.add_argument("-en","--data_ele_filename", help="electron data filename (.
 parser.add_argument("-od","--outdir",            help="/path/to/output/directory")
 parser.add_argument("-on","--out_filename",      help="output name (no .root)")
 parser.add_argument("-var","--variable",         help="variable name")
+parser.add_argument("-c","--cut",                help="cut namte")
 parser.add_argument("-rng","--ptrange",          help="pT range (ex. 250to400")
 parser.add_argument("-log","--do_log",  action='store_true', help="Set Log Scale")
 args = parser.parse_args()
@@ -35,9 +36,10 @@ data_ele_filename  = args.data_ele_filename
 outdir             = args.outdir  
 out_filename       = args.out_filename  
 variable           = args.variable
+cut                = args.cut
 ptrange            = args.ptrange
 do_log             = args.do_log
-webdir = "/afs/hep.wisc.edu/user/tperry/www/MonoPhoton/qcdPlots/%s"%(version)
+webdir = "/afs/hep.wisc.edu/user/tperry/www/MonoPhoton/qcdPlots/%s/qcd"%(version)
 
 import errno
 import os
@@ -93,7 +95,7 @@ c.SetFrameLineWidth(2)
 c.SetCanvasSize(canx,cany)
 
 # Numerator Total (Data, Signal Selection)
-h_ntot = d_file.Get("h_sig_%s_%s"%(variable,ptrange))
+h_ntot = d_file.Get("h_sig_%s_%s_%s"%(variable,ptrange,cut))
 h_ntot.SetName("h_ntot")
 h_ntot.SetTitle("")
 h_ntot.SetLineColor(c_ntot)
@@ -105,7 +107,7 @@ h_ntot.Scale( 1. / max(h_ntot.Integral(-1,-1),1.) )
 themax = h_ntot.GetMaximum()
 
 # Numerator (electron shape)  Total (Data Ele, Signal Selection)
-h_etot = e_file.Get("h_sig_%s_%s"%(variable,ptrange))
+h_etot = e_file.Get("h_sig_%s_%s_%s"%(variable,ptrange,cut))
 h_etot.SetName("h_etot")
 h_etot.SetTitle("")
 h_etot.SetLineColor(c_etot)
@@ -117,7 +119,7 @@ h_etot.Scale( 1. / max(h_etot.Integral(-1,-1),1.) )
 themax = max( themax, h_etot.GetMaximum() )
 
 # Numerator Background (Data, 5 < chIso < 10 sideband)
-h_nbkg = d_file.Get("h_bkg_%s_%s"%(variable,ptrange))
+h_nbkg = d_file.Get("h_bkg_%s_%s_%s"%(variable,ptrange,cut))
 h_nbkg.SetName("h_nbkg")
 h_nbkg.SetTitle("")
 h_nbkg.SetLineColor(c_nbkg)
@@ -129,7 +131,7 @@ h_nbkg.Scale( 0.5 / max(h_nbkg.Integral(-1,-1),1.) )
 themax = max( themax, h_nbkg.GetMaximum() )
 
 # Numerator Signal (MC, Signal Selection)
-h_nsig = m_file.Get("h_sig_%s_%s"%(variable,ptrange))
+h_nsig = m_file.Get("h_sig_%s_%s_%s"%(variable,ptrange,cut))
 h_nsig.SetName("h_nsig")
 h_nsig.SetTitle("")
 h_nsig.SetLineColor(c_nsig)
@@ -141,7 +143,7 @@ h_nsig.Scale( 0.5 / max(h_nsig.Integral(-1,-1),1.) )
 themax = max( themax, h_nsig.GetMaximum() )
 
 # Denominator (Data, Inv. Iso / Pass V.Loose ID/ Fail Loose ID)
-h_deno = d_file.Get("h_den_%s_%s"%(variable,ptrange))
+h_deno = d_file.Get("h_den_%s_%s_%s"%(variable,ptrange,cut))
 h_deno.SetName("h_deno")
 h_deno.SetTitle("")
 h_deno.SetLineColor(c_deno)
@@ -153,7 +155,7 @@ h_deno.Scale( 0.5 / max(h_deno.Integral(-1,-1),1.) )
 themax = max( themax, h_deno.GetMaximum() )
 
 # QCD Denominator (QCD MC, Inv. Iso / Pass V.Loose ID/ Fail Loose ID)
-h_qden = q_file.Get("h_den_%s_%s"%(variable,ptrange))
+h_qden = q_file.Get("h_den_%s_%s_%s"%(variable,ptrange,cut))
 h_qden.SetName("h_qden")
 h_qden.SetTitle("")
 h_qden.SetLineColor(c_qden)
