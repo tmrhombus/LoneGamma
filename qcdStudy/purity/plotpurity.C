@@ -11,44 +11,69 @@
 
 void plotpurity()
 {
+
+ Bool_t dolines = kFALSE;
+ //Bool_t dolines = kTRUE;
+ TString lines = "";
+
  TString xn = "";
+ //TString xn = "_onlyQCD";
+ //TString xn = "_onlyGJ";
+ //TString xn = "_denominator";
+ if(dolines){lines="/lines";}
 
  std::vector<TString> rebins;
- rebins.push_back("rebin1");
- rebins.push_back("rebin2");
- rebins.push_back("rebin3");
- rebins.push_back("rebin4");
- rebins.push_back("rebin5");
+ rebins.push_back("");
+// rebins.push_back("rebin1");
+// rebins.push_back("rebin2");
+// rebins.push_back("rebin3");
+// rebins.push_back("rebin4");
+// rebins.push_back("rebin5");
 
  std::vector<TString> ptranges;
 // ptranges.push_back("90to120");
 // ptranges.push_back("120to155");
 // ptranges.push_back("155to175");
-// ptranges.push_back("175to190");
-// ptranges.push_back("190to250");
-// ptranges.push_back("250to400");
-// ptranges.push_back("400to700");
-// ptranges.push_back("700to1000");
+ ptranges.push_back("175to190");
+ ptranges.push_back("190to250");
+ ptranges.push_back("250to400");
+ ptranges.push_back("400to700");
+ ptranges.push_back("700to1000");
+ ptranges.push_back("175to1000");
  //ptranges.push_back("250to1000");
- ptranges.push_back("400to1000");
+ //ptranges.push_back("400to1000");
 
  std::vector<TString> isovars;
-// isovars.push_back("wchiso");
+ //isovars.push_back("wchiso");
  isovars.push_back("chiso");
+// isovars.push_back("sieieF5x5");
+// isovars.push_back("sieipF5x5");
+// isovars.push_back("sipipF5x5");
+// isovars.push_back("rho");
+// isovars.push_back("nVtx");
+// isovars.push_back("phoet");
+// isovars.push_back("pfMET");
 
  std::vector<TString> cuts;
-// cuts.push_back("idnc");
-// cuts.push_back("idnc_mL30");
-// cuts.push_back("idnc_trig");
- cuts.push_back("idnc_mL30_trig");
+ cuts.push_back("a_idnc");
+ cuts.push_back("b_idnc_mL30");
+ cuts.push_back("c_idnc_trig");
+ cuts.push_back("d_idnc_mL30_trig");
+ cuts.push_back("e_idnc_t175");
+ cuts.push_back("f_idnc_mL30_t175");
+ cuts.push_back("g_idnc_t250");
+ cuts.push_back("h_idnc_mL30_t250");
+ cuts.push_back("i_idnc_mL30_allt");
 // cuts.push_back("oldj");
 
- TString inpath = "/afs/hep.wisc.edu/cms/tperry/LoneG_slc6_491_CMSSW_7_4_14/src/LoneGamma/qcdStudy/Morvars/analyzed";
- TString outpath = "/afs/hep.wisc.edu/cms/tperry/LoneG_slc6_491_CMSSW_7_4_14/src/LoneGamma/qcdStudy/Morvars/plots";
-// TString inname_GJ  = inpath+"/purity_GJets_Merged.root";
-// TString inname_QCD = inpath+"/purity_QCD_Merged.root";
- TString inname_GJ  = inpath+"/purity_mrg4bins_GJets.root";
- TString inname_QCD = inpath+"/purity_mrg4bins_QCD.root";
+ TString inpath = "/afs/hep.wisc.edu/cms/tperry/LoneG_slc6_491_CMSSW_7_4_14/src/LoneGamma/qcdStudy/gitignore/Lire/analyzed";
+ TString outpath = "/afs/hep.wisc.edu/cms/tperry/LoneG_slc6_491_CMSSW_7_4_14/src/LoneGamma/qcdStudy/gitignore/Lire/plots";
+ TString wwwpath = "/afs/hep.wisc.edu/home/tperry/www/MonoPhoton/qcdPlots/Lire/purity";
+
+ TString inname_GJ  = inpath+"/purity_GJets_Merged.root";
+ TString inname_QCD = inpath+"/purity_QCD_Merged.root";
+// TString inname_GJ  = inpath+"/purity_mrg4bins_GJets.root";
+// TString inname_QCD = inpath+"/purity_mrg4bins_QCD.root";
  //TString inname_GJ  = inpath+"/purity_mrg3bins_GJets.root";
  //TString inname_QCD = inpath+"/purity_mrg3bins_QCD.root";
  
@@ -57,8 +82,8 @@ void plotpurity()
  
  ofstream log;
  ofstream log_latex;
- log.open (outpath+"/Purity_log.txt");
- log_latex.open (outpath+"/Purity_log_latex.txt");
+ log.open (outpath+"/Purity_log"+xn+".txt");
+ log_latex.open (outpath+"/Purity_log_latex"+xn+".txt");
 
  Int_t fillcolor = 3;
  gStyle->SetOptStat(0);
@@ -127,7 +152,8 @@ void plotpurity()
      //Signal purity
      TH1F* h_Nsig_GJ  = (TH1F*)infile_GJ->Get("h_Nsig_"+isovar+"_"+ptrange+"_"+cut);
      TH1F* h_Nsig_QCD = (TH1F*)infile_QCD->Get("h_Nsig_"+isovar+"_"+ptrange+"_"+cut);
-     h_Nsig_GJ->Rebin(l+1); h_Nsig_QCD->Rebin(l+1);
+     h_Nsig_GJ->Rebin(3); h_Nsig_QCD->Rebin(3); //h_Nsig_GJ->Rebin(l+1); h_Nsig_QCD->Rebin(l+1);
+             //TH1F* h_Nsig  = (TH1F*)h_Nsig_QCD->Clone("h_Nsig");
      TH1F* h_Nsig  = (TH1F*)h_Nsig_GJ->Clone("h_Nsig");
      h_Nsig->Add(h_Nsig_QCD);
      h_Nsig->SetLineColor(c_sig); h_Nsig_GJ->SetLineColor(c_sig); h_Nsig_QCD->SetLineColor(c_sig);
@@ -136,21 +162,31 @@ void plotpurity()
      //Background purity
      TH1F* h_Nbkg_GJ  = (TH1F*)infile_GJ->Get("h_Nbkg_"+isovar+"_"+ptrange+"_"+cut);
      TH1F* h_Nbkg_QCD = (TH1F*)infile_QCD->Get("h_Nbkg_"+isovar+"_"+ptrange+"_"+cut);
-     h_Nbkg_GJ->Rebin(l+1); h_Nbkg_QCD->Rebin(l+1);
+     h_Nbkg_GJ->Rebin(3); h_Nbkg_QCD->Rebin(3);
+             //TH1F* h_Nbkg  = (TH1F*)h_Nbkg_QCD->Clone("h_Nbkg");
      TH1F* h_Nbkg  = (TH1F*)h_Nbkg_GJ->Clone("h_Nbkg");
      h_Nbkg->Add(h_Nbkg_QCD);
      h_Nbkg->SetLineColor(c_bkg); h_Nbkg_GJ->SetLineColor(c_bkg); h_Nbkg_QCD->SetLineColor(c_bkg);
      h_Nbkg->SetLineStyle(ls_cmb); h_Nbkg_GJ->SetLineStyle(ls_gj); h_Nbkg_QCD->SetLineStyle(ls_qcd);
      h_Nbkg->SetLineWidth(2); h_Nbkg_GJ->SetLineWidth(2); h_Nbkg_QCD->SetLineWidth(2);
+
      //Denominator
-     TH1F* h_Deno_GJ  = (TH1F*)infile_GJ->Get("h_Deno_"+isovar+"_"+ptrange+"_"+cut);
-     TH1F* h_Deno_QCD = (TH1F*)infile_QCD->Get("h_Deno_"+isovar+"_"+ptrange+"_"+cut);
-     h_Deno_GJ->Rebin(l+1); h_Deno_QCD->Rebin(l+1);
+     TH1F* h_Deno_GJ  = (TH1F*)h_Nsig_GJ->Clone("h_Deno_GJ");
+     h_Deno_GJ->Add(h_Nbkg_GJ);
+
+     TH1F* h_Deno_QCD  = (TH1F*)h_Nsig_QCD->Clone("h_Deno_QCD");
+     h_Deno_QCD->Add(h_Nbkg_QCD);
+
+//     TH1F* h_Deno_GJ  = (TH1F*)infile_GJ->Get("h_Deno_"+isovar+"_"+ptrange+"_"+cut);
+//     TH1F* h_Deno_QCD = (TH1F*)infile_QCD->Get("h_Deno_"+isovar+"_"+ptrange+"_"+cut);
+//     h_Deno_GJ->Rebin(3); h_Deno_QCD->Rebin(3);
+//             //TH1F* h_Deno  = (TH1F*)h_Deno_QCD->Clone("h_Deno");
      TH1F* h_Deno  = (TH1F*)h_Deno_GJ->Clone("h_Deno");
      h_Deno->Add(h_Deno_QCD);
+
      h_Deno->SetLineColor(c_den); h_Deno_GJ->SetLineColor(c_den); h_Deno_QCD->SetLineColor(c_den);
      h_Deno->SetLineStyle(ls_cmb); h_Deno_GJ->SetLineStyle(ls_gj); h_Deno_QCD->SetLineStyle(ls_qcd);
-     h_Deno->SetLineWidth(2); h_Deno_GJ->SetLineWidth(2); h_Deno_QCD->SetLineWidth(2);
+     h_Deno->SetLineWidth(1); h_Deno_GJ->SetLineWidth(1); h_Deno_QCD->SetLineWidth(1);
 
      // should probably add these as last bin..
      h_Nsig->ClearUnderflowAndOverflow();
@@ -593,37 +629,44 @@ void plotpurity()
 
      meg->SetHeader("photon p_{T}: "+ptrange);
      meg->Draw();
-     neg->Draw();
+     if(dolines){
+      neg->Draw();
+     }
      title->DrawTextNDC(0.17,0.87,"CMS");
      extra->DrawTextNDC(0.17,0.81,"Preliminary");
      lumi->DrawTextNDC(0.9,0.91,"2.32 /fb (13 TeV)");
 
-     lhb_lo0->Draw();
-     lhb_lo1->Draw();
-     lhb_lo2->Draw();
-     lhb_lo3->Draw();
-     lhb_lo4->Draw();
-     
-     lhb_hi0->Draw();
-     lhb_hi1->Draw();
-     lhb_hi2->Draw();
-     lhb_hi3->Draw();
-     lhb_hi4->Draw();
+     if(dolines){
+      lhb_lo0->Draw();
+      lhb_lo1->Draw();
+      lhb_lo2->Draw();
+      lhb_lo3->Draw();
+      lhb_lo4->Draw();
+      
+      lhb_hi0->Draw();
+      lhb_hi1->Draw();
+      lhb_hi2->Draw();
+      lhb_hi3->Draw();
+      lhb_hi4->Draw();
 
-     lhc_lo0->Draw();
-     lhc_lo1->Draw();
-     lhc_lo2->Draw();
-     lhc_lo3->Draw();
-     lhc_lo4->Draw();
-     
-     lhc_hi0->Draw();
-     lhc_hi1->Draw();
-     lhc_hi2->Draw();
-     lhc_hi3->Draw();
-     lhc_hi4->Draw();
+      lhc_lo0->Draw();
+      lhc_lo1->Draw();
+      lhc_lo2->Draw();
+      lhc_lo3->Draw();
+      lhc_lo4->Draw();
+      
+      lhc_hi0->Draw();
+      lhc_hi1->Draw();
+      lhc_hi2->Draw();
+      lhc_hi3->Draw();
+      lhc_hi4->Draw();
+     }
 
      gPad->SetLogy();
-     canvas->SaveAs(outpath+"/Histos_"+isovar+"_"+ptrange+"_"+cut+"_"+rebin+xn+".pdf");
+
+     canvas->SaveAs(outpath+"/Histos_"+isovar+"_"+ptrange+"_"+cut+rebin+xn+".pdf");
+     canvas->SaveAs(wwwpath+"/pdf/"+ptrange+"/"+isovar+"/"+cut+lines+"/Histos_"+isovar+"_"+ptrange+"_"+cut+rebin+xn+".pdf");
+     canvas->SaveAs(wwwpath+"/png/"+ptrange+"/"+isovar+"/"+cut+lines+"/Histos_"+isovar+"_"+ptrange+"_"+cut+rebin+xn+".png");
      canvas->Clear();
      gPad->SetLogy(kFALSE);
      //-----------------------------------------------------
@@ -636,8 +679,10 @@ void plotpurity()
      leg->AddEntry(purity_signal,"Signal","lep");
      leg->AddEntry(purity_background,"Background","lep");
 
-     float xmin = 0.;
-     float xmax = 25.;
+     float xmin ; //= 0.;
+     float xmax ; //= 25.;
+     xmin = h_Nsig->GetXaxis()->GetXmin();
+     xmax = h_Nsig->GetXaxis()->GetXmax();
      TLine *lowline = new TLine(xmin,0,xmax,0);
      TLine *hiline = new TLine(xmin,1,xmax,1);
      lowline->SetLineWidth(1); lowline->SetLineColor(1); lowline->SetLineStyle(3);         
@@ -659,44 +704,48 @@ void plotpurity()
      leg->SetHeader("photon p_{T}: "+ptrange);
      leg->Draw();
 
-     canvas->SaveAs(outpath+"/Purity_"+isovar+"_"+ptrange+"_"+cut+"_"+rebin+xn+".pdf");
+     //canvas->SaveAs(outpath+"/Purity_"+isovar+"_"+ptrange+"_"+cut+"_"+rebin+xn+".pdf");
 
-     lgb_lo0->Draw();
-     lgb_lo1->Draw();
-     lgb_lo2->Draw();
-     lgb_lo3->Draw();
-     lgb_lo4->Draw();
-     
-     lgb_hi0->Draw();
-     lgb_hi1->Draw();
-     lgb_hi2->Draw();
-     lgb_hi3->Draw();
-     lgb_hi4->Draw();
-     
-     lgc_lo0->Draw();
-     lgc_lo1->Draw();
-     lgc_lo2->Draw();
-     lgc_lo3->Draw();
-     lgc_lo4->Draw();
-     
-     lgc_hi0->Draw();
-     lgc_hi1->Draw();
-     lgc_hi2->Draw();
-     lgc_hi3->Draw();
-     lgc_hi4->Draw();
+     if(dolines){
+      lgb_lo0->Draw();
+      lgb_lo1->Draw();
+      lgb_lo2->Draw();
+      lgb_lo3->Draw();
+      lgb_lo4->Draw();
+      
+      lgb_hi0->Draw();
+      lgb_hi1->Draw();
+      lgb_hi2->Draw();
+      lgb_hi3->Draw();
+      lgb_hi4->Draw();
+      
+      lgc_lo0->Draw();
+      lgc_lo1->Draw();
+      lgc_lo2->Draw();
+      lgc_lo3->Draw();
+      lgc_lo4->Draw();
+      
+      lgc_hi0->Draw();
+      lgc_hi1->Draw();
+      lgc_hi2->Draw();
+      lgc_hi3->Draw();
+      lgc_hi4->Draw();
 
-     lgb_pur0->Draw();
-     lgb_pur1->Draw();
-     lgb_pur2->Draw();
-     lgb_pur3->Draw();
-     lgb_pur4->Draw();
-     lgc_pur0->Draw();
-     lgc_pur1->Draw();
-     lgc_pur2->Draw();
-     lgc_pur3->Draw();
-     lgc_pur4->Draw();
+      lgb_pur0->Draw();
+      lgb_pur1->Draw();
+      lgb_pur2->Draw();
+      lgb_pur3->Draw();
+      lgb_pur4->Draw();
+      lgc_pur0->Draw();
+      lgc_pur1->Draw();
+      lgc_pur2->Draw();
+      lgc_pur3->Draw();
+      lgc_pur4->Draw();
+     }
      
-     canvas->SaveAs(outpath+"/Purity_"+isovar+"_"+ptrange+"_"+cut+"_"+rebin+"_lines"+xn+".pdf");
+     canvas->SaveAs(outpath+"/Purity_"+isovar+"_"+ptrange+"_"+cut+rebin+xn+".pdf");
+     canvas->SaveAs(wwwpath+"/pdf/"+ptrange+"/"+isovar+"/"+cut+lines+"/Purity_"+isovar+"_"+ptrange+"_"+cut+rebin+xn+".pdf");
+     canvas->SaveAs(wwwpath+"/png/"+ptrange+"/"+isovar+"/"+cut+lines+"/Purity_"+isovar+"_"+ptrange+"_"+cut+rebin+xn+".png");
 
      canvas->Clear();
      //-----------------------------------------------------
