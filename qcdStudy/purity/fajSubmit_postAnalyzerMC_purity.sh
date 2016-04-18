@@ -9,12 +9,12 @@ grablists=true
 START=$(date +%s);
 printf "Started at `date`"
 
-mkdir -p "${submitbase}/${version}/lists"
-mkdir -p "${submitbase}/${version}/submit"
+mkdir -p "${submitbase}/gitignore/${version}/lists"
+mkdir -p "${submitbase}/gitignore/${version}/submit"
 
 if [ ${grablists} = true ]
 then
- cp "${submitbase}/Domb/lists/"*txt "${submitbase}/${version}/lists/"
+ cp "${submitbase}/gitignore/Domb/lists/"*txt "${submitbase}/gitignore/${version}/lists/"
 fi
 
 lumi=2320. # /pb
@@ -22,7 +22,7 @@ lumi=2320. # /pb
 if [ ${domc} = true ]
 then
 
- initevents="${submitbase}/${version}/lists/initialEvents.txt"
+ initevents="${submitbase}/gitignore/${version}/lists/initialEvents.txt"
  echo " " >> ${initevents}
  touch ${initevents}
 
@@ -73,22 +73,22 @@ then
    # /hdfs/store/user/jjbuch/${mc_samplename}-${bin}_*TuneCUETP8M1_13TeV*pythia8/crab_ggNtuplizer_spring15_${mc_samplename}-${${bin}_try${trynr}/
 
    find /hdfs/store/user/jjbuch/${mc_samplename}-${bin}_*TuneCUETP8M1_13TeV*pythia8/crab_ggNtuplizer_spring15_${mc_samplename}-*_try${trynr}/151212_*/0000/*root > \
-    ${submitbase}/${version}/lists/hdfslist_${submitname}.txt
+    ${submitbase}/gitignore/${version}/lists/hdfslist_${submitname}.txt
 
    # format as xrootd
-   cp ${submitbase}/${version}/lists/hdfslist_${submitname}.txt \
-      ${submitbase}/${version}/lists/xrdlist_${submitname}.txt 
-   xrdlist="${submitbase}/${version}/lists/xrdlist_${submitname}.txt"
+   cp ${submitbase}/gitignore/${version}/lists/hdfslist_${submitname}.txt \
+      ${submitbase}/gitignore/${version}/lists/xrdlist_${submitname}.txt 
+   xrdlist="${submitbase}/gitignore/${version}/lists/xrdlist_${submitname}.txt"
    sed -i 's@/hdfs/@root://cmsxrootd.hep.wisc.edu//@g' $xrdlist #
 
    echo "                    .. counting events"
    python ../eventCounter.py ${submitname} \
-      ${submitbase}/${version}/lists/hdfslist_${submitname}.txt \
+      ${submitbase}/gitignore/${version}/lists/hdfslist_${submitname}.txt \
       ${initevents}
    echo "                    .. counted events"
    
   fi
-  xrdlist="${submitbase}/${version}/lists/xrdlist_${submitname}.txt"
+  xrdlist="${submitbase}/gitignore/${version}/lists/xrdlist_${submitname}.txt"
 
   # sample specific parameters..
   treename="ggNtuplizer/EventTree"
@@ -98,13 +98,13 @@ then
    #printf "\nxc is ${xc}\n"
 
   # make correct executable xx_callpostAnalyzer_QCD
-  cp template_callpostAnalyzerMC_purity.cc    "${submitbase}/${version}/submit/${submitname}_callpostAnalyzerMC_purity.cc"
-  sed -i "s@SAMPLENAME@${submitname}@g"  "${submitbase}/${version}/submit/${submitname}_callpostAnalyzerMC_purity.cc"
-  sed -i "s@TREENAME@${treename}@g"      "${submitbase}/${version}/submit/${submitname}_callpostAnalyzerMC_purity.cc"
-  sed -i "s@ISMC@${isMC}@g"              "${submitbase}/${version}/submit/${submitname}_callpostAnalyzerMC_purity.cc"
-  sed -i "s@CROSSSEC@${xc}@g"            "${submitbase}/${version}/submit/${submitname}_callpostAnalyzerMC_purity.cc"
-  sed -i "s@NREVENTS@${nrE}@g"           "${submitbase}/${version}/submit/${submitname}_callpostAnalyzerMC_purity.cc"
-  sed -i "s@LUMI@${lumi}@g"              "${submitbase}/${version}/submit/${submitname}_callpostAnalyzerMC_purity.cc"
+  cp template_callpostAnalyzerMC_purity.cc    "${submitbase}/gitignore/${version}/submit/${submitname}_callpostAnalyzerMC_purity.cc"
+  sed -i "s@SAMPLENAME@${submitname}@g"  "${submitbase}/gitignore/${version}/submit/${submitname}_callpostAnalyzerMC_purity.cc"
+  sed -i "s@TREENAME@${treename}@g"      "${submitbase}/gitignore/${version}/submit/${submitname}_callpostAnalyzerMC_purity.cc"
+  sed -i "s@ISMC@${isMC}@g"              "${submitbase}/gitignore/${version}/submit/${submitname}_callpostAnalyzerMC_purity.cc"
+  sed -i "s@CROSSSEC@${xc}@g"            "${submitbase}/gitignore/${version}/submit/${submitname}_callpostAnalyzerMC_purity.cc"
+  sed -i "s@NREVENTS@${nrE}@g"           "${submitbase}/gitignore/${version}/submit/${submitname}_callpostAnalyzerMC_purity.cc"
+  sed -i "s@LUMI@${lumi}@g"              "${submitbase}/gitignore/${version}/submit/${submitname}_callpostAnalyzerMC_purity.cc"
 
   printf "  done making submit template\n"
 
@@ -120,7 +120,7 @@ then
    --use-hdfs \
    --extra-inputs=${submitbase}/purity/postAnalyzerMC_purity.C,${submitbase}/purity/postAnalyzerMC_purity.h \
    ${version} \
-   "${submitbase}/${version}/submit/${submitname}_callpostAnalyzerMC_purity.cc"
+   "${submitbase}/gitignore/${version}/submit/${submitname}_callpostAnalyzerMC_purity.cc"
 
   fi # ${dosubmit} = true
 
