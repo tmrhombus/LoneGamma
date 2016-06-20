@@ -1,0 +1,184 @@
+#define plotfakeratio_cxx 
+#include "plotfakeratio.h"
+
+void plotfakeratio::Loop()
+{
+
+ char* submitbase;
+ submitbase = getenv ("submitbase");
+ char* version;
+ version = getenv("version");
+ Tsubmitbase = TString(submitbase);
+ Tversion = TString(version);
+
+ outpath = TString(Tsubmitbase+"/gitignore/"+Tversion+"/plots");
+ wwwpath = TString("/afs/hep.wisc.edu/user/tperry/www/MonoPhoton/qcdPlots/"+Tversion);
+
+
+std::vector<Double_t> ratios;
+std::vector<Double_t> ratioerrors;
+
+  // Ratio Plot
+  //////////////////////////////////////////////////////////////////////////////
+  TCanvas* c2 = new TCanvas("c2","c2",900,100,500,500);   
+
+
+ Double_t size_num_corr[4] = {426.022, 545.5  , 172.364, 7.0357};
+ Double_t size_den     [4] = {10305  , 16674  , 4893   , 327};
+ Double_t err_num_corr [4] = {138.033, 177.11 , 105.451, 31.1127};
+ Double_t err_den      [4] = {101.514, 129.128, 69.95  , 18.0831};
+ Double_t mid   [4] = {181.971, 213.076, 293.492, 469.272};
+ Double_t miderr[4] = {4.32988, 16.5566, 36.6713, 64.7329};
+
+ Double_t v1_size_num_corr[4] = {594.038, 707.621, 163.113, 7.12871 };
+ Double_t v1_size_den     [4] = {10450, 16818, 4896, 352   };
+ Double_t v1_err_num_corr [4] = {144.675, 186.901, 110.716, 35.0286  };
+ Double_t v1_err_den      [4] = {102.225, 129.684, 69.9714, 18.7617  };
+ Double_t v1_mid   [4]        = {181.979, 212.927, 292.708, 474.476  };
+ Double_t v1_miderr[4]        = {4.31802, 16.5006, 36.2155, 69.6858  };
+
+  gStyle->SetOptStat(0);
+  //gPad->SetLogy();
+  gPad->SetTickx();
+  gPad->SetTicky();
+  gStyle->SetLineWidth(3);
+
+  //Double_t ratio[3];
+  // 2016 Numbers
+  Double_t *ratio = new Double_t[4];
+  ratio[0] = size_num_corr[0]/size_den[0];
+  ratio[1] = size_num_corr[1]/size_den[1];
+  ratio[2] = size_num_corr[2]/size_den[2];
+  ratio[3] = size_num_corr[3]/size_den[3];
+
+  Double_t *ratioerr = new Double_t[4];
+  ratioerr[0]= ratio[0] * pow( pow(err_num_corr[0]/size_num_corr[0] + pow(err_den[0]/size_den[0] ,2) ,2) ,0.5); //0.005;
+  ratioerr[1]= ratio[1] * pow( pow(err_num_corr[1]/size_num_corr[1] + pow(err_den[1]/size_den[1] ,2) ,2) ,0.5); //0.005;
+  ratioerr[2]= ratio[2] * pow( pow(err_num_corr[2]/size_num_corr[2] + pow(err_den[2]/size_den[2] ,2) ,2) ,0.5); //0.005;
+  ratioerr[3]= ratio[3] * pow( pow(err_num_corr[3]/size_num_corr[3] + pow(err_den[3]/size_den[3] ,2) ,2) ,0.5); //0.005;
+
+  // 2015 Numbers
+  Double_t *v1_ratio = new Double_t[4];
+  v1_ratio[0] = v1_size_num_corr[0]/v1_size_den[0];
+  v1_ratio[1] = v1_size_num_corr[1]/v1_size_den[1];
+  v1_ratio[2] = v1_size_num_corr[2]/v1_size_den[2];
+  v1_ratio[3] = v1_size_num_corr[3]/v1_size_den[3];
+
+  Double_t *v1_ratioerr = new Double_t[4];
+  v1_ratioerr[0]= v1_ratio[0] * pow( pow(v1_err_num_corr[0]/v1_size_num_corr[0] + pow(v1_err_den[0]/v1_size_den[0] ,2) ,2) ,0.5); //0.005;
+  v1_ratioerr[1]= v1_ratio[1] * pow( pow(v1_err_num_corr[1]/v1_size_num_corr[1] + pow(v1_err_den[1]/v1_size_den[1] ,2) ,2) ,0.5); //0.005;
+  v1_ratioerr[2]= v1_ratio[2] * pow( pow(v1_err_num_corr[2]/v1_size_num_corr[2] + pow(v1_err_den[2]/v1_size_den[2] ,2) ,2) ,0.5); //0.005;
+  v1_ratioerr[3]= v1_ratio[3] * pow( pow(v1_err_num_corr[3]/v1_size_num_corr[3] + pow(v1_err_den[3]/v1_size_den[3] ,2) ,2) ,0.5); //0.005;
+
+  ratios.push_back(ratio[0]);
+  ratios.push_back(ratio[1]);
+  ratios.push_back(ratio[2]);
+  ratios.push_back(ratio[3]);
+
+  ratioerrors.push_back(ratioerr[0]);
+  ratioerrors.push_back(ratioerr[1]);
+  ratioerrors.push_back(ratioerr[2]);
+  ratioerrors.push_back(ratioerr[3]);
+
+  TGraph *gr_ratio_noe = new TGraph(4,mid,ratio);
+  TGraphErrors *gr_ratio = new TGraphErrors(4,mid,ratio,miderr,ratioerr);
+
+  TGraph *v1_gr_ratio_noe = new TGraph(4,v1_mid,v1_ratio);
+  TGraphErrors *v1_gr_ratio = new TGraphErrors(4,v1_mid,v1_ratio,v1_miderr,v1_ratioerr);
+
+
+  v1_gr_ratio->SetMarkerColor(4);
+  v1_gr_ratio->SetLineColor(4);
+  v1_gr_ratio->SetMarkerStyle(21);
+
+  gr_ratio->SetMarkerColor(2);
+  gr_ratio->SetLineColor(2);
+  gr_ratio->SetMarkerStyle(22);
+
+  //TH1F *hs = c2->DrawFrame(0.,0.,1000.,0.5,"");
+  TH1F *hs = c2->DrawFrame(175.,0.,1000.,0.5,"");
+  hs->SetXTitle("photon pT [GeV]");
+  hs->SetYTitle("Fake Ratio");
+  hs->GetYaxis()->SetTitleOffset(1.4);
+
+   TText* title = new TText(1,1,"") ;
+   title->SetTextSize(0.07);
+   title->SetTextColor(kBlack);
+   title->SetTextAlign(13);
+   title->SetTextFont(62);
+   title->DrawTextNDC(0.17,0.87,"CMS");
+
+   TText* extra = new TText(1,1,"") ;
+   extra->SetTextSize(0.05);
+   extra->SetTextColor(kBlack);
+   extra->SetTextAlign(13);
+   extra->SetTextFont(52);
+   extra->DrawTextNDC(0.17,0.81,"Preliminary");
+
+   TText* lumi = new TText(1,1,"") ;
+   lumi->SetTextSize(0.05);
+   lumi->SetTextColor(kBlack);
+   lumi->SetTextAlign(31);
+   lumi->SetTextFont(42);
+   lumi->DrawTextNDC(0.9,0.91,"2.20 /fb (13 TeV)");
+
+  title->DrawTextNDC(0.17,0.87,"CMS");
+  extra->DrawTextNDC(0.17,0.81,"Preliminary");
+  lumi->DrawTextNDC(0.9,0.91,"2.20 /fb (13 TeV)");
+
+  TLegend *leg3 = new TLegend(0.55,0.7,0.88,0.88 );
+  leg3->SetFillColor(kWhite);
+  leg3->AddEntry( gr_ratio,"2016 Num./Den. (2.2 /fb)", "L");
+  leg3->AddEntry( v1_gr_ratio,"2015 Num./Den. (2.3 /fb)", "L");
+  leg3->Draw("same");
+
+  // 2015
+  v1_gr_ratio->Draw("P");
+  v1_gr_ratio_noe->Draw("P,sames");
+  v1_gr_ratio_noe->Fit("pol1");
+  TF1 *v1_fit_ratio = v1_gr_ratio_noe->GetFunction("pol1");
+  v1_fit_ratio->SetLineColor(13);
+  v1_fit_ratio->SetLineWidth(3);
+  Double_t v1_chi2 = v1_fit_ratio->GetChisquare();
+  Double_t v1_p0   = v1_fit_ratio->GetParameter(0);
+  Double_t v1_p1   = v1_fit_ratio->GetParameter(1);
+  Double_t v1_e0   = v1_fit_ratio->GetParError(0);
+  Double_t v1_e1   = v1_fit_ratio->GetParError(1);
+
+  // 2016
+  gr_ratio->Draw("P");
+  gr_ratio_noe->Draw("P,sames");
+  gr_ratio_noe->Fit("pol1");
+  TF1 *fit_ratio = gr_ratio_noe->GetFunction("pol1");
+  fit_ratio->SetLineColor(1);
+  fit_ratio->SetLineWidth(3);
+  Double_t chi2 = fit_ratio->GetChisquare();
+  Double_t p0 = fit_ratio->GetParameter(0);
+  Double_t p1 = fit_ratio->GetParameter(1);
+  Double_t e0 = fit_ratio->GetParError(0);
+  Double_t e1 = fit_ratio->GetParError(1);
+
+  ms.push_back(p1); mes.push_back(e1);
+  bs.push_back(p0); bes.push_back(e0);
+
+  v1_fit_ratio->Draw("sames");
+  fit_ratio->Draw("sames");
+
+  TLatex tex;
+  tex.SetTextSize(0.07);
+  tex.SetTextColor(kBlack);
+  tex.SetTextAlign(11);
+  tex.SetTextFont(42);
+  tex.DrawLatexNDC(0.45,0.47,"y = m x + b");
+  tex.SetTextSize(0.05);
+  tex.DrawLatexNDC(0.35,0.40,TString(boost::lexical_cast<string>(boost::format("m = %0.5f +- %0.5f") % p1 % e1)));
+  tex.DrawLatexNDC(0.45,0.35,TString(boost::lexical_cast<string>(boost::format("b = %0.3f +- %0.3f") % p0 % e0)));
+  //tex.DrawLatexNDC(0.45,0.30,"#chi^{2}"+TString(boost::lexical_cast<string>(boost::format(" = %0.5f") % chi2)));
+
+  c2->Update();
+
+  c2->SaveAs(outpath+"/Graph_FakeRatio_yearcomp.pdf");
+  c2->SaveAs(wwwpath+"/Graph_FakeRatio_yearcomp.pdf");
+
+  c2->Clear();
+}
