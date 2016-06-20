@@ -7,34 +7,34 @@ mkdir -p ${submitbase}/gitignore/${version}/plots
 printf "${submitbase}/gitignore/${version}/analyzed \n"
 printf "${submitbase}/gitignore/${version}/plots \n"
 
-for samplename in \
- "QCD_Pt15to20" \
- "QCD_Pt20to30" \
- "QCD_Pt30to50" \
- "QCD_Pt50to80" \
- "QCD_Pt80to120" \
- "QCD_Pt120to170" \
- "QCD_Pt170to300" \
- "QCD_Pt300toInf" \
- "GJets_HT40To100" \
- "GJets_HT100To200" \
- "GJets_HT200To400" \
- "GJets_HT400To600" \
- "GJets_HT600ToInf" \
- "SinglePhoton" \
- "DoubleElectron"
-
-do
- hadd \
-  ${submitbase}/gitignore/${version}/analyzed/analyzed_${samplename}.root \
-  ${hdfs}/${version}-${samplename}_callpostAnalyzer_QCD/*root
-done
-
-hadd \
- ${submitbase}/gitignore/${version}/analyzed/analyzed_GJets_Merged.root \
- ${submitbase}/gitignore/${version}/analyzed/analyzed_GJets_HT*root
+## "QCDPt15to20" \
+## "QCDPt20to30" \
+## "QCDPt30to50" \
+## "QCDPt50to80" \
+#for samplename in \
+# "QCDPt80to120" \
+# "QCDPt120to170" \
+# "QCDPt170to300" \
+# "QCDPt300toInf" \
+# "GJetsHT40to100" \
+# "GJetsHT100to200" \
+# "GJetsHT200to400" \
+# "GJetsHT400to600" \
+# "GJetsHT600toInf" \
+# "SinglePhoton" \
+# "DoubleElectron"
+#
+#do
+# hadd \
+#  ${submitbase}/gitignore/${version}/analyzed/analyzed_${samplename}.root \
+#  ${hdfs}/${version}-${samplename}_callpostAnalyzer_QCD/*root
+#done
 
 hadd \
- ${submitbase}/gitignore/${version}/analyzed/analyzed_QCD_Merged.root \
- ${submitbase}/gitignore/${version}/analyzed/analyzed_QCD_Pt*root
+ ${submitbase}/gitignore/${version}/analyzed/analyzed_GJetsMerged.root \
+ ${submitbase}/gitignore/${version}/analyzed/analyzed_GJetsHT*root
+
+hadd \
+ ${submitbase}/gitignore/${version}/analyzed/analyzed_QCDMerged.root \
+ ${submitbase}/gitignore/${version}/analyzed/analyzed_QCDPt*root
 
