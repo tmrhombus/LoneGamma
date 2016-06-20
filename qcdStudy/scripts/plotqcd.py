@@ -196,7 +196,7 @@ h_qden.Draw('hist,GOFF,sames')
 h_deno.Draw('hist,GOFF,sames')
 leg.Draw('sames,GOFF')
 
-cpr.prelim_tdr(lumi=2320,hor=0.17)
+cpr.prelim_tdr(lumi=2200,hor=0.17)
 tex.SetTextSize(0.03)
 tex.SetTextAlign(11) #left, bottom
 tex.DrawLatex(0.13,0.75,"pT Range [GeV]: %s"%(ptrange))
