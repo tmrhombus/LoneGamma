@@ -5,7 +5,6 @@
 domc=true
 dodata=true
 dosubmit=true
-grablists=true
 
 START=$(date +%s);
 printf "Started at `date`"
@@ -13,83 +12,39 @@ printf "Started at `date`"
 mkdir -p "${submitbase}/gitignore/${version}/lists"
 mkdir -p "${submitbase}/gitignore/${version}/submit"
 
-lumi=2320. # /pb
-
-if [ ${grablists} = true ]
-then
- cp "${submitbase}/gitignore/Domb/lists/"*txt "${submitbase}/gitignore/${version}/lists/"
-fi
+lumi=2200. # /pb
 
 if [ ${domc} = true ]
 then
 
- initevents="${submitbase}/gitignore/${version}/lists/initialEvents.txt"
- echo " " >> ${initevents}
- touch ${initevents}
+ initevents="${CMSSW_BASE}/src/LoneGamma/lists/initialEvents.txt"
 
  for mc_samplename in \
-  "GJets_HT" \
-  "QCD_Pt"
+  "GJetsHT" \
+  "QCDPt"
  do
 
-  if [ ${mc_samplename} = "GJets_HT" ]
+  if [ ${mc_samplename} = "GJetsHT" ]
    then 
-    bins=( "40To100" "100To200" "200To400" "400To600" "600ToInf" )
+    bins=( "40to100" "100to200" "200to400" "400to600" "600toInf" )
    fi
-  if [ ${mc_samplename} = "QCD_Pt" ]
+  if [ ${mc_samplename} = "QCDPt" ]
    then
-    bins=( "15to20" "20to30" "30to50" "50to80" "80to120" "120to170" "170to300" "300toInf" )
+    bins=( "80to120" "120to170" "170to300" "300toInf" )
+    #bins=( "15to20" "20to30" "30to50" "50to80" "80to120" "120to170" "170to300" "300toInf" )
   fi
 
   for bin in ${bins[*]}
   do  
-   echo $bin
-
-   trynr="5"
-   if [ ${bin} = "100To200" ] 
-   then
-    trynr="4"
-   fi
 
   submitname="${mc_samplename}${bin}"
-
- # count the total number of events, put in a file if it's not there
- if ! grep -F "${submitname} " ${initevents}
- then 
-  echo "Need to count events.. making list"
-
-   # /hdfs/store/user/jjbuch/QCD_Pt-15to20_EMEnriched_TuneCUETP8M1_13TeV_pythia8/crab_ggNtuplizer_spring15_QCD_Pt-15to20_EMEnriched_try5/151212_075448/0000/
-   # /hdfs/store/user/jjbuch/QCD_Pt-20to30_EMEnriched_TuneCUETP8M1_13TeV_pythia8/crab_ggNtuplizer_spring15_QCD_Pt-20to30_EMEnriched_try5/151212_075603/0000/
-   # /hdfs/store/user/jjbuch/QCD_Pt-30to50_EMEnriched_TuneCUETP8M1_13TeV_pythia8/crab_ggNtuplizer_spring15_QCD_Pt-30to50_EMEnriched_try5/151212_075643/0000/
-   # /hdfs/store/user/jjbuch/QCD_Pt-50to80_EMEnriched_TuneCUETP8M1_13TeV_pythia8/crab_ggNtuplizer_spring15_QCD_Pt-50to80_EMEnriched_try5/151212_075742/0000/
-   # /hdfs/store/user/jjbuch/QCD_Pt-80to120_EMEnriched_TuneCUETP8M1_13TeV_pythia8/crab_ggNtuplizer_spring15_QCD_Pt-80to120_EMEnriched_try5/151212_075831/0000/
-   # /hdfs/store/user/jjbuch/QCD_Pt-120to170_EMEnriched_TuneCUETP8M1_13TeV_pythia8/crab_ggNtuplizer_spring15_QCD_Pt-120to170_EMEnriched_try5/151212_080000/0000/
-   # /hdfs/store/user/jjbuch/QCD_Pt-170to300_EMEnriched_TuneCUETP8M1_13TeV_pythia8/crab_ggNtuplizer_spring15_QCD_Pt-170to300_EMEnriched_try5/151212_080124/0000/
-   # /hdfs/store/user/jjbuch/QCD_Pt-300toInf_EMEnriched_TuneCUETP8M1_13TeV_pythia8/crab_ggNtuplizer_spring15_QCD_Pt-300toInf_EMEnriched_try5/151212_080212/0000/
-
-   # /hdfs/store/user/jjbuch/${mc_samplename}-${bin}_*TuneCUETP8M1_13TeV*pythia8/crab_ggNtuplizer_spring15_${mc_samplename}-${${bin}_try${trynr}/151212_*/0000/
-   # /hdfs/store/user/jjbuch/${mc_samplename}-${bin}_*TuneCUETP8M1_13TeV*pythia8/crab_ggNtuplizer_spring15_${mc_samplename}-${${bin}_try${trynr}/
-   # /hdfs/store/user/jjbuch/${mc_samplename}-${bin}_*TuneCUETP8M1_13TeV*pythia8/crab_ggNtuplizer_spring15_${mc_samplename}-${${bin}_try${trynr}/
-   # /hdfs/store/user/jjbuch/${mc_samplename}-${bin}_*TuneCUETP8M1_13TeV*pythia8/crab_ggNtuplizer_spring15_${mc_samplename}-${${bin}_try${trynr}/
-   # /hdfs/store/user/jjbuch/${mc_samplename}-${bin}_*TuneCUETP8M1_13TeV*pythia8/crab_ggNtuplizer_spring15_${mc_samplename}-${${bin}_try${trynr}/
-
-   find /hdfs/store/user/jjbuch/${mc_samplename}-${bin}_*TuneCUETP8M1_13TeV*pythia8/crab_ggNtuplizer_spring15_${mc_samplename}-*_try${trynr}/151212_*/0000/*root > \
-    ${submitbase}/gitignore/${version}/lists/hdfslist_${submitname}.txt
+  printf "${submitname}\n"
 
    # format as xrootd
-   cp ${submitbase}/gitignore/${version}/lists/hdfslist_${submitname}.txt \
+   cp ${CMSSW_BASE}/src/LoneGamma/lists/hdfslist_${submitname}.txt \
       ${submitbase}/gitignore/${version}/lists/xrdlist_${submitname}.txt 
    xrdlist="${submitbase}/gitignore/${version}/lists/xrdlist_${submitname}.txt"
    sed -i 's@/hdfs/@root://cmsxrootd.hep.wisc.edu//@g' $xrdlist #
-
-   echo "                    .. counting events"
-   python ./eventCounter.py ${submitname} \
-      ${submitbase}/gitignore/${version}/lists/hdfslist_${submitname}.txt \
-      ${initevents}
-   echo "                    .. counted events"
-   
-  fi
-  xrdlist="${submitbase}/gitignore/${version}/lists/xrdlist_${submitname}.txt"
 
   # sample specific parameters..
   treename="ggNtuplizer/EventTree"
@@ -146,26 +101,16 @@ then
 
   if [ "$data_samplename" = "SinglePhoton" ]
   then 
-   find /hdfs/store/user/gomber/SinglePhoton_Crab_2015D_v3_226fb/SinglePhoton/crab_job_single_photon_13TeV_v3_226fb/160109_082344/0000/*root > \
-    ${submitbase}/gitignore/${version}/lists/hdfslist_${data_samplename}.txt
-   find /hdfs/store/user/gomber/SinglePhoton_Crab_2015D_v4_226fb/SinglePhoton/crab_job_single_photon_13TeV_v4_226fb/160109_082133/000*/*root >> \
-    ${submitbase}/gitignore/${version}/lists/hdfslist_${data_samplename}.txt
-
    isELE="kFALSE"
   fi
 
   if [ "$data_samplename" = "DoubleElectron" ]
   then
-   find /hdfs/store/user/gomber/DoubleElectron_Crab_2015D_v3_226fb/*/crab_job_*_13TeV_v3_226fb/160216_*/0000/*root > \
-    ${submitbase}/gitignore/${version}/lists/hdfslist_${data_samplename}.txt
-   find /hdfs/store/user/gomber/DoubleElectron_Crab_2015D_v4_226fb/*/crab_job_*_13TeV_v4_226fb/160216_*/000*/*root >> \
-    ${submitbase}/gitignore/${version}/lists/hdfslist_${data_samplename}.txt
-
    isELE="kTRUE"
   fi
 
   # format as xrootd
-  cp ${submitbase}/gitignore/${version}/lists/hdfslist_${data_samplename}.txt \
+   cp ${CMSSW_BASE}/src/LoneGamma/lists/hdfslist_${data_samplename}.txt \
      ${submitbase}/gitignore/${version}/lists/xrdlist_${data_samplename}.txt 
   xrdlist="${submitbase}/gitignore/${version}/lists/xrdlist_${data_samplename}.txt"
   sed -i 's@/hdfs/@root://cmsxrootd.hep.wisc.edu//@g' $xrdlist #
@@ -177,7 +122,7 @@ then
   treename="ggNtuplizer/EventTree"
   isMC="kFALSE"
   xc="1."
-  nrE="2260."
+  nrE=${lumi}
 
   # make correct executable xx_callpostAnalyzer_QCD
   cp template_callpostAnalyzer_QCD.cc         "${submitbase}/gitignore/${version}/submit/${data_samplename}_callpostAnalyzer_QCD.cc"
