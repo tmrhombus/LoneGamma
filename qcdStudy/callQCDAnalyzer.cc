@@ -15,26 +15,26 @@ void callQCDAnalyzer(void)
  TChain *theChain = new TChain("ggNtuplizer/EventTree"); ;
  theChain->Reset();
  
- Double_t lumi=2.32;
+ Double_t lumi=2.20;
  Double_t nrEvents=10000;
  Double_t crossSec=40000;
  
  TString path = "../test";
 
-//  // GJMC
-// Bool_t isMC=kTRUE;  Bool_t isEle=kFALSE;
-// TString outfilename=path+"/QCDs_GJMC.root";
-// TString inputListName=path+"/filenames_GJMC_10.txt";
-
-  // QCDMC
+  // GJMC
  Bool_t isMC=kTRUE;  Bool_t isEle=kFALSE;
- TString outfilename=path+"/QCDs_QCDMC.root";
- TString inputListName=path+"/filenames_MC_QCD_5.txt";
+ TString outfilename=path+"/QCDs_GJMC.root";
+ TString inputListName=path+"/filenames_GJMC_10.txt";
 
-//  // Data Mu
+//  // QCDMC
+// Bool_t isMC=kTRUE;  Bool_t isEle=kFALSE;
+// TString outfilename=path+"/QCDs_QCDMC.root";
+// TString inputListName=path+"/filenames_MC_QCD_5.txt";
+
+//  // Data Photon
 // Bool_t isMC=kFALSE;  Bool_t isEle=kFALSE;
 // TString outfilename=path+"/QCDs_Data.root";
-// TString inputListName=path+"/filenames_Data2015D_20.txt";
+// TString inputListName=path+"/filenames_SinglePhoton2016_10.txt";
 
 //  // Data Ele
 // Bool_t isMC=kFALSE;  Bool_t isEle=kTRUE;

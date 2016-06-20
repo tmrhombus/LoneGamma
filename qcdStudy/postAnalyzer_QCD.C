@@ -277,12 +277,12 @@ std::vector<int> postAnalyzer_QCD::pcPassSel(int sel, int sys, double phoPtLo, d
 
      // non collision backgrounds
      //noncoll = kTRUE;
-     if(isMC){
+     //if(isMC){
       noncoll = (*phoSigmaIEtaIEtaFull5x5)[p] > 0.001 && (*phoSigmaIPhiIPhiFull5x5)[p] > 0.001; // isMC
-     }
-     if(!isMC){
-      noncoll = fabs((*phoseedTimeFull5x5)[p]) < 3. && (*phomipTotEnergy)[p] < 4.9 && (*phoSigmaIEtaIEtaFull5x5)[p] > 0.001 && (*phoSigmaIPhiIPhiFull5x5)[p] > 0.001;
-     }
+     //}
+     //if(!isMC){
+     // noncoll = fabs((*phoseedTimeFull5x5)[p]) < 3. && (*phomipTotEnergy)[p] < 4.9 && (*phoSigmaIEtaIEtaFull5x5)[p] > 0.001 && (*phoSigmaIPhiIPhiFull5x5)[p] > 0.001;
+     //}
 
      passKinematics = (
                        ( (*phoEt)[p] > phoPtLo  ) &&
