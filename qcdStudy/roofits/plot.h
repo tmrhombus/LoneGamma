@@ -119,6 +119,7 @@ public :
    std::vector<int> ptbinbounds;
    int nptbins;
    std::vector<TString> ptbinnames;
+   TString cut;
 
    Double_t lower[5];
 

@@ -12,6 +12,7 @@ void plot::Loop()
  Tversion = TString(version);
  
  TString extraname="";
+ cut = "_b_idnc_mL30";
  //TString extraname="_clossure";
  
  sysnames.push_back("");
@@ -247,14 +248,14 @@ void plot::getFraction(
    logg<<boost::format("pT Range:  %s \n\n") % binrange;
   
     //set template histo names
-    datahistname = "h_sig_sieieF5x5_"+binrange+sysname; //data histos with tigh ID and without sigIetaIeta cut
-    fullhistname = "h_sig_sieieF5x5_"+binrange+sysname; //phojet histos with tight ID cut but without sigIetaIeta
-    qcdhistname  = "h_bkg_sieieF5x5_"+binrange+sysname; //data histos with very loose id and  sideband of track iso
+    datahistname = "h_sig_sieieF5x5_"+binrange+sysname+cut; //data histos with tigh ID and without sigIetaIeta cut
+    fullhistname = "h_sig_sieieF5x5_"+binrange+sysname+cut; //phojet histos with tight ID cut but without sigIetaIeta
+    qcdhistname  = "h_bkg_sieieF5x5_"+binrange+sysname+cut; //data histos with very loose id and  sideband of track iso
 
     if(sysname.EqualTo("_eleTmpl")){ 
-     datahistname = "h_sig_sieieF5x5_"+binrange; //data histos with tigh ID and without sigIetaIeta cut
-     fullhistname = "h_sig_sieieF5x5_"+binrange; //phojet histos with tight ID cut but without sigIetaIeta
-     qcdhistname  = "h_bkg_sieieF5x5_"+binrange; //data histos with very loose id and  sideband of track iso
+     datahistname = "h_sig_sieieF5x5_"+binrange+cut; //data histos with tigh ID and without sigIetaIeta cut
+     fullhistname = "h_sig_sieieF5x5_"+binrange+cut; //phojet histos with tight ID cut but without sigIetaIeta
+     qcdhistname  = "h_bkg_sieieF5x5_"+binrange+cut; //data histos with very loose id and  sideband of track iso
     }
 
     //// for closure test
@@ -265,19 +266,25 @@ void plot::getFraction(
     ////QCD histo
     //hqcd  = (TH1D*)qcdfile->Get(qcdhistname)->Clone();
 
+    std::cout<<" hiy"<<std::endl;
     //  used and good
     //get Data template and QCD template from data
     datafile->cd();
+    std::cout<<" hit"<<std::endl;
     if(sysname.EqualTo("_eleTmpl")){ 
      hdata = (TH1D*)edatafile->Get(datahistname)->Clone();
      //hqcd  = (TH1D*)edatafile->Get(qcdhistname)->Clone();
     }
     else{ 
+    std::cout<<" hig"<<std::endl;
+    std::cout<<datahistname<<std::endl;
      hdata = (TH1D*)datafile->Get(datahistname)->Clone(); 
      //hqcd  = (TH1D*)datafile->Get(qcdhistname)->Clone();
     }
     //QCD histo
+    std::cout<<" hir"<<std::endl;
     hqcd  = (TH1D*)datafile->Get(qcdhistname)->Clone();
+    std::cout<<" hi"<<std::endl;
 
     double integ_data = hdata->Integral();
     double integ_qcd = hqcd->Integral();
@@ -575,7 +582,7 @@ void plot::getFraction(
    lumi->SetTextColor(kBlack);
    lumi->SetTextAlign(31);
    lumi->SetTextFont(42);
-   lumi->DrawTextNDC(0.9,0.91,"2.32 /fb (13 TeV)");
+   lumi->DrawTextNDC(0.9,0.91,"2.20 /fb (13 TeV)");
    xframe->addObject(lumi);
 
    TText* ptrange = new TText(1,1,"") ;
@@ -596,7 +603,7 @@ void plot::getFraction(
    xframe->addObject(sflabel);
 
    if(sysname.EqualTo("_eleTmpl")){ 
-    datahistname = "h_sig_sieieF5x5_"+binrange+sysname;
+    datahistname = "h_sig_sieieF5x5_"+binrange+sysname+cut;
    }
    canvas->SaveAs(outpath+"/Fitted_"+datahistname+extraname+".pdf");
    canvas->SaveAs(wwwpath+"/Fitted_"+datahistname+extraname+".pdf");
@@ -646,9 +653,9 @@ void plot::getBinCenters(
  
    //set template histo names
    if(sysname.EqualTo("_eleTmpl")){ 
-    datahistname = "h_sig_et_"+binrange; //data histos with tigh ID and without sigIetaIeta cut
+    datahistname = "h_sig_et_"+binrange+cut; //data histos with tigh ID and without sigIetaIeta cut
    }
-   else {datahistname = "h_sig_et_"+binrange+sysname; } //data histos with tigh ID and without sigIetaIeta cut
+   else {datahistname = "h_sig_et_"+binrange+sysname+cut; } //data histos with tigh ID and without sigIetaIeta cut
 
    //// for closure test
    ////get "Data" template = MC (GJ + QCD) 
@@ -721,12 +728,12 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
 
   //set template histo names
   if(sysname.EqualTo("_eleTmpl")){ 
-   numhistname = "h_sig_sieieF5x5_"+binrange; //data histos with tight ID cut but without sigIetaIeta
-   denhistname = "h_den_sieieF5x5_"+binrange; //data histos fail loose ID and pass Vloose ID
+   numhistname = "h_sig_sieieF5x5_"+binrange+cut; //data histos with tight ID cut but without sigIetaIeta
+   denhistname = "h_den_sieieF5x5_"+binrange+cut; //data histos fail loose ID and pass Vloose ID
   }
   else{
-   numhistname = "h_sig_sieieF5x5_"+binrange+sysname; //data histos with tight ID cut but without sigIetaIeta
-   denhistname = "h_den_sieieF5x5_"+binrange+sysname; //data histos fail loose ID and pass Vloose ID
+   numhistname = "h_sig_sieieF5x5_"+binrange+sysname+cut; //data histos with tight ID cut but without sigIetaIeta
+   denhistname = "h_den_sieieF5x5_"+binrange+sysname+cut; //data histos fail loose ID and pass Vloose ID
   }
 
   //get the numerator and denominator
@@ -838,7 +845,7 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
   lumi->SetTextColor(kBlack);
   lumi->SetTextAlign(31);
   lumi->SetTextFont(42);
-  lumi->DrawTextNDC(0.9,0.91,"2.32 /fb (13 TeV)");
+  lumi->DrawTextNDC(0.9,0.91,"2.20 /fb (13 TeV)");
   //xframe->addObject(lumi);
 
   TLegend *leg2 = new TLegend(0.55,0.6,0.88,0.88 );
@@ -868,6 +875,14 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
   gPad->SetTicky();
   gStyle->SetLineWidth(3);
 
+  std::cout<<"size_num_corr"<<size_num_corr[0]<<" "<<size_num_corr[1]<<" "<<size_num_corr[2]<<" "<<size_num_corr[3]<<" "<<std::endl;
+  std::cout<<"size_den"<<size_den[0]<<" "<<size_den[1]<<" "<<size_den[2]<<" "<<size_den[3]<<" "<<std::endl;
+  std::cout<<"err_num_corr"<<err_num_corr[0]<<" "<<err_num_corr[1]<<" "<<err_num_corr[2]<<" "<<err_num_corr[3]<<" "<<std::endl;
+  std::cout<<"err_den"<<err_den[0]<<" "<<err_den[1]<<" "<<err_den[2]<<" "<<err_den[3]<<" "<<std::endl;
+
+
+  std::cout<<"mid"<<mid[0]<<" "<<mid[1]<<" "<<mid[2]<<" "<<mid[3]<<" "<<std::endl;
+  std::cout<<"miderr"<<miderr[0]<<" "<<miderr[1]<<" "<<miderr[2]<<" "<<miderr[3]<<" "<<std::endl;
   //Double_t ratio[3];
   Double_t *ratio = new Double_t[4];
   ratio[0] = size_num_corr[0]/size_den[0];
@@ -915,10 +930,11 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
   TH1F *hs = c2->DrawFrame(175.,0.,1000.,0.5,"");
   hs->SetXTitle("photon pT [GeV]");
   hs->SetYTitle("Fake Ratio"); 
+  hs->GetYaxis()->SetTitleOffset(1.4);
 
   title->DrawTextNDC(0.17,0.87,"CMS");
   extra->DrawTextNDC(0.17,0.81,"Preliminary");
-  lumi->DrawTextNDC(0.9,0.91,"2.32 /fb (13 TeV)");
+  lumi->DrawTextNDC(0.9,0.91,"2.20 /fb (13 TeV)");
 
   TLegend *leg3 = new TLegend(0.55,0.6,0.88,0.88 );
   leg3->SetFillColor(kWhite);
@@ -951,7 +967,7 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
   tex.SetTextSize(0.05);
   tex.DrawLatexNDC(0.35,0.40,TString(boost::lexical_cast<string>(boost::format("m = %0.5f +- %0.5f") % p1 % e1))); 
   tex.DrawLatexNDC(0.45,0.35,TString(boost::lexical_cast<string>(boost::format("b = %0.3f +- %0.3f") % p0 % e0))); 
-  tex.DrawLatexNDC(0.45,0.30,"#chi^{2}"+TString(boost::lexical_cast<string>(boost::format(" = %0.5f") % chi2))); 
+  //tex.DrawLatexNDC(0.45,0.30,"#chi^{2}"+TString(boost::lexical_cast<string>(boost::format(" = %0.5f") % chi2))); 
 
   //std::cout<<"Npoints: "<<gr_ratio->GetN()<<std::endl;
   //Double_t thex;
@@ -1021,8 +1037,8 @@ void plot::getCorrectedFakeRatioErrUpDown(TFile* datafile,  //<----data file
    logg<<boost::format("pT Range:  %s \n\n") % binrange;
 
   //set template histo names
-  numhistname = "h_sig_sieieF5x5_"+binrange; //data histos with tight ID cut but without sigIetaIeta
-  denhistname = "h_den_sieieF5x5_"+binrange; //data histos fail loose ID and pass Vloose ID
+  numhistname = "h_sig_sieieF5x5_"+binrange+cut; //data histos with tight ID cut but without sigIetaIeta
+  denhistname = "h_den_sieieF5x5_"+binrange+cut; //data histos fail loose ID and pass Vloose ID
 
   //get the numerator and denominator
   datafile->cd();
@@ -1141,7 +1157,7 @@ void plot::getCorrectedFakeRatioErrUpDown(TFile* datafile,  //<----data file
   lumi->SetTextColor(kBlack);
   lumi->SetTextAlign(31);
   lumi->SetTextFont(42);
-  lumi->DrawTextNDC(0.9,0.91,"2.32 /fb (13 TeV)");
+  lumi->DrawTextNDC(0.9,0.91,"2.20 /fb (13 TeV)");
   //xframe->addObject(lumi);
 
   TLegend *leg2 = new TLegend(0.55,0.6,0.88,0.88 );
@@ -1221,7 +1237,7 @@ void plot::getCorrectedFakeRatioErrUpDown(TFile* datafile,  //<----data file
 
   title->DrawTextNDC(0.17,0.87,"CMS");
   extra->DrawTextNDC(0.17,0.81,"Preliminary");
-  lumi->DrawTextNDC(0.9,0.91,"2.32 /fb (13 TeV)");
+  lumi->DrawTextNDC(0.9,0.91,"2.20 /fb (13 TeV)");
 
   TLegend *leg3 = new TLegend(0.55,0.6,0.88,0.88 );
   leg3->SetFillColor(kWhite);
@@ -1317,12 +1333,12 @@ void plot::drawAllRates(TString extraname){
   lumi->SetTextColor(kBlack);
   lumi->SetTextAlign(31);
   lumi->SetTextFont(42);
-  //lumi->DrawTextNDC(0.9,0.91,"2.32 /fb (13 TeV)");
+  //lumi->DrawTextNDC(0.9,0.91,"2.20 /fb (13 TeV)");
   //xframe->addObject(lumi);
 
   title->DrawTextNDC(0.17,0.87,"CMS");
   extra->DrawTextNDC(0.17,0.81,"Preliminary");
-  lumi->DrawTextNDC(0.9,0.91,"2.32 /fb (13 TeV)");
+  lumi->DrawTextNDC(0.9,0.91,"2.20 /fb (13 TeV)");
 
   ////////// Draw points first, then lines
 
@@ -1632,12 +1648,12 @@ void plot::drawAllRatesRelative(TString extraname){
   lumi->SetTextColor(kBlack);
   lumi->SetTextAlign(31);
   lumi->SetTextFont(42);
-  //lumi->DrawTextNDC(0.9,0.91,"2.32 /fb (13 TeV)");
+  //lumi->DrawTextNDC(0.9,0.91,"2.20 /fb (13 TeV)");
   //xframe->addObject(lumi);
 
   title->DrawTextNDC(0.17,0.87,"CMS");
   extra->DrawTextNDC(0.17,0.81,"Preliminary");
-  lumi->DrawTextNDC(0.9,0.91,"2.32 /fb (13 TeV)");
+  lumi->DrawTextNDC(0.9,0.91,"2.20 /fb (13 TeV)");
 
   ////////// Draw points first, then lines
 
@@ -1832,7 +1848,7 @@ void plot::drawAllRatesRelativeHist(TString extraname){
   //TH1F *hs = c2->DrawFrame(0.,0.,1000.,0.5,"");
   //TH1F *hs = c3->DrawFrame(175.,0.,1000.,0.5,"");
   //TH1F *hs = c3->DrawFrame(xlow,-2.,xhi,2.,"");
-  TH1F *hs = c3->DrawFrame(xlow,-0.3,xhi,0.8,"");
+  TH1F *hs = c3->DrawFrame(xlow,-0.5,xhi,0.8,"");
   hs->SetXTitle("photon pT [GeV]");
   hs->SetYTitle("Relative Fake Ratio"); 
 
@@ -1856,12 +1872,12 @@ void plot::drawAllRatesRelativeHist(TString extraname){
   lumi->SetTextColor(kBlack);
   lumi->SetTextAlign(31);
   lumi->SetTextFont(42);
-  //lumi->DrawTextNDC(0.9,0.91,"2.32 /fb (13 TeV)");
+  //lumi->DrawTextNDC(0.9,0.91,"2.20 /fb (13 TeV)");
   //xframe->addObject(lumi);
 
   title->DrawTextNDC(0.17,0.87,"CMS");
   extra->DrawTextNDC(0.17,0.81,"Preliminary");
-  lumi->DrawTextNDC(0.9,0.91,"2.32 /fb (13 TeV)");
+  lumi->DrawTextNDC(0.9,0.91,"2.20 /fb (13 TeV)");
 
   ////////// Draw points first, then lines
 
@@ -1921,16 +1937,16 @@ void plot::drawAllRatesRelativeHist(TString extraname){
   //  _binDown
   //  _noPiso
   //  _eleTmpl
-  Int_t ci1  = 1001;
-  Int_t ci2  = 1002;
-  Int_t ci3  = 1003;
-  Int_t ci4  = 1004;
-  Int_t ci5  = 1005;
-  Int_t ci6  = 1006;
-  Int_t ci7  = 1007;
-  Int_t ci8  = 1008;
-  Int_t ci9  = 1009;
-  Int_t ci10 = 1010;
+  Int_t ci1  = 3001; //TColor::GetFreeColorIndex(); // 1001;
+  Int_t ci2  = 3002; //TColor::GetFreeColorIndex(); // 1002;
+  Int_t ci3  = 3003; //TColor::GetFreeColorIndex(); // 1003;
+  Int_t ci4  = 3004; //TColor::GetFreeColorIndex(); // 1004;
+  Int_t ci5  = 3005; //TColor::GetFreeColorIndex(); // 1005;
+  Int_t ci6  = 3006; //TColor::GetFreeColorIndex(); // 1006;
+  Int_t ci7  = 3007; //TColor::GetFreeColorIndex(); // 1007;
+  Int_t ci8  = 3008; //TColor::GetFreeColorIndex(); // 1008;
+  Int_t ci9  = 3009; //TColor::GetFreeColorIndex(); // 1009;
+  Int_t ci10 = 3010; //TColor::GetFreeColorIndex(); // 1010;
   TColor *color1  = new TColor( ci1,178./255,223./255,138./255);
   TColor *color2  = new TColor( ci2, 51./255,160./255, 44./255);
   TColor *color3  = new TColor( ci3,251./255,154./255,153./255);
@@ -2070,7 +2086,7 @@ void plot::drawAllRatesRelativeHist(TString extraname){
 
   title->DrawTextNDC(0.17,0.87,"CMS");
   extra->DrawTextNDC(0.17,0.81,"Preliminary");
-  lumi->DrawTextNDC(0.9,0.91,"2.32 /fb (13 TeV)");
+  lumi->DrawTextNDC(0.9,0.91,"2.20 /fb (13 TeV)");
 
   h_sys0->Draw("hist,same");
   h_sys1->Draw("hist,same");
