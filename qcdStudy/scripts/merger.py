@@ -13,8 +13,8 @@ import os
 infilenames = [
 "analyzed_SinglePhoton",
 "analyzed_DoubleElectron",
-"analyzed_GJets_Merged",
-"analyzed_QCD_Merged",
+"analyzed_GJetsMerged",
+"analyzed_QCDMerged",
 #"purity_GJets_Merged",
 #"purity_QCD_Merged",
 #"purity_mrg4bins_GJets",
