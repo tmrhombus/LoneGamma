@@ -1,7 +1,6 @@
-#export version="GFlagM140"
-export version="GFlagM170"
+export version="Erste"
 export submitbase="${CMSSW_BASE}/src/LoneGamma/znunugStudy"
 
-export analyzed="${submitbase}/${version}/analyzed"
-export plots="${submitbase}/${version}/plots"
+export analyzed="${submitbase}/gitignore/${version}/analyzed"
+export plots="${submitbase}/gitignore/${version}/plots"
 
