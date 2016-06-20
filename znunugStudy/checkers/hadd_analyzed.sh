@@ -1,26 +1,27 @@
 echo
 echo "version: ${version}"
 
-mkdir -p ${submitbase}/${version}/analyzed
-mkdir -p ${submitbase}/${version}/plots
+mkdir -p ${submitbase}/gitignore/${version}/analyzed
+mkdir -p ${submitbase}/gitignore/${version}/plots
 
-printf "${submitbase}/${version}/analyzed \n"
-printf "${submitbase}/${version}/plots \n"
+printf "${submitbase}/gitignore/${version}/analyzed \n"
+printf "${submitbase}/gitignore/${version}/plots \n"
 
 for samplename in \
- "ZLLG" \
- "ZJetsToNuNu100To200" \
- "ZJetsToNuNu200To400" \
- "ZJetsToNuNu400To600" \
- "ZJetsToNuNu600ToInf" \
+ "ZnnGJets" \
+ "ZllGJets" \
+ "ZllJetsHT100to200" \
+ "ZllJetsHT200to400" \
+ "ZllJetsHT400to600" \
+ "ZllJetsHT600toInf" \
  "SinglePhoton"
 
 do
  hadd \
-  ${submitbase}/${version}/analyzed/analyzed_${samplename}.root \
+  ${submitbase}/gitignore/${version}/analyzed/analyzed_${samplename}.root \
   ${hdfs}/${version}-${samplename}_callpostAnalyzer_ZnunuG/*root
 done
 
 hadd \
- ${submitbase}/${version}/analyzed/analyzed_ZnnJ.root \
- ${submitbase}/${version}/analyzed/analyzed_ZJetsToNuNu*.root \
+ ${submitbase}/gitignore/${version}/analyzed/analyzed_ZllJets.root \
+ ${submitbase}/gitignore/${version}/analyzed/analyzed_ZllJetsHT*.root \

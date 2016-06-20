@@ -18,11 +18,12 @@ printf "%s " " -----------------------------------------"
 printf "%s \n" "-----------------------------------------"
 
 for samplename in \
- "ZLLG" \
- "ZJetsToNuNu100To200" \
- "ZJetsToNuNu200To400" \
- "ZJetsToNuNu400To600" \
- "ZJetsToNuNu600ToInf" \
+ "ZnnGJets" \
+ "ZllGJets" \
+ "ZllJetsHT100to200" \
+ "ZllJetsHT200to400" \
+ "ZllJetsHT400to600" \
+ "ZllJetsHT600toInf" \
  "SinglePhoton"
 do
 
