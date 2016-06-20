@@ -1,5 +1,0 @@
-/hdfs/store/user/gomber/DoubleElectron_Crab_2015D_v4_226fb/DoubleEG/crab_job_double_electron_13TeV_v4_226fb/160216_212400/0000/ggtree_data_1.root
-/hdfs/store/user/gomber/DoubleElectron_Crab_2015D_v4_226fb/DoubleEG/crab_job_double_electron_13TeV_v4_226fb/160216_212400/0000/ggtree_data_2.root
-/hdfs/store/user/gomber/DoubleElectron_Crab_2015D_v4_226fb/DoubleEG/crab_job_double_electron_13TeV_v4_226fb/160216_212400/0000/ggtree_data_3.root
-/hdfs/store/user/gomber/DoubleElectron_Crab_2015D_v4_226fb/DoubleEG/crab_job_double_electron_13TeV_v4_226fb/160216_212400/0000/ggtree_data_4.root
-/hdfs/store/user/gomber/DoubleElectron_Crab_2015D_v4_226fb/DoubleEG/crab_job_double_electron_13TeV_v4_226fb/160216_212400/0000/ggtree_data_5.root
