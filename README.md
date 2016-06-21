@@ -19,23 +19,28 @@ bash countlists.sh  #  count total number of events in each of the lists and mat
 ```
 
 # QCD Study
-cd ../qcdStudy
+```bash
+cd ${CMSSW_BASE}/src/LoneGamma/qcdStudy
 
 source setup.sh # set version number here
+```
 
--- test running - uses list in ../test/ directory, pointed to in callQCDAnalyzer.cc
+test running - uses list in ../test/ directory, pointed to in callQCDAnalyzer.cc
+```bash 
 nohup root -l -b -q callQCDAnalyzer.cc > out.out 2>&1& 
-
--- after satisfied that everything is running fine, submit with
-
+```
+after satisfied that everything is running fine, submit with
+```bash
 nohup bash fajSubmit_postAnalyzer_QCD.sh > gitignore/${version}/submit.out 2>&1&
--- there are flags to create the submit directory structure without actually submitting inside fajSubmit_postAnalyzer_QCD.sh
+```
+there are flags to create the submit directory structure without actually submitting inside fajSubmit_postAnalyzer_QCD.sh
 
--- purity is basically the same way, but things haven't yet been updated from the 2015 setup
+purity is basically the same way, but things haven't yet been updated from the 2015 setup
 
 
 # Z(nn)G Study
+```bash 
 cd ${CMSSW_BASE}/src/LoneGamma/znunugStudy
 source setup.sh
-
--- same thing with callZnunuGAnalyzer.cc to test and fajSubmit_postAnalyzer_ZnunuG.sh to submit
+```
+same thing with callZnunuGAnalyzer.cc to test and fajSubmit_postAnalyzer_ZnunuG.sh to submit
