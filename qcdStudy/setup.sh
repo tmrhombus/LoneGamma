@@ -1,4 +1,4 @@
-export version="Erste"
+export version="Preapp"
 export submitbase="${CMSSW_BASE}/src/LoneGamma/qcdStudy"
 
 export analyzed="${submitbase}/gitignore/${version}/analyzed"
