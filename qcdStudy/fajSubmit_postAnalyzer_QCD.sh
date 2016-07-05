@@ -12,7 +12,7 @@ printf "Started at `date`"
 mkdir -p "${submitbase}/gitignore/${version}/lists"
 mkdir -p "${submitbase}/gitignore/${version}/submit"
 
-lumi=2200. # /pb
+lumi=2600. # /pb
 
 if [ ${domc} = true ]
 then
