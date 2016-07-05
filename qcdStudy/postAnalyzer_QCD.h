@@ -57,8 +57,6 @@ public :
 
    double event_weight;
 
-//Data
-
    // Declaration of leaf types
    Int_t           run;
    Long64_t        event;
@@ -124,10 +122,25 @@ public :
    vector<float>   *phoSigmaIEtaIPhi;
    vector<float>   *phoSigmaIPhiIPhi;
    vector<float>   *phoE1x3;
+   vector<float>   *phoE3x1;
    vector<float>   *phoE1x5;
+   vector<float>   *phoE5x1;
    vector<float>   *phoE2x2;
+   vector<float>   *phoE3x2;
+   vector<float>   *phoE3x3;
+   vector<float>   *phoE4x4;
+   vector<int>     *phoN5x5;
    vector<float>   *phoE2x5Max;
    vector<float>   *phoE5x5;
+   vector<float>   *phoE2x5Right;
+   vector<float>   *phoE2x5Left;
+   vector<float>   *phoE2x5Top;
+   vector<float>   *phoE2x5Bottom;
+   vector<float>   *phoELeft;
+   vector<float>   *phoERight;
+   vector<float>   *phoETop;
+   vector<float>   *phoEBottom;
+   vector<float>   *phoE2nd;
    vector<float>   *phoESEffSigmaRR;
    vector<float>   *phoSigmaIEtaIEtaFull5x5;
    vector<float>   *phoSigmaIEtaIPhiFull5x5;
@@ -183,7 +196,17 @@ public :
    vector<float>   *phoIDMVA;
    vector<int>     *phoFiredSingleTrgs;
    vector<int>     *phoFiredDoubleTrgs;
+   vector<int>     *phoIEta;
+   vector<int>     *phoIPhi;
    vector<unsigned short> *phoxtalBits;
+   vector<float>   *phomaxXtalenergyFull5x5;
+   vector<float>   *phoseedTimeFull5x5;
+   vector<float>   *phomipChi2;
+   vector<float>   *phomipTotEnergy;
+   vector<float>   *phomipSlope;
+   vector<float>   *phomipIntercept;
+   vector<int>     *phomipNhitCone;
+   vector<bool>    *phomipIsHalo;
    vector<unsigned short> *phoIDbit;
    Int_t           nEle;
    vector<int>     *eleCharge;
@@ -306,6 +329,9 @@ public :
    vector<float>   *mutrkKink;
    vector<float>   *muBestTrkPtError;
    vector<float>   *muBestTrkPt;
+   vector<bool>    *muIsPFMuon;
+   vector<bool>    *muIsGlobalMuon;
+   vector<bool>    *muIsTrackerMuon;
    Int_t           nTau;
    vector<bool>    *taupfTausDiscriminationByDecayModeFinding;
    vector<bool>    *taupfTausDiscriminationByDecayModeFindingNewDMs;
@@ -514,10 +540,25 @@ public :
    TBranch        *b_phoSigmaIEtaIPhi;   //!
    TBranch        *b_phoSigmaIPhiIPhi;   //!
    TBranch        *b_phoE1x3;   //!
+   TBranch        *b_phoE3x1;   //!
    TBranch        *b_phoE1x5;   //!
+   TBranch        *b_phoE5x1;   //!
    TBranch        *b_phoE2x2;   //!
+   TBranch        *b_phoE3x2;   //!
+   TBranch        *b_phoE3x3;   //!
+   TBranch        *b_phoE4x4;   //!
+   TBranch        *b_phoN5x5;   //!
    TBranch        *b_phoE2x5Max;   //!
    TBranch        *b_phoE5x5;   //!
+   TBranch        *b_phoE2x5Right;   //!
+   TBranch        *b_phoE2x5Left;   //!
+   TBranch        *b_phoE2x5Top;   //!
+   TBranch        *b_phoE2x5Bottom;   //!
+   TBranch        *b_phoELeft;   //!
+   TBranch        *b_phoERight;   //!
+   TBranch        *b_phoETop;   //!
+   TBranch        *b_phoEBottom;   //!
+   TBranch        *b_phoE2nd;   //!
    TBranch        *b_phoESEffSigmaRR;   //!
    TBranch        *b_phoSigmaIEtaIEtaFull5x5;   //!
    TBranch        *b_phoSigmaIEtaIPhiFull5x5;   //!
@@ -573,7 +614,17 @@ public :
    TBranch        *b_phoIDMVA;   //!
    TBranch        *b_phoFiredSingleTrgs;   //!
    TBranch        *b_phoFiredDoubleTrgs;   //!
+   TBranch        *b_phoIEta;   //!
+   TBranch        *b_phoIPhi;   //!
    TBranch        *b_phoxtalBits;   //!
+   TBranch        *b_phomaxXtalenergyFull5x5;   //!
+   TBranch        *b_phoseedTimeFull5x5;   //!
+   TBranch        *b_phomipChi2;   //!
+   TBranch        *b_phomipTotEnergy;   //!
+   TBranch        *b_phomipSlope;   //!
+   TBranch        *b_phomipIntercept;   //!
+   TBranch        *b_phomipNhitCone;   //!
+   TBranch        *b_phomipIsHalo;   //!
    TBranch        *b_phoIDbit;   //!
    TBranch        *b_nEle;   //!
    TBranch        *b_eleCharge;   //!
@@ -696,6 +747,9 @@ public :
    TBranch        *b_mutrkKink;   //!
    TBranch        *b_muBestTrkPtError;   //!
    TBranch        *b_muBestTrkPt;   //!
+   TBranch        *b_muIsPFMuon;   //!
+   TBranch        *b_muIsGlobalMuon;   //!
+   TBranch        *b_muIsTrackerMuon;   //!
    TBranch        *b_nTau;   //!
    TBranch        *b_taupfTausDiscriminationByDecayModeFinding;   //!
    TBranch        *b_taupfTausDiscriminationByDecayModeFindingNewDMs;   //!
@@ -838,6 +892,9 @@ public :
    TBranch        *b_AK8softdropSubjetCharge;   //!
    TBranch        *b_AK8softdropSubjetFlavour;   //!
    TBranch        *b_AK8softdropSubjetCSV;   //!
+
+   // MC Only
+
 
    postAnalyzer_QCD(TTree *tree=0);
    virtual ~postAnalyzer_QCD();
@@ -1032,7 +1089,6 @@ void postAnalyzer_QCD::Init(TTree *tree, Bool_t isMC)
    }
 
 
-   //Common
    // Set object pointer
    phoE = 0;
    phoEt = 0;
@@ -1058,10 +1114,25 @@ void postAnalyzer_QCD::Init(TTree *tree, Bool_t isMC)
    phoSigmaIEtaIPhi = 0;
    phoSigmaIPhiIPhi = 0;
    phoE1x3 = 0;
+   phoE3x1 = 0;
    phoE1x5 = 0;
+   phoE5x1 = 0;
    phoE2x2 = 0;
+   phoE3x2 = 0;
+   phoE3x3 = 0;
+   phoE4x4 = 0;
+   phoN5x5 = 0;
    phoE2x5Max = 0;
    phoE5x5 = 0;
+   phoE2x5Right = 0;
+   phoE2x5Left = 0;
+   phoE2x5Top = 0;
+   phoE2x5Bottom = 0;
+   phoELeft = 0;
+   phoERight = 0;
+   phoETop = 0;
+   phoEBottom = 0;
+   phoE2nd = 0;
    phoESEffSigmaRR = 0;
    phoSigmaIEtaIEtaFull5x5 = 0;
    phoSigmaIEtaIPhiFull5x5 = 0;
@@ -1117,7 +1188,17 @@ void postAnalyzer_QCD::Init(TTree *tree, Bool_t isMC)
    phoIDMVA = 0;
    phoFiredSingleTrgs = 0;
    phoFiredDoubleTrgs = 0;
+   phoIEta = 0;
+   phoIPhi = 0;
    phoxtalBits = 0;
+   phomaxXtalenergyFull5x5 = 0;
+   phoseedTimeFull5x5 = 0;
+   phomipChi2 = 0;
+   phomipTotEnergy = 0;
+   phomipSlope = 0;
+   phomipIntercept = 0;
+   phomipNhitCone = 0;
+   phomipIsHalo = 0;
    phoIDbit = 0;
    eleCharge = 0;
    eleChargeConsistent = 0;
@@ -1238,6 +1319,9 @@ void postAnalyzer_QCD::Init(TTree *tree, Bool_t isMC)
    mutrkKink = 0;
    muBestTrkPtError = 0;
    muBestTrkPt = 0;
+   muIsPFMuon = 0;
+   muIsGlobalMuon = 0;
+   muIsTrackerMuon = 0;
    taupfTausDiscriminationByDecayModeFinding = 0;
    taupfTausDiscriminationByDecayModeFindingNewDMs = 0;
    tauByMVA6VLooseElectronRejection = 0;
@@ -1447,10 +1531,25 @@ void postAnalyzer_QCD::Init(TTree *tree, Bool_t isMC)
    fChain->SetBranchAddress("phoSigmaIEtaIPhi", &phoSigmaIEtaIPhi, &b_phoSigmaIEtaIPhi);
    fChain->SetBranchAddress("phoSigmaIPhiIPhi", &phoSigmaIPhiIPhi, &b_phoSigmaIPhiIPhi);
    fChain->SetBranchAddress("phoE1x3", &phoE1x3, &b_phoE1x3);
+   fChain->SetBranchAddress("phoE3x1", &phoE3x1, &b_phoE3x1);
    fChain->SetBranchAddress("phoE1x5", &phoE1x5, &b_phoE1x5);
+   fChain->SetBranchAddress("phoE5x1", &phoE5x1, &b_phoE5x1);
    fChain->SetBranchAddress("phoE2x2", &phoE2x2, &b_phoE2x2);
+   fChain->SetBranchAddress("phoE3x2", &phoE3x2, &b_phoE3x2);
+   fChain->SetBranchAddress("phoE3x3", &phoE3x3, &b_phoE3x3);
+   fChain->SetBranchAddress("phoE4x4", &phoE4x4, &b_phoE4x4);
+   fChain->SetBranchAddress("phoN5x5", &phoN5x5, &b_phoN5x5);
    fChain->SetBranchAddress("phoE2x5Max", &phoE2x5Max, &b_phoE2x5Max);
    fChain->SetBranchAddress("phoE5x5", &phoE5x5, &b_phoE5x5);
+   fChain->SetBranchAddress("phoE2x5Right", &phoE2x5Right, &b_phoE2x5Right);
+   fChain->SetBranchAddress("phoE2x5Left", &phoE2x5Left, &b_phoE2x5Left);
+   fChain->SetBranchAddress("phoE2x5Top", &phoE2x5Top, &b_phoE2x5Top);
+   fChain->SetBranchAddress("phoE2x5Bottom", &phoE2x5Bottom, &b_phoE2x5Bottom);
+   fChain->SetBranchAddress("phoELeft", &phoELeft, &b_phoELeft);
+   fChain->SetBranchAddress("phoERight", &phoERight, &b_phoERight);
+   fChain->SetBranchAddress("phoETop", &phoETop, &b_phoETop);
+   fChain->SetBranchAddress("phoEBottom", &phoEBottom, &b_phoEBottom);
+   fChain->SetBranchAddress("phoE2nd", &phoE2nd, &b_phoE2nd);
    fChain->SetBranchAddress("phoESEffSigmaRR", &phoESEffSigmaRR, &b_phoESEffSigmaRR);
    fChain->SetBranchAddress("phoSigmaIEtaIEtaFull5x5", &phoSigmaIEtaIEtaFull5x5, &b_phoSigmaIEtaIEtaFull5x5);
    fChain->SetBranchAddress("phoSigmaIEtaIPhiFull5x5", &phoSigmaIEtaIPhiFull5x5, &b_phoSigmaIEtaIPhiFull5x5);
@@ -1506,7 +1605,17 @@ void postAnalyzer_QCD::Init(TTree *tree, Bool_t isMC)
    fChain->SetBranchAddress("phoIDMVA", &phoIDMVA, &b_phoIDMVA);
    fChain->SetBranchAddress("phoFiredSingleTrgs", &phoFiredSingleTrgs, &b_phoFiredSingleTrgs);
    fChain->SetBranchAddress("phoFiredDoubleTrgs", &phoFiredDoubleTrgs, &b_phoFiredDoubleTrgs);
+   fChain->SetBranchAddress("phoIEta", &phoIEta, &b_phoIEta);
+   fChain->SetBranchAddress("phoIPhi", &phoIPhi, &b_phoIPhi);
    fChain->SetBranchAddress("phoxtalBits", &phoxtalBits, &b_phoxtalBits);
+   fChain->SetBranchAddress("phomaxXtalenergyFull5x5", &phomaxXtalenergyFull5x5, &b_phomaxXtalenergyFull5x5);
+   fChain->SetBranchAddress("phoseedTimeFull5x5", &phoseedTimeFull5x5, &b_phoseedTimeFull5x5);
+   fChain->SetBranchAddress("phomipChi2", &phomipChi2, &b_phomipChi2);
+   fChain->SetBranchAddress("phomipTotEnergy", &phomipTotEnergy, &b_phomipTotEnergy);
+   fChain->SetBranchAddress("phomipSlope", &phomipSlope, &b_phomipSlope);
+   fChain->SetBranchAddress("phomipIntercept", &phomipIntercept, &b_phomipIntercept);
+   fChain->SetBranchAddress("phomipNhitCone", &phomipNhitCone, &b_phomipNhitCone);
+   fChain->SetBranchAddress("phomipIsHalo", &phomipIsHalo, &b_phomipIsHalo);
    fChain->SetBranchAddress("phoIDbit", &phoIDbit, &b_phoIDbit);
    fChain->SetBranchAddress("nEle", &nEle, &b_nEle);
    fChain->SetBranchAddress("eleCharge", &eleCharge, &b_eleCharge);
@@ -1629,6 +1738,9 @@ void postAnalyzer_QCD::Init(TTree *tree, Bool_t isMC)
    fChain->SetBranchAddress("mutrkKink", &mutrkKink, &b_mutrkKink);
    fChain->SetBranchAddress("muBestTrkPtError", &muBestTrkPtError, &b_muBestTrkPtError);
    fChain->SetBranchAddress("muBestTrkPt", &muBestTrkPt, &b_muBestTrkPt);
+   fChain->SetBranchAddress("muIsPFMuon", &muIsPFMuon, &b_muIsPFMuon);
+   fChain->SetBranchAddress("muIsGlobalMuon", &muIsGlobalMuon, &b_muIsGlobalMuon);
+   fChain->SetBranchAddress("muIsTrackerMuon", &muIsTrackerMuon, &b_muIsTrackerMuon);
    fChain->SetBranchAddress("nTau", &nTau, &b_nTau);
    fChain->SetBranchAddress("taupfTausDiscriminationByDecayModeFinding", &taupfTausDiscriminationByDecayModeFinding, &b_taupfTausDiscriminationByDecayModeFinding);
    fChain->SetBranchAddress("taupfTausDiscriminationByDecayModeFindingNewDMs", &taupfTausDiscriminationByDecayModeFindingNewDMs, &b_taupfTausDiscriminationByDecayModeFindingNewDMs);

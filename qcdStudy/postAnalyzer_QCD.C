@@ -47,7 +47,7 @@ void postAnalyzer_QCD::Loop(TString outfilename, Bool_t isMC, Bool_t isEle, Doub
    }
 
    // MET requirements
-   bool passMETfilters =  ( metFilters==0 || metFilters==4 ) ;
+   bool passMETfilters =  ( metFilters==0 ); //|| metFilters==4 ) ;
 
    // some more filters
    bool passTriggers;
@@ -278,10 +278,10 @@ std::vector<int> postAnalyzer_QCD::pcPassSel(int sel, int sys, double phoPtLo, d
      // non collision backgrounds
      //noncoll = kTRUE;
      //if(isMC){
-      noncoll = (*phoSigmaIEtaIEtaFull5x5)[p] > 0.001 && (*phoSigmaIPhiIPhiFull5x5)[p] > 0.001; // isMC
+      //noncoll = (*phoSigmaIEtaIEtaFull5x5)[p] > 0.001 && (*phoSigmaIPhiIPhiFull5x5)[p] > 0.001; // isMC
      //}
      //if(!isMC){
-     // noncoll = fabs((*phoseedTimeFull5x5)[p]) < 3. && (*phomipTotEnergy)[p] < 4.9 && (*phoSigmaIEtaIEtaFull5x5)[p] > 0.001 && (*phoSigmaIPhiIPhiFull5x5)[p] > 0.001;
+      noncoll = fabs((*phoseedTimeFull5x5)[p]) < 3. && (*phomipTotEnergy)[p] < 4.9 && (*phoSigmaIEtaIEtaFull5x5)[p] > 0.001 && (*phoSigmaIPhiIPhiFull5x5)[p] > 0.001;
      //}
 
      passKinematics = (
@@ -324,10 +324,10 @@ std::vector<int> postAnalyzer_QCD::pcPassSel(int sel, int sys, double phoPtLo, d
      //if(sys==1){chIsoUB = chIsoUB+2.;}
      //if(sys==2){chIsoUB = chIsoLB-2.;}
 
-     chIsoLB = 9.;
-     chIsoUB = 24.;
-     if(sys==1){chIsoUB = 26.;}
-     if(sys==2){chIsoUB = 22.;}
+     chIsoLB = 7.;
+     chIsoUB = 13.;
+     if(sys==1){chIsoUB = 11.;}
+     if(sys==2){chIsoUB = 15.;}
 
      //passCHBkgIso = (
      //                ( TMath::Max( ( (*phoPFChWorstIso)[p] - rho*EAcharged((*phoSCEta)[p]) ), 0.0) > chIsoLB )  &&
@@ -383,8 +383,8 @@ std::vector<int> postAnalyzer_QCD::pcPassSel(int sel, int sys, double phoPtLo, d
 // worst charged hadron isolation EA
 Double_t postAnalyzer_QCD::EAcharged(Double_t eta){
   Float_t EffectiveArea = 0.0;
-  if(fabs(eta) >= 0.0   && fabs(eta) < 1.0   ) EffectiveArea = 0.078;
-  if(fabs(eta) >= 1.0   && fabs(eta) < 1.479 ) EffectiveArea = 0.089;
+  if(fabs(eta) >= 0.0   && fabs(eta) < 1.0   ) EffectiveArea = 0.080721;
+  if(fabs(eta) >= 1.0   && fabs(eta) < 1.479 ) EffectiveArea = 0.063986;
   return EffectiveArea;
 }
 
