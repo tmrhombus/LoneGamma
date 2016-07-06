@@ -1,0 +1,1 @@
+g++ -Wno-deprecated main.C -o plotfrerrors.exe -I$ROOTSYS/include -L$ROOTSYS/lib -I$CMS_PATH/$SCRAM_ARCH/lcg/roofit/5.32.03-cms9/include -L$CMS_PATH/$SCRAM_ARCH/lcg/roofit/5.32.03-cms9/lib -lRooFit -lRooFitCore `root-config --cflags` `root-config --libs` 
