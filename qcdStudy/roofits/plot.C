@@ -582,7 +582,7 @@ void plot::getFraction(
    lumi->SetTextColor(kBlack);
    lumi->SetTextAlign(31);
    lumi->SetTextFont(42);
-   lumi->DrawTextNDC(0.9,0.91,"2.20 /fb (13 TeV)");
+   lumi->DrawTextNDC(0.9,0.91,"2.60 /fb (13 TeV)");
    xframe->addObject(lumi);
 
    TText* ptrange = new TText(1,1,"") ;
@@ -845,7 +845,7 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
   lumi->SetTextColor(kBlack);
   lumi->SetTextAlign(31);
   lumi->SetTextFont(42);
-  lumi->DrawTextNDC(0.9,0.91,"2.20 /fb (13 TeV)");
+  lumi->DrawTextNDC(0.9,0.91,"2.60 /fb (13 TeV)");
   //xframe->addObject(lumi);
 
   TLegend *leg2 = new TLegend(0.55,0.6,0.88,0.88 );
@@ -875,14 +875,13 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
   gPad->SetTicky();
   gStyle->SetLineWidth(3);
 
-  std::cout<<"size_num_corr"<<size_num_corr[0]<<" "<<size_num_corr[1]<<" "<<size_num_corr[2]<<" "<<size_num_corr[3]<<" "<<std::endl;
-  std::cout<<"size_den"<<size_den[0]<<" "<<size_den[1]<<" "<<size_den[2]<<" "<<size_den[3]<<" "<<std::endl;
-  std::cout<<"err_num_corr"<<err_num_corr[0]<<" "<<err_num_corr[1]<<" "<<err_num_corr[2]<<" "<<err_num_corr[3]<<" "<<std::endl;
-  std::cout<<"err_den"<<err_den[0]<<" "<<err_den[1]<<" "<<err_den[2]<<" "<<err_den[3]<<" "<<std::endl;
-
-
-  std::cout<<"mid"<<mid[0]<<" "<<mid[1]<<" "<<mid[2]<<" "<<mid[3]<<" "<<std::endl;
-  std::cout<<"miderr"<<miderr[0]<<" "<<miderr[1]<<" "<<miderr[2]<<" "<<miderr[3]<<" "<<std::endl;
+  std::cout<<"Sysname: "<<sysname<<std::endl;
+  std::cout<<"Double_t size_num_corr[4]={"<<size_num_corr[0]<<", "<<size_num_corr[1]<<", "<<size_num_corr[2]<<", "<<size_num_corr[3]<<"}; "<<std::endl;
+  std::cout<<"Double_t size_den[4]={"<<size_den[0]<<", "<<size_den[1]<<", "<<size_den[2]<<", "<<size_den[3]<<"}; "<<std::endl;
+  std::cout<<"Double_t err_num_corr[4]={"<<err_num_corr[0]<<", "<<err_num_corr[1]<<", "<<err_num_corr[2]<<", "<<err_num_corr[3]<<"}; "<<std::endl;
+  std::cout<<"Double_t err_den[4]={"<<err_den[0]<<", "<<err_den[1]<<", "<<err_den[2]<<", "<<err_den[3]<<"}; "<<std::endl;
+  std::cout<<"Double_t mid[4]={"<<mid[0]<<", "<<mid[1]<<", "<<mid[2]<<", "<<mid[3]<<"}; "<<std::endl;
+  std::cout<<"Double_t miderr[4]={"<<miderr[0]<<", "<<miderr[1]<<", "<<miderr[2]<<", "<<miderr[3]<<"}; "<<std::endl;
   //Double_t ratio[3];
   Double_t *ratio = new Double_t[4];
   ratio[0] = size_num_corr[0]/size_den[0];
@@ -891,10 +890,10 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
   ratio[3] = size_num_corr[3]/size_den[3];
 
   Double_t *ratioerr = new Double_t[4];
-  ratioerr[0]= ratio[0] * pow( pow(err_num_corr[0]/size_num_corr[0] + pow(err_den[0]/size_den[0] ,2) ,2) ,0.5); //0.005;
-  ratioerr[1]= ratio[1] * pow( pow(err_num_corr[1]/size_num_corr[1] + pow(err_den[1]/size_den[1] ,2) ,2) ,0.5); //0.005;
-  ratioerr[2]= ratio[2] * pow( pow(err_num_corr[2]/size_num_corr[2] + pow(err_den[2]/size_den[2] ,2) ,2) ,0.5); //0.005;
-  ratioerr[3]= ratio[3] * pow( pow(err_num_corr[3]/size_num_corr[3] + pow(err_den[3]/size_den[3] ,2) ,2) ,0.5); //0.005;
+  ratioerr[0]= ratio[0] * pow( pow(err_num_corr[0]/size_num_corr[0] ,2) + pow(err_den[0]/size_den[0] ,2) ,0.5); //0.005;
+  ratioerr[1]= ratio[1] * pow( pow(err_num_corr[1]/size_num_corr[1] ,2) + pow(err_den[1]/size_den[1] ,2) ,0.5); //0.005;
+  ratioerr[2]= ratio[2] * pow( pow(err_num_corr[2]/size_num_corr[2] ,2) + pow(err_den[2]/size_den[2] ,2) ,0.5); //0.005;
+  ratioerr[3]= ratio[3] * pow( pow(err_num_corr[3]/size_num_corr[3] ,2) + pow(err_den[3]/size_den[3] ,2) ,0.5); //0.005;
 
   ratios.push_back(ratio[0]);
   ratios.push_back(ratio[1]);
@@ -934,7 +933,7 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
 
   title->DrawTextNDC(0.17,0.87,"CMS");
   extra->DrawTextNDC(0.17,0.81,"Preliminary");
-  lumi->DrawTextNDC(0.9,0.91,"2.20 /fb (13 TeV)");
+  lumi->DrawTextNDC(0.9,0.91,"2.60 /fb (13 TeV)");
 
   TLegend *leg3 = new TLegend(0.55,0.6,0.88,0.88 );
   leg3->SetFillColor(kWhite);
@@ -1157,7 +1156,7 @@ void plot::getCorrectedFakeRatioErrUpDown(TFile* datafile,  //<----data file
   lumi->SetTextColor(kBlack);
   lumi->SetTextAlign(31);
   lumi->SetTextFont(42);
-  lumi->DrawTextNDC(0.9,0.91,"2.20 /fb (13 TeV)");
+  lumi->DrawTextNDC(0.9,0.91,"2.60 /fb (13 TeV)");
   //xframe->addObject(lumi);
 
   TLegend *leg2 = new TLegend(0.55,0.6,0.88,0.88 );
@@ -1195,10 +1194,10 @@ void plot::getCorrectedFakeRatioErrUpDown(TFile* datafile,  //<----data file
   ratio[3] = size_num_corr[3]/size_den[3];
 
   Double_t *ratioerr = new Double_t[4];
-  ratioerr[0]= ratio[0] * pow( pow(err_num_corr[0]/size_num_corr[0] + pow(err_den[0]/size_den[0] ,2) ,2) ,0.5); //0.005;
-  ratioerr[1]= ratio[1] * pow( pow(err_num_corr[1]/size_num_corr[1] + pow(err_den[1]/size_den[1] ,2) ,2) ,0.5); //0.005;
-  ratioerr[2]= ratio[2] * pow( pow(err_num_corr[2]/size_num_corr[2] + pow(err_den[2]/size_den[2] ,2) ,2) ,0.5); //0.005;
-  ratioerr[3]= ratio[3] * pow( pow(err_num_corr[3]/size_num_corr[3] + pow(err_den[3]/size_den[3] ,2) ,2) ,0.5); //0.005;
+  ratioerr[0]= ratio[0] * pow( pow(err_num_corr[0]/size_num_corr[0] ,2) + pow(err_den[0]/size_den[0] ,2) ,0.5); //0.005;
+  ratioerr[1]= ratio[1] * pow( pow(err_num_corr[1]/size_num_corr[1] ,2) + pow(err_den[1]/size_den[1] ,2) ,0.5); //0.005;
+  ratioerr[2]= ratio[2] * pow( pow(err_num_corr[2]/size_num_corr[2] ,2) + pow(err_den[2]/size_den[2] ,2) ,0.5); //0.005;
+  ratioerr[3]= ratio[3] * pow( pow(err_num_corr[3]/size_num_corr[3] ,2) + pow(err_den[3]/size_den[3] ,2) ,0.5); //0.005;
 
   ratios.push_back(ratio[0]);
   ratios.push_back(ratio[1]);
@@ -1237,7 +1236,7 @@ void plot::getCorrectedFakeRatioErrUpDown(TFile* datafile,  //<----data file
 
   title->DrawTextNDC(0.17,0.87,"CMS");
   extra->DrawTextNDC(0.17,0.81,"Preliminary");
-  lumi->DrawTextNDC(0.9,0.91,"2.20 /fb (13 TeV)");
+  lumi->DrawTextNDC(0.9,0.91,"2.60 /fb (13 TeV)");
 
   TLegend *leg3 = new TLegend(0.55,0.6,0.88,0.88 );
   leg3->SetFillColor(kWhite);
@@ -1333,12 +1332,12 @@ void plot::drawAllRates(TString extraname){
   lumi->SetTextColor(kBlack);
   lumi->SetTextAlign(31);
   lumi->SetTextFont(42);
-  //lumi->DrawTextNDC(0.9,0.91,"2.20 /fb (13 TeV)");
+  //lumi->DrawTextNDC(0.9,0.91,"2.60 /fb (13 TeV)");
   //xframe->addObject(lumi);
 
   title->DrawTextNDC(0.17,0.87,"CMS");
   extra->DrawTextNDC(0.17,0.81,"Preliminary");
-  lumi->DrawTextNDC(0.9,0.91,"2.20 /fb (13 TeV)");
+  lumi->DrawTextNDC(0.9,0.91,"2.60 /fb (13 TeV)");
 
   ////////// Draw points first, then lines
 
@@ -1648,12 +1647,12 @@ void plot::drawAllRatesRelative(TString extraname){
   lumi->SetTextColor(kBlack);
   lumi->SetTextAlign(31);
   lumi->SetTextFont(42);
-  //lumi->DrawTextNDC(0.9,0.91,"2.20 /fb (13 TeV)");
+  //lumi->DrawTextNDC(0.9,0.91,"2.60 /fb (13 TeV)");
   //xframe->addObject(lumi);
 
   title->DrawTextNDC(0.17,0.87,"CMS");
   extra->DrawTextNDC(0.17,0.81,"Preliminary");
-  lumi->DrawTextNDC(0.9,0.91,"2.20 /fb (13 TeV)");
+  lumi->DrawTextNDC(0.9,0.91,"2.60 /fb (13 TeV)");
 
   ////////// Draw points first, then lines
 
@@ -1872,12 +1871,12 @@ void plot::drawAllRatesRelativeHist(TString extraname){
   lumi->SetTextColor(kBlack);
   lumi->SetTextAlign(31);
   lumi->SetTextFont(42);
-  //lumi->DrawTextNDC(0.9,0.91,"2.20 /fb (13 TeV)");
+  //lumi->DrawTextNDC(0.9,0.91,"2.60 /fb (13 TeV)");
   //xframe->addObject(lumi);
 
   title->DrawTextNDC(0.17,0.87,"CMS");
   extra->DrawTextNDC(0.17,0.81,"Preliminary");
-  lumi->DrawTextNDC(0.9,0.91,"2.20 /fb (13 TeV)");
+  lumi->DrawTextNDC(0.9,0.91,"2.60 /fb (13 TeV)");
 
   ////////// Draw points first, then lines
 
@@ -1925,6 +1924,27 @@ void plot::drawAllRatesRelativeHist(TString extraname){
 //  for(unsigned int p=0; p<4; ++p){ h_sys9->SetBinContent( p+1, (-ratioerrorss[0][p])/ratioss[0][p] ); std::cout<<ratioss[0][p]<<std::endl;}
   for(unsigned int p=0; p<4; ++p){ h_sys10->SetBinContent( p+1, (ratioss[10][p]-ratioss[0][p])/ratioss[0][p] ); }
 
+ std::cout<<"Fake Ratios Relative Hist"<<std::endl;
+  std::cout<<"standard"<<std::endl;
+  std::cout<<"sideband Up"<<std::endl;
+  std::cout<<"sideband Down"<<std::endl;
+  std::cout<<"MET Up"<<std::endl;
+  std::cout<<"MET Down"<<std::endl;
+  std::cout<<"binning Up"<<std::endl;
+  std::cout<<"binning Down"<<std::endl;
+  std::cout<<"bkg. no #gamma iso req"<<std::endl;
+  std::cout<<"fit Up"<<std::endl;
+  std::cout<<"fit Down"<<std::endl;
+  std::cout<<"Double_t p_00[4]={"<<ratioss[0][0]<<", "<<ratioss[0][1]<<", "<<ratioss[0][2]<<", "<<ratioss[0][3]<<"}; "<<std::endl;
+  std::cout<<"Double_t p_01[4]={"<<ratioss[1][0]<<", "<<ratioss[1][1]<<", "<<ratioss[1][2]<<", "<<ratioss[1][3]<<"}; "<<std::endl;
+  std::cout<<"Double_t p_02[4]={"<<ratioss[2][0]<<", "<<ratioss[2][1]<<", "<<ratioss[2][2]<<", "<<ratioss[2][3]<<"}; "<<std::endl;
+  std::cout<<"Double_t p_03[4]={"<<ratioss[3][0]<<", "<<ratioss[3][1]<<", "<<ratioss[3][2]<<", "<<ratioss[3][3]<<"}; "<<std::endl;
+  std::cout<<"Double_t p_04[4]={"<<ratioss[4][0]<<", "<<ratioss[4][1]<<", "<<ratioss[4][2]<<", "<<ratioss[4][3]<<"}; "<<std::endl;
+  std::cout<<"Double_t p_05[4]={"<<ratioss[5][0]<<", "<<ratioss[5][1]<<", "<<ratioss[5][2]<<", "<<ratioss[5][3]<<"}; "<<std::endl;
+  std::cout<<"Double_t p_06[4]={"<<ratioss[6][0]<<", "<<ratioss[6][1]<<", "<<ratioss[6][2]<<", "<<ratioss[6][3]<<"}; "<<std::endl;
+  std::cout<<"Double_t p_07[4]={"<<ratioss[7][0]<<", "<<ratioss[7][1]<<", "<<ratioss[7][2]<<", "<<ratioss[7][3]<<"}; "<<std::endl;
+  std::cout<<"Double_t p_09[4]={"<<ratioss[9][0]<<", "<<ratioss[9][1]<<", "<<ratioss[9][2]<<", "<<ratioss[9][3]<<"}; "<<std::endl;
+  std::cout<<"Double_t p_10[4]={"<<ratioss[10][0]<<", "<<ratioss[10][1]<<", "<<ratioss[10][2]<<", "<<ratioss[10][3]<<"}; "<<std::endl;
 
 //TColor *mycolor = gROOT->TColor::GetColor("#33a02c");
   //// set colors
@@ -2086,7 +2106,7 @@ void plot::drawAllRatesRelativeHist(TString extraname){
 
   title->DrawTextNDC(0.17,0.87,"CMS");
   extra->DrawTextNDC(0.17,0.81,"Preliminary");
-  lumi->DrawTextNDC(0.9,0.91,"2.20 /fb (13 TeV)");
+  lumi->DrawTextNDC(0.9,0.91,"2.60 /fb (13 TeV)");
 
   h_sys0->Draw("hist,same");
   h_sys1->Draw("hist,same");
