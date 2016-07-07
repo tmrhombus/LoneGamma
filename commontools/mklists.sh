@@ -3,27 +3,27 @@
 outdir="${CMSSW_BASE}/src/LoneGamma/lists"
 mkdir -p "${outdir}"
 
-doSinglePhoton=false
+doSinglePhoton=true
 doDoubleElectron=false
-doGJetsMC=true
+doGJetsMC=false
  # GJetsHT40to100
  # GJetsHT100to200
  # GJetsHT200to400
  # GJetsHT400to600
  # GJetsHT600toInf
-doQCDMC=true
+doQCDMC=false
  # QCDPt80to120
  # QCDPt120to170
  # QCDPt170to300
  # QCDPt300toInf
-doZllJMC=true
+doZllJMC=false
  # ZllJetsHT100to200
  # ZllJetsHT200to400
  # ZllJetsHT400to600
  # ZllJetsHT600toInf
-doZnnGJMC=true
+doZnnGJMC=false
  # ZnnGJets
-doZllGJMC=true
+doZllGJMC=false
  # ZllGJets
 
 
@@ -32,7 +32,7 @@ doZllGJMC=true
 if [ ${doSinglePhoton} = true ]
 then
  printf "Making SinglePhoton\n" 
- ls /hdfs/store/user/gomber/SinglePhoton_2016B/SinglePhoton/crab_job_SinglePhoton_13TeV_2016_2p6fb_allvar/160618_232516/*/*root \
+ ls  /hdfs/store/user/gomber/SinglePhoton_2016B/SinglePhoton/crab_job_SinglePhoton*13TeV_2016_5p76fb_allvar_newbh/*/*/*root \
   > "${outdir}/hdfslist_SinglePhoton.txt"
 fi
 
