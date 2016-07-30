@@ -20,8 +20,8 @@ done # for samplename in "GJets_*" "SingleP"
 
 sed -i 's/\s*$//' ${thedir}/events_${samplename}.txt
 
-grep -v -F -x -f ../EventList.txt ${thedir}/events_SinglePhoton.txt > ${thedir}/events_menothey.txt
-grep -F -x -f ../EventList.txt ${thedir}/events_SinglePhoton.txt > ${thedir}/events_common.txt
-grep -v -F -x -f ${thedir}/events_SinglePhoton.txt ../EventList.txt > ${thedir}/events_theynome.txt
+grep -v -F -x -f EventList.txt ${thedir}/events_SinglePhoton.txt > ${thedir}/events_menothey.txt
+grep -F -x -f EventList.txt ${thedir}/events_SinglePhoton.txt > ${thedir}/events_common.txt
+grep -v -F -x -f ${thedir}/events_SinglePhoton.txt EventList.txt > ${thedir}/events_theynome.txt
 
 
