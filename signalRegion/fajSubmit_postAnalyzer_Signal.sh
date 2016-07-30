@@ -2,8 +2,8 @@
 
 #voms-proxy-init --voms cms --valid 100:00
 
-domc=false
-dodata=true
+domc=true
+dodata=false
 dosubmit=true
 
 START=$(date +%s);
@@ -18,54 +18,63 @@ lumi=2320. # /pb
   #"ZNuNuG"
 if [ ${domc} = true ]
 then
+
+ initevents="${CMSSW_BASE}/src/LoneGamma/lists/initialEvents.txt"
+
  for mc_samplename in \
-  "ZJetsToNuNu"
+  "GJetsHT"   \
+  "QCDPt"     \
+  "ZllGJets"  \
+  "ZnnGJets"  \
+  "ZllJetsHT" \
+  "ZnnJetsHT" \
+  "WlnGJets"  \
+  "Wen"       \
+  "Wmn"       \
+  "Wtn"       \
+  "TTGJets" 
+
  do
 
-  for htbin in \
-   "100To200" \
-   "200To400" \
-   "400To600" \
-   "600ToInf"
-  do 
+  bins=( "" )
+  if [ ${mc_samplename} = "GJetsHT" ]
+   then 
+    bins=( "40to100" "100to200" "200to400" "400to600" "600toInf" )
+   fi
+  if [ ${mc_samplename} = "QCDPt" ]
+   then
+    bins=( "15to20" "20to30" "30to50" "50to80" "80to120" "120to170" "170to300" "300toInf" )
+  fi
+  if [ ${mc_samplename} = "ZllJetsHT" ]
+   then
+    bins=( "100to200" "200to400" "400to600" "600toInf" )
+  fi
+  if [ ${mc_samplename} = "ZnnJetsHT" ]
+   then
+    bins=( "100to200" "200to400" "400to600" "600toInf" )
+  fi
 
-  submitname="${mc_samplename}${htbin}"
+  #for bin in ${bins[*]}
+  for bin in "${bins[@]}"
+  do  
 
-  initevents="${submitbase}/gitignore/${version}/lists/initialEvents.txt"
-  touch ${initevents}
-
- # count the total number of events, put in a file if it's not there
- if ! grep -F "${submitname} " ${initevents}
- then 
-  echo "Need to count events.. making list"
-
-#/hdfs/store/user/jjbuch/ZJetsToNuNu_HT-100To200_13TeV-madgraph/
-#/hdfs/store/user/jjbuch/ZJetsToNuNu_HT-600ToInf_13TeV-madgraph/
-#/hdfs/store/user/jjbuch/ZJetsToNuNu_HT-200To400_13TeV-madgraph/
-#/hdfs/store/user/jjbuch/ZJetsToNuNu_HT-400To600_13TeV-madgraph/
-
-   #find /hdfs/store/user/jjbuch/${mc_samplename}*TuneCUETP8M1_13TeV*/crab_ggNtuplizer_spring15_${mc_samplename}*_try5/151212_*/0000/*root > \
-   find /hdfs/store/user/jjbuch/${mc_samplename}*${htbin}*13TeV*/crab_ggNtuplizer_spring15_${mc_samplename}*_try5/151212_*/0000/*root > \
-    ${submitbase}/gitignore/${version}/lists/hdfslist_${submitname}.txt
+  submitname="${mc_samplename}${bin}"
+  printf "\nPreparing  ${submitname}\n"
 
    # format as xrootd
-   cp ${submitbase}/gitignore/${version}/lists/hdfslist_${submitname}.txt \
+   cp ${CMSSW_BASE}/src/LoneGamma/lists/hdfslist_${submitname}.txt \
       ${submitbase}/gitignore/${version}/lists/xrdlist_${submitname}.txt 
    xrdlist="${submitbase}/gitignore/${version}/lists/xrdlist_${submitname}.txt"
    sed -i 's@/hdfs/@root://cmsxrootd.hep.wisc.edu//@g' $xrdlist #
 
-   echo "                    .. counting events"
-   python ../commontools/eventCounter.py ${submitname} \
-      ${submitbase}/gitignore/${version}/lists/hdfslist_${submitname}.txt \
-      ${initevents}
-   echo "                    .. counted events"
-   
-  fi
-  xrdlist="${submitbase}/gitignore/${version}/lists/xrdlist_${submitname}.txt"
-
   # sample specific parameters..
   treename="ggNtuplizer/EventTree"
   isMC="kTRUE"
+  isZnnG="kFALSE"
+  if [ ${submitname} = "ZnnGJets" ]
+   then 
+   isZnnG="kTRUE" 
+  fi
   nrE="$(grep -P ${submitname} ${initevents} | sed -n -e "s@${submitname} Events: @@p")"
   xc="$(grep -P ${submitname}  ${initevents} | sed -n -e "s@${submitname} XC: @@p")"
    #printf "\nxc is ${xc}\n"
@@ -75,6 +84,7 @@ then
   sed -i "s@SAMPLENAME@${submitname}@g"   "${submitbase}/gitignore/${version}/submit/${submitname}_callpostAnalyzer_Signal.cc"
   sed -i "s@TREENAME@${treename}@g"       "${submitbase}/gitignore/${version}/submit/${submitname}_callpostAnalyzer_Signal.cc"
   sed -i "s@ISMC@${isMC}@g"               "${submitbase}/gitignore/${version}/submit/${submitname}_callpostAnalyzer_Signal.cc"
+  sed -i "s@ISZNNG@${isZnnG}@g"           "${submitbase}/gitignore/${version}/submit/${submitname}_callpostAnalyzer_Signal.cc"
   sed -i "s@CROSSSEC@${xc}@g"             "${submitbase}/gitignore/${version}/submit/${submitname}_callpostAnalyzer_Signal.cc"
   sed -i "s@NREVENTS@${nrE}@g"            "${submitbase}/gitignore/${version}/submit/${submitname}_callpostAnalyzer_Signal.cc"
   sed -i "s@LUMI@${lumi}@g"               "${submitbase}/gitignore/${version}/submit/${submitname}_callpostAnalyzer_Signal.cc"
@@ -114,15 +124,9 @@ then
   
   printf " making list of files\n"
 
-  #find /hdfs/store/user/jjbuch/SinglePhoton/crab_ggNtuplizer_spring15_SinglePhoton_Run2015D_PromptReco_v3_try5/151212_080518/0000/*root > \
-  find /hdfs/store/user/gomber/SinglePhoton_Crab_2015D_v3_226fb/SinglePhoton/crab_job_single_photon_13TeV_v3_226fb/160109_082344/0000/*root > \
-   ${submitbase}/gitignore/${version}/lists/hdfslist_${data_samplename}.txt
-  #find /hdfs/store/user/jjbuch/SinglePhoton/crab_ggNtuplizer_spring15_SinglePhoton_Run2015D_PromptReco_v4_try5/151212_080439/0000/*root >> \
-  find /hdfs/store/user/gomber/SinglePhoton_Crab_2015D_v4_226fb/SinglePhoton/crab_job_single_photon_13TeV_v4_226fb/160109_082133/000*/*root >> \
-   ${submitbase}/gitignore/${version}/lists/hdfslist_${data_samplename}.txt
 
   # format as xrootd
-  cp ${submitbase}/gitignore/${version}/lists/hdfslist_${data_samplename}.txt \
+   cp ${CMSSW_BASE}/src/LoneGamma/lists/hdfslist_${data_samplename}.txt \
      ${submitbase}/gitignore/${version}/lists/xrdlist_${data_samplename}.txt 
   xrdlist="${submitbase}/gitignore/${version}/lists/xrdlist_${data_samplename}.txt"
   sed -i 's@/hdfs/@root://cmsxrootd.hep.wisc.edu//@g' $xrdlist #
@@ -134,7 +138,7 @@ then
   treename="ggNtuplizer/EventTree"
   isMC="kFALSE"
   xc="1."
-  nrE="2320."
+  nrE=${lumi}
 
   # make correct executable xx_callpostAnalyzer_Signal
   cp template_callpostAnalyzer_Signal.cc      "${submitbase}/gitignore/${version}/submit/${data_samplename}_callpostAnalyzer_Signal.cc"
