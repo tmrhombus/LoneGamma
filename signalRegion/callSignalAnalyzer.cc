@@ -19,22 +19,21 @@ void callSignalAnalyzer(void)
  Double_t nrEvents=10000;
  Double_t crossSec=40000;
  
- Bool_t isMC=kFALSE;
  TString path = "../test";
- //TString outfilename=path+"/Signal_GJMC.root";
- //TString outfilename=path+"/Signal_ZGMC.root";
- TString outfilename=path+"/OneBadSignal_DataD.root";
+
+// Bool_t isMC=kFALSE;
+// Bool_t isZnnG=kFALSE;
+// TString outfilename=path+"/Datatest.root";
+// TString inputListName=path+"/SinglePhoton_callpostAnalyzer_Signal-ggtree_data_1117.inputs";
+
+ Bool_t isMC=kTRUE;
+ Bool_t isZnnG=kTRUE;
+ TString outfilename=path+"/Signal_ZnnGJets.root";
+ TString inputListName=path+"/hdfslist_ZnnGJets.txt";
+
+ std::cout << "Input List Name:  " << inputListName << std::endl;
  std::cout << "Output File Name: " << outfilename << std::endl;
- 
- // get each filename from list and add it to TChain
- //TString inputListName=path+"/filenames_GJMC_10.txt";
- //TString inputListName=path+"/filenames_ZGMC_10.txt";
- //TString inputListName=path+"/filenames_Data2015D_Full.txt";
- //TString inputListName=path+"/filenames_Data2015D_20.txt";
- //TString inputListName=path+"/SinglePhoton_badevent.inputs";
- //TString inputListName=path+"/SinglePhoton_callpostAnalyzer_Signal-ggtree_data_1017.inputs";
- TString inputListName=path+"/SinglePhoton_callpostAnalyzer_Signal-ggtree_data_1117.inputs";
- //TString inputListName=path+"/SinglePhoton_callpostAnalyzer_Signal-ggtree_data_37.inputs";
+
  std::vector<TString> infilename_dump;
   
  // open file_name_list.txt
@@ -60,7 +59,7 @@ void callSignalAnalyzer(void)
 
  postAnalyzer_Signal m;
  m.Init(theChain,isMC);
- m.Loop(outfilename,isMC,lumi,nrEvents,crossSec);
+ m.Loop(outfilename,isMC,lumi,nrEvents,crossSec,isZnnG);
 }
 
 #if !defined(__CINT__) && !defined(__ACLIC__)

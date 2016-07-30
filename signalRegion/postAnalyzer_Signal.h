@@ -268,14 +268,14 @@ public :
    vector<vector<float> > *eleBCSipip;
    vector<int>     *eleFiredTrgs;
    vector<unsigned short> *eleIDbit;
-   Int_t           npfHF;
-   vector<float>   *pfHFEn;
-   vector<float>   *pfHFECALEn;
-   vector<float>   *pfHFHCALEn;
-   vector<float>   *pfHFPt;
-   vector<float>   *pfHFEta;
-   vector<float>   *pfHFPhi;
-   vector<float>   *pfHFIso;
+   //Int_t           npfHF;
+   //vector<float>   *pfHFEn;
+   //vector<float>   *pfHFECALEn;
+   //vector<float>   *pfHFHCALEn;
+   //vector<float>   *pfHFPt;
+   //vector<float>   *pfHFEta;
+   //vector<float>   *pfHFPhi;
+   //vector<float>   *pfHFIso;
    Int_t           nMu;
    vector<float>   *muPt;
    vector<float>   *muEn;
@@ -529,8 +529,8 @@ public :
    TBranch        *b_phoIDMVA;   //!
    TBranch        *b_phoFiredSingleTrgs;   //!
    TBranch        *b_phoFiredDoubleTrgs;   //!
-   TBranch        *b_phoIEta;   //!
-   TBranch        *b_phoIPhi;   //!
+   ///TBranch        *b_phoIEta;   //!
+   ///TBranch        *b_phoIPhi;   //!
    TBranch        *b_phoIDbit;   //!
    TBranch        *b_nEle;   //!
    TBranch        *b_eleCharge;   //!
@@ -611,14 +611,14 @@ public :
    TBranch        *b_eleBCSipip;   //!
    TBranch        *b_eleFiredTrgs;   //!
    TBranch        *b_eleIDbit;   //!
-   TBranch        *b_npfHF;   //!
-   TBranch        *b_pfHFEn;   //!
-   TBranch        *b_pfHFECALEn;   //!
-   TBranch        *b_pfHFHCALEn;   //!
-   TBranch        *b_pfHFPt;   //!
-   TBranch        *b_pfHFEta;   //!
-   TBranch        *b_pfHFPhi;   //!
-   TBranch        *b_pfHFIso;   //!
+   //TBranch        *b_npfHF;   //!
+   //TBranch        *b_pfHFEn;   //!
+   //TBranch        *b_pfHFECALEn;   //!
+   //TBranch        *b_pfHFHCALEn;   //!
+   //TBranch        *b_pfHFPt;   //!
+   //TBranch        *b_pfHFEta;   //!
+   //TBranch        *b_pfHFPhi;   //!
+   //TBranch        *b_pfHFIso;   //!
    TBranch        *b_nMu;   //!
    TBranch        *b_muPt;   //!
    TBranch        *b_muEn;   //!
@@ -796,8 +796,8 @@ public :
    vector<float>   *mcTrkIsoDR04;
    Float_t         genMET;
    Float_t         genMETPhi;
-   vector<int>   *phoIEta;
-   vector<int>   *phoIPhi;
+//   vector<int>   *phoIEta;
+//   vector<int>   *phoIPhi;
    //vector<float>   *phoIEta;
    //vector<float>   *phoIPhi;
    vector<int>     *jetPartonID;
@@ -918,7 +918,7 @@ public :
    virtual void     Init(TTree *tree, Bool_t isMC);
    virtual void     Loop(TString outfilename, Bool_t isMC,
                          Double_t lumi, Double_t nrEvents,
-                         Double_t crossSec);
+                         Double_t crossSec, Bool_t isZnnG);
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
    virtual vector<int> getPhoCand(double phoPtCut=175., double phoEtaCut=1.4442);
@@ -1049,7 +1049,7 @@ void postAnalyzer_Signal::Init(TTree *tree, Bool_t isMC)
      h_sig_sieieF5x5[i].Sumw2();
      //
      h_sig_pfMET[i].Clear();
-     h_sig_pfMET[i] = TH1F(histname_sig_pfMET,"ParticleFlow MET",300,0.,300.);
+     h_sig_pfMET[i] = TH1F(histname_sig_pfMET,"ParticleFlow MET",166,170.,1000.);
      h_sig_pfMET[i].Sumw2();
      //
 
@@ -1143,8 +1143,8 @@ void postAnalyzer_Signal::Init(TTree *tree, Bool_t isMC)
    phoIDMVA = 0;
    phoFiredSingleTrgs = 0;
    phoFiredDoubleTrgs = 0;
-   phoIEta = 0;
-   phoIPhi = 0;
+//   phoIEta = 0;
+//   phoIPhi = 0;
    phoIDbit = 0;
    eleCharge = 0;
    eleChargeConsistent = 0;
@@ -1454,7 +1454,7 @@ void postAnalyzer_Signal::Init(TTree *tree, Bool_t isMC)
    fChain->SetBranchAddress("HLTEleMuX", &HLTEleMuX, &b_HLTEleMuX);
    fChain->SetBranchAddress("HLTPho", &HLTPho, &b_HLTPho);
    fChain->SetBranchAddress("HLTJet", &HLTJet, &b_HLTJet);
-   fChain->SetBranchAddress("HLTEleMuXIsPrescaled", &HLTEleMuXIsPrescaled, &b_HLTEleMuXIsPrescaled); //
+   fChain->SetBranchAddress("HLTEleMuXIsPrescaled", &HLTEleMuXIsPrescaled, &b_HLTEleMuXIsPrescaled);
    fChain->SetBranchAddress("HLTPhoIsPrescaled", &HLTPhoIsPrescaled, &b_HLTPhoIsPrescaled);
    fChain->SetBranchAddress("HLTJetIsPrescaled", &HLTJetIsPrescaled, &b_HLTJetIsPrescaled);
    fChain->SetBranchAddress("metFilters", &metFilters, &b_metFilters);
@@ -1550,8 +1550,8 @@ void postAnalyzer_Signal::Init(TTree *tree, Bool_t isMC)
    fChain->SetBranchAddress("phoIDMVA", &phoIDMVA, &b_phoIDMVA);
    fChain->SetBranchAddress("phoFiredSingleTrgs", &phoFiredSingleTrgs, &b_phoFiredSingleTrgs);
    fChain->SetBranchAddress("phoFiredDoubleTrgs", &phoFiredDoubleTrgs, &b_phoFiredDoubleTrgs);
-   fChain->SetBranchAddress("phoIEta", &phoIEta, &b_phoIEta);
-   fChain->SetBranchAddress("phoIPhi", &phoIPhi, &b_phoIPhi);
+//   fChain->SetBranchAddress("phoIEta", &phoIEta, &b_phoIEta);
+//   fChain->SetBranchAddress("phoIPhi", &phoIPhi, &b_phoIPhi);
    fChain->SetBranchAddress("phoIDbit", &phoIDbit, &b_phoIDbit);
    fChain->SetBranchAddress("nEle", &nEle, &b_nEle);
    fChain->SetBranchAddress("eleCharge", &eleCharge, &b_eleCharge);
@@ -1632,14 +1632,14 @@ void postAnalyzer_Signal::Init(TTree *tree, Bool_t isMC)
    fChain->SetBranchAddress("eleBCSipip", &eleBCSipip, &b_eleBCSipip);
    fChain->SetBranchAddress("eleFiredTrgs", &eleFiredTrgs, &b_eleFiredTrgs);
    fChain->SetBranchAddress("eleIDbit", &eleIDbit, &b_eleIDbit);
-   fChain->SetBranchAddress("npfHF", &npfHF, &b_npfHF);
-   fChain->SetBranchAddress("pfHFEn", &pfHFEn, &b_pfHFEn);
-   fChain->SetBranchAddress("pfHFECALEn", &pfHFECALEn, &b_pfHFECALEn);
-   fChain->SetBranchAddress("pfHFHCALEn", &pfHFHCALEn, &b_pfHFHCALEn);
-   fChain->SetBranchAddress("pfHFPt", &pfHFPt, &b_pfHFPt);
-   fChain->SetBranchAddress("pfHFEta", &pfHFEta, &b_pfHFEta);
-   fChain->SetBranchAddress("pfHFPhi", &pfHFPhi, &b_pfHFPhi);
-   fChain->SetBranchAddress("pfHFIso", &pfHFIso, &b_pfHFIso);
+   //fChain->SetBranchAddress("npfHF", &npfHF, &b_npfHF);
+   //fChain->SetBranchAddress("pfHFEn", &pfHFEn, &b_pfHFEn);
+   //fChain->SetBranchAddress("pfHFECALEn", &pfHFECALEn, &b_pfHFECALEn);
+   //fChain->SetBranchAddress("pfHFHCALEn", &pfHFHCALEn, &b_pfHFHCALEn);
+   //fChain->SetBranchAddress("pfHFPt", &pfHFPt, &b_pfHFPt);
+   //fChain->SetBranchAddress("pfHFEta", &pfHFEta, &b_pfHFEta);
+   //fChain->SetBranchAddress("pfHFPhi", &pfHFPhi, &b_pfHFPhi);
+   //fChain->SetBranchAddress("pfHFIso", &pfHFIso, &b_pfHFIso);
    fChain->SetBranchAddress("nMu", &nMu, &b_nMu);
    fChain->SetBranchAddress("muPt", &muPt, &b_muPt);
    fChain->SetBranchAddress("muEn", &muEn, &b_muEn);

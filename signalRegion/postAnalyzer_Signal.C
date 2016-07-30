@@ -4,7 +4,7 @@
 #include <TStyle.h>
 #include <TCanvas.h>
 
-void postAnalyzer_Signal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double_t nrEvents, Double_t crossSec)
+void postAnalyzer_Signal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double_t nrEvents, Double_t crossSec, Bool_t isZnnG)
 {
 
  TStopwatch sw; 
@@ -53,9 +53,6 @@ void postAnalyzer_Signal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, 
   if (ientry < 0) break;
   nb = fChain->GetEntry(jentry);   nbytes += nb;
 
-  //=1.0 for real data
-  event_weight=1.0;
-  if(isMC){ event_weight=lumi*crossSec/nrEvents; }
 
   //// vector of ints, each int corresponds to location in vector of photons of photon passing cut
   //// one such vector for each systematic bin
@@ -68,6 +65,18 @@ void postAnalyzer_Signal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, 
       n_phokin++; //
       int candphotonindex = phoCand.at(0);
 
+      double phopt = phoEt->at(candphotonindex) ;
+
+      //=1.0 for real data
+      event_weight=1.0;
+      if(isZnnG){
+       if      ( phopt < 190 ) {crossSec=14.4;}
+       else if ( phopt < 250 ) {crossSec=29.7;}
+       else if ( phopt < 400 ) {crossSec=17.5;}
+       else if ( phopt < 700 ) {crossSec=3.7;}
+       else                    {crossSec=0.3;}
+      }
+      if(isMC){ event_weight=lumi*crossSec/nrEvents; }
   
       // if event passes MonoPhoton triggers (HLT_Photon165_HE10_v)
       // https://github.com/cmkuo/ggAnalysis/blob/master/ggNtuplizer/plugins/ggNtuplizer_globalEvent.cc#L179
@@ -76,17 +85,7 @@ void postAnalyzer_Signal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, 
       // spike cleaning
       int iphi = 41; 
       int ieta = 5;
-      bool passSpike = !(phoIPhi->at(candphotonindex) == iphi && phoIEta->at(candphotonindex) == ieta) ;
-if( event==295505278  ){std::cout<<candphotonindex<<"spike p, e  "<<phoIPhi->at(candphotonindex)<<" "<<phoIEta->at(candphotonindex)<<std::endl;}
-if( event==285078441  ){std::cout<<candphotonindex<<"spike p, e  "<<phoIPhi->at(candphotonindex)<<" "<<phoIEta->at(candphotonindex)<<std::endl;}
-if( event==46661859   ){std::cout<<candphotonindex<<"spike p, e  "<<phoIPhi->at(candphotonindex)<<" "<<phoIEta->at(candphotonindex)<<std::endl;}
-if( event==389981922  ){std::cout<<candphotonindex<<"spike p, e  "<<phoIPhi->at(candphotonindex)<<" "<<phoIEta->at(candphotonindex)<<std::endl;}
-if( event==2208621600 ){std::cout<<candphotonindex<<"spike p, e  "<<phoIPhi->at(candphotonindex)<<" "<<phoIEta->at(candphotonindex)<<std::endl;}
-if( event==2127047219 ){std::cout<<candphotonindex<<"spike p, e  "<<phoIPhi->at(candphotonindex)<<" "<<phoIEta->at(candphotonindex)<<std::endl;}
-if( event==1215728566 ){std::cout<<candphotonindex<<"spike p, e  "<<phoIPhi->at(candphotonindex)<<" "<<phoIEta->at(candphotonindex)<<std::endl;}
-if( event==85380629   ){std::cout<<candphotonindex<<"spike p, e  "<<phoIPhi->at(candphotonindex)<<" "<<phoIEta->at(candphotonindex)<<std::endl;}
-if( event==89128679   ){std::cout<<candphotonindex<<"spike p, e  "<<phoIPhi->at(candphotonindex)<<" "<<phoIEta->at(candphotonindex)<<std::endl;}
-if( event==776377515  ){std::cout<<candphotonindex<<"spike p, e  "<<phoIPhi->at(candphotonindex)<<" "<<phoIEta->at(candphotonindex)<<std::endl;} 
+      bool passSpike = true; //!(phoIPhi->at(candphotonindex) == iphi && phoIEta->at(candphotonindex) == ieta) ;
 
       // lepton rejection
       std::vector<int> elelist = electron_passLooseID(candphotonindex, 10.);
@@ -96,7 +95,7 @@ if( event==776377515  ){std::cout<<candphotonindex<<"spike p, e  "<<phoIPhi->at(
 
 
       // MET requirements
-      bool passMETfilters = ( metFilters==0 ) ; //|| metFilters==4 ) ;
+      bool passMETfilters = ( metFilters==0 || metFilters==4 ) ;
       //bool passMETfilters = true ; // ( metFilters==0 ) ;
       bool passMET = (pfMET > 170.) ;
 
@@ -114,71 +113,6 @@ if( event==776377515  ){std::cout<<candphotonindex<<"spike p, e  "<<phoIPhi->at(
       if( passMET       ){ ++n_passMET        ;}
       if( passdPhiPhoMET){ ++n_passdPhiPhoMET ;}
       if( passdPhiJM    ){ ++n_passdPhiJM     ;}
-
-//if( event==767326116 ){
-if( event==194194378 ){
-      printf("Event: %lli \n",event);
-      printf("  HLTPho        %llu \n",HLTPho         );
-      printf("  passSpike       %i \n",passSpike      );
-      printf("  passLepRej      %i \n",passLepRej     );
-      printf("  passMETfilters  %i \n",passMETfilters );
-      printf("  passMET         %i \n",passMET        );
-      printf("  passdPhiPhoMET  %i \n",passdPhiPhoMET );
-      printf("  passdPhiJM      %i \n",passdPhiJM     );
-      printf("  passTrig        %i \n",passTrig       );
- std::cout<<elelist.size()<<std::endl;
- std::cout<<mulist.size()<<std::endl;
-std::cout<< "(HLTPho>>7&1 )   "<< (HLTPho>>7&1) <<std::endl;
-std::cout<< "(HLTPho>>8&1 )   "<< (HLTPho>>8&1) <<std::endl; 
-std::cout<< "(HLTPho>>9&1 )   "<< (HLTPho>>9&1) <<std::endl; 
-std::cout<< "(HLTPho>>10&1)   "<< (HLTPho>>10&1)<<std::endl; 
-std::cout<< "(HLTPho>>11&1)   "<< (HLTPho>>11&1)<<std::endl; 
-std::cout<< "(HLTPho>>12&1)   "<< (HLTPho>>12&1)<<std::endl; 
-std::cout<< "(HLTPho>>22&1)   "<< (HLTPho>>22&1)<<std::endl; 
-
-std::cout<< "(HLTPho>>7&1 == 1)   "<< (HLTPho>>7&1 == 1) <<std::endl;
-std::cout<< "(HLTPho>>8&1 == 1)   "<< (HLTPho>>8&1 == 1) <<std::endl; 
-std::cout<< "(HLTPho>>9&1 == 1)   "<< (HLTPho>>9&1 == 1) <<std::endl; 
-std::cout<< "(HLTPho>>10&1 == 1)  "<< (HLTPho>>10&1 == 1)<<std::endl; 
-std::cout<< "(HLTPho>>11&1 == 1)  "<< (HLTPho>>11&1 == 1)<<std::endl; 
-std::cout<< "(HLTPho>>12&1 == 1)  "<< (HLTPho>>12&1 == 1)<<std::endl; 
-std::cout<< "(HLTPho>>22&1 == 1)  "<< (HLTPho>>22&1 == 1)<<std::endl; 
-
-}
-
-
-
-//if( event==767326116 ){
-//if( event==194194378 ){
-//            std::cout<<"D : "<<run<<" : "<<event<<" : "<<lumis<<" : "<<phoCand1[0]<<std::endl;
-//            std::cout<<"Passed Denominator Cut-----------------------------------------------------------"<<std::endl;
-//            std::cout<<" run           "<<   run            <<std::endl;
-//            std::cout<<" lumis          "<<   lumis           <<std::endl;
-//            std::cout<<" event         "<<   event          <<std::endl;
-//            std::cout<<" photon index  "<<   phoCand1[0]     <<std::endl;
-//
-//            std::cout<<" phoEt         "<<   (*phoEt)[phoCand1[0]]          <<std::endl;
-//            std::cout<<" phoSCEta      "<<   (*phoSCEta)[phoCand1[0]]       <<std::endl;
-//            std::cout<<" pfMET         "<<   pfMET          <<std::endl;
-//            std::cout<<" phoPFNeuIso   "<<   (*phoPFNeuIso)[phoCand1[0]]    <<std::endl;
-//            std::cout<<" phoPFPhoIso   "<<   (*phoPFPhoIso)[phoCand1[0]]    <<std::endl;
-//            std::cout<<" phoPFChIso    "<<   (*phoPFChIso) [phoCand1[0]]     <<std::endl;
-//            std::cout<<" rho           "<<   rho            <<std::endl;
-//            std::cout<<" EAneutral     "<<   EAneutral((*phoSCEta)[phoCand1[0]]) <<std::endl;
-//            std::cout<<" EAphoton      "<<   EAphoton((*phoSCEta)[phoCand1[0]])       <<std::endl<<std::endl;
-//
-//std::cout<< metFilters <<std::endl;
-//std::cout<< HLTPho <<std::endl;
-////std::cout<< TMath::Max( ( (*phoPFChWorstIso)[phoCand1[0]]  - rho*EAchargedworst((*phoSCEta)[phoCand1[0]]) ), 0.0) < 1.37  <<std::endl;
-//std::cout<< pfMET <<std::endl;
-////std::cout<< DeltaPhi(phoPhi->at(phoCand1[0]),pfMETPhi)>2.0 <<std::endl;
-//std::cout<< electron_veto_looseID(phoCand1[0],10) <<std::endl;
-//std::cout<< muon_veto_looseID(phoCand1[0],10) <<std::endl<<std::endl<<std::endl;
-//if(0){std::cout<<0<<std::endl;}
-//if(1){std::cout<<1<<std::endl;}
-//
-//
-//}
 
       if( passTrig ){
        n_trig++; //
@@ -370,13 +304,13 @@ std::vector<int> postAnalyzer_Signal::getPhoCand(double phoPtCut, double phoEtaC
                         (0.28 + (0.0053 * (*phoEt)[p])) ) 
                       );
 
-      //bool noncoll = (*phoSigmaIEtaIEtaFull5x5)[p] > 0.001 &&
-      //               (*phoSigmaIPhiIPhiFull5x5)[p] > 0.001;   
+      bool noncoll = (*phoSigmaIEtaIEtaFull5x5)[p] > 0.001 &&
+                     (*phoSigmaIPhiIPhiFull5x5)[p] > 0.001;   
                      
-      bool noncoll = fabs((*phoseedTimeFull5x5)[p]) < 3. && 
-                     (*phomipTotEnergy)[p] < 4.9 && 
-                     (*phoSigmaIEtaIEtaFull5x5)[p] > 0.001 && 
-                     (*phoSigmaIPhiIPhiFull5x5)[p] > 0.001;
+      //bool noncoll = fabs((*phoseedTimeFull5x5)[p]) < 3. && 
+      //               (*phomipTotEnergy)[p] < 4.9 && 
+      //               (*phoSigmaIEtaIEtaFull5x5)[p] > 0.001 && 
+      //               (*phoSigmaIPhiIPhiFull5x5)[p] > 0.001;
 
       if(photonId && kinematic && noncoll){
         pholist.push_back(p);
