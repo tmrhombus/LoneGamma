@@ -21,15 +21,23 @@ void callSignalAnalyzer(void)
  
  TString path = "../test";
 
-// Bool_t isMC=kFALSE;
-// Bool_t isZnnG=kFALSE;
-// TString outfilename=path+"/Datatest.root";
-// TString inputListName=path+"/SinglePhoton_callpostAnalyzer_Signal-ggtree_data_1117.inputs";
+ Bool_t isMC=kFALSE;
+ Bool_t isZnnG=kFALSE;
+ Bool_t isEle=kFALSE;
+ Bool_t isHalo=kFALSE;
+ Bool_t isSpike=kFALSE;
+ Bool_t isJet=kTRUE;
+ TString outfilename=path+"/Datatest.root";
+ TString inputListName=path+"/SinglePhoton_callpostAnalyzer_Signal-ggtree_data_1117.inputs";
 
- Bool_t isMC=kTRUE;
- Bool_t isZnnG=kTRUE;
- TString outfilename=path+"/Signal_ZnnGJets.root";
- TString inputListName=path+"/hdfslist_ZnnGJets.txt";
+// Bool_t isMC=kTRUE;
+// Bool_t isZnnG=kTRUE;
+// Bool_t isEle=kFALSE;
+// Bool_t isHalo=kFALSE;
+// Bool_t isSpike=kFALSE;
+// Bool_t isJet=kFALSE;
+// TString outfilename=path+"/Signal_ZnnGJets.root";
+// TString inputListName=path+"/hdfslist_ZnnGJets.txt";
 
  std::cout << "Input List Name:  " << inputListName << std::endl;
  std::cout << "Output File Name: " << outfilename << std::endl;
@@ -59,7 +67,7 @@ void callSignalAnalyzer(void)
 
  postAnalyzer_Signal m;
  m.Init(theChain,isMC);
- m.Loop(outfilename,isMC,lumi,nrEvents,crossSec,isZnnG);
+ m.Loop(outfilename,isMC,lumi,nrEvents,crossSec,isZnnG,isEle,isHalo,isSpike,isJet);
 }
 
 #if !defined(__CINT__) && !defined(__ACLIC__)

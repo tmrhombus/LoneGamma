@@ -529,8 +529,8 @@ public :
    TBranch        *b_phoIDMVA;   //!
    TBranch        *b_phoFiredSingleTrgs;   //!
    TBranch        *b_phoFiredDoubleTrgs;   //!
-   ///TBranch        *b_phoIEta;   //!
-   ///TBranch        *b_phoIPhi;   //!
+   TBranch        *b_phoIEta;   //!
+   TBranch        *b_phoIPhi;   //!
    TBranch        *b_phoIDbit;   //!
    TBranch        *b_nEle;   //!
    TBranch        *b_eleCharge;   //!
@@ -796,9 +796,9 @@ public :
    vector<float>   *mcTrkIsoDR04;
    Float_t         genMET;
    Float_t         genMETPhi;
-//   vector<int>   *phoIEta;
-//   vector<int>   *phoIPhi;
-   //vector<float>   *phoIEta;
+   vector<int>   *phoIEta;
+   vector<int>   *phoIPhi;
+   //vector<float>   *phoIEta;  //isMC
    //vector<float>   *phoIPhi;
    vector<int>     *jetPartonID;
    vector<int>     *jetGenJetIndex;
@@ -918,10 +918,13 @@ public :
    virtual void     Init(TTree *tree, Bool_t isMC);
    virtual void     Loop(TString outfilename, Bool_t isMC,
                          Double_t lumi, Double_t nrEvents,
-                         Double_t crossSec, Bool_t isZnnG);
+                         Double_t crossSec, Bool_t isZnnG,
+                         Bool_t isEle, Bool_t isHalo,
+                         Bool_t isSpike, Bool_t isJet);
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
    virtual vector<int> getPhoCand(double phoPtCut=175., double phoEtaCut=1.4442);
+   virtual vector<int> getPhoJetCand(double phoPtCut=175., double phoEtaCut=1.4442);
    vector<int>      selectedJets(int pho_index);
    double           dR(double eta1, double phi1, double eta2, double phi2);
    double           DeltaPhi(double phi1, double phi2);
@@ -1143,8 +1146,8 @@ void postAnalyzer_Signal::Init(TTree *tree, Bool_t isMC)
    phoIDMVA = 0;
    phoFiredSingleTrgs = 0;
    phoFiredDoubleTrgs = 0;
-//   phoIEta = 0;
-//   phoIPhi = 0;
+   phoIEta = 0;
+   phoIPhi = 0;
    phoIDbit = 0;
    eleCharge = 0;
    eleChargeConsistent = 0;
@@ -1550,8 +1553,8 @@ void postAnalyzer_Signal::Init(TTree *tree, Bool_t isMC)
    fChain->SetBranchAddress("phoIDMVA", &phoIDMVA, &b_phoIDMVA);
    fChain->SetBranchAddress("phoFiredSingleTrgs", &phoFiredSingleTrgs, &b_phoFiredSingleTrgs);
    fChain->SetBranchAddress("phoFiredDoubleTrgs", &phoFiredDoubleTrgs, &b_phoFiredDoubleTrgs);
-//   fChain->SetBranchAddress("phoIEta", &phoIEta, &b_phoIEta);
-//   fChain->SetBranchAddress("phoIPhi", &phoIPhi, &b_phoIPhi);
+   fChain->SetBranchAddress("phoIEta", &phoIEta, &b_phoIEta);
+   fChain->SetBranchAddress("phoIPhi", &phoIPhi, &b_phoIPhi);
    fChain->SetBranchAddress("phoIDbit", &phoIDbit, &b_phoIDbit);
    fChain->SetBranchAddress("nEle", &nEle, &b_nEle);
    fChain->SetBranchAddress("eleCharge", &eleCharge, &b_eleCharge);

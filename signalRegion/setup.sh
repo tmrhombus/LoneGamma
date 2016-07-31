@@ -1,4 +1,4 @@
-export version="SaThesis"
+export version="SuThesis"
 export submitbase="${CMSSW_BASE}/src/LoneGamma/signalRegion"
 
 export analyzed="${submitbase}/gitignore/${version}/analyzed"
