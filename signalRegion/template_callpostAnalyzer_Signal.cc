@@ -8,6 +8,11 @@ void SAMPLENAME_callpostAnalyzer_Signal(void)
  theChain->Reset();
 
  Bool_t isMC = ISMC ;
+ Bool_t isZnnG = ISZNNG ;
+ Bool_t isEle = ISELE;
+ Bool_t isHalo = ISHALO;
+ Bool_t isSpike = ISSPIKE;
+ Bool_t isJet = ISJET;
  Double_t lumi = LUMI ;
  Double_t nrEvents = NREVENTS ;
  Double_t crossSec = CROSSSEC ;
@@ -42,7 +47,7 @@ void SAMPLENAME_callpostAnalyzer_Signal(void)
 
  postAnalyzer_Signal m;
  m.Init(theChain, isMC);
- m.Loop(outfilename,isMC,lumi,nrEvents,crossSec);
+ m.Loop(outfilename,isMC,lumi,nrEvents,crossSec,isZnnG,isEle,isHalo,isSpike,isJet);
 }
 
 #if !defined(__CINT__) && !defined(__ACLIC__)
