@@ -32,7 +32,7 @@ doZllGJMC=false
 if [ ${doSinglePhoton} = true ]
 then
  printf "Making SinglePhoton\n" 
- ls  /hdfs/store/user/gomber/SinglePhoton_2016B/SinglePhoton/crab_job_SinglePhoton*13TeV_2016_5p76fb_allvar_newbh/*/*/*root \
+ ls  /hdfs/store/user/gomber/SinglePhoton_2016B/SinglePhoton/crab_job_SinglePhoton*12p9*newbh_1/*/*/*root \
   > "${outdir}/hdfslist_SinglePhoton.txt"
 fi
 
