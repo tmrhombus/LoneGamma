@@ -25,10 +25,13 @@ void callSignalAnalyzer(void)
  Bool_t isZnnG=kFALSE;
  Bool_t isEle=kFALSE;
  Bool_t isHalo=kFALSE;
- Bool_t isSpike=kFALSE;
- Bool_t isJet=kTRUE;
- TString outfilename=path+"/Datatest.root";
- TString inputListName=path+"/SinglePhoton_callpostAnalyzer_Signal-ggtree_data_1117.inputs";
+ Bool_t isSpike=kTRUE;
+ Bool_t isJet=kFALSE;
+
+ TString outfilename=path+"/Datafull.root";
+ //TString inputListName=path+"/filenames_data.txt";
+ //TString inputListName=path+"/hdfslist_SinglePhoton.txt";
+ TString inputListName=path+"/filenames_SinglePhoton2016_10.txt";
 
 // Bool_t isMC=kTRUE;
 // Bool_t isZnnG=kTRUE;

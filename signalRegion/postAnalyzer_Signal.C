@@ -111,9 +111,13 @@ void postAnalyzer_Signal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, 
       //bool passNoncoll = (phoSigmaIEtaIEtaFull5x5->at(candphotonindex) > 0.001)
       //                && (phoSigmaIPhiIPhiFull5x5->at(candphotonindex) > 0.001);   
 
-      bool passNoncoll = (phoSigmaIEtaIEtaFull5x5->at(candphotonindex) > 0.001)
-                      && (phoSigmaIPhiIPhiFull5x5->at(candphotonindex) > 0.001)
-                      && (fabs(phoseedTimeFull5x5->at(candphotonindex)) < 3.);
+      //bool passNoncoll = (phoSigmaIEtaIEtaFull5x5->at(candphotonindex) > 0.001)
+      //                && (phoSigmaIPhiIPhiFull5x5->at(candphotonindex) > 0.001)
+      //                && (fabs(phoseedTimeFull5x5->at(candphotonindex)) < 3.);
+
+      bool passNoncoll = ( (phoSigmaIEtaIEtaFull5x5->at(candphotonindex) > 0.001)
+                        && (phoSigmaIPhiIPhiFull5x5->at(candphotonindex) > 0.001) );
+                        //&& (fabs(phoseedTimeFull5x5->at(candphotonindex)) < 3.) );
 
 
       bool passMIP = phomipTotEnergy->at(candphotonindex) < 4.9;
@@ -368,7 +372,7 @@ std::vector<int> postAnalyzer_Signal::getPhoCand(double phoPtCut, double phoEtaC
 
       bool photonId = (
                        ((*phoHoverE)[p]                <  0.05   ) &&
-                       ( TMath::Max( (*phoPFChIso)[p] - 0.0, 0.0) < 1.37 )  && // wtf TMath - shouldn't do anything since we have worstCHiso ..
+                       ( TMath::Max( (*phoPFChIso)[p] - 0.0, 0.0) < 1.37 )  && 
                        ( TMath::Max( ( (*phoPFChWorstIso)[p]  - rho*EAcharged((*phoSCEta)[p]) ), 0.0) < 1.37 )  &&
                        ( TMath::Max( ( (*phoPFNeuIso)[p] - rho*EAneutral((*phoSCEta)[p]) ), 0.0) <
                         (1.06 + (0.014 * (*phoEt)[p]) + (0.000019 * pow((*phoEt)[p], 2.0))) )  &&
