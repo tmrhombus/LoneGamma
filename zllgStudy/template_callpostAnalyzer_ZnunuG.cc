@@ -10,6 +10,8 @@ void SAMPLENAME_callpostAnalyzer_ZnunuG(void)
  Bool_t isMC = ISMC ;
  Bool_t isZnnG = ISZNNG ;
  Bool_t ewkZG = EWKZG ;
+ Bool_t isEle = ISELE ;
+ Bool_t isJet = ISJET ;
  Double_t lumi = LUMI ;
  Double_t nrEvents = NREVENTS ;
  Double_t crossSec = CROSSSEC ;
@@ -44,7 +46,7 @@ void SAMPLENAME_callpostAnalyzer_ZnunuG(void)
 
  postAnalyzer_ZnunuG m;
  m.Init(theChain, isMC);
- m.Loop(outfilename,isMC,lumi,nrEvents,crossSec,isZnnG,ewkZG);
+ m.Loop(outfilename,isMC,lumi,nrEvents,crossSec,isZnnG,ewkZG,isEle,isJet);
 }
 
 #if !defined(__CINT__) && !defined(__ACLIC__)

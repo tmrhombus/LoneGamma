@@ -8,23 +8,29 @@ printf "${submitbase}/gitignore/${version}/analyzed \n"
 printf "${submitbase}/gitignore/${version}/plots \n"
 
 for samplename in \
-  "SinglePhoton"      \
+  "SinglePhotonData"  \
+  "SinglePhotonEle"   \
+  "SinglePhotonJet"   \
   "GJetsHT40to100"    \
   "GJetsHT100to200"   \
   "GJetsHT200to400"   \
   "GJetsHT400to600"   \
   "GJetsHT600toInf"   \
-  "QCDPt80to120"      \
-  "QCDPt120to170"     \
-  "QCDPt170to300"     \
-  "QCDPt300toInf"     \
   "ZllGJets"          \
+  "ZnnGJets"          \
   "ZllJetsHT100to200" \
   "ZllJetsHT200to400" \
   "ZllJetsHT400to600" \
   "ZllJetsHT600toInf" \
   "WlnGJets"          \
-  "TTGJets"
+  "Wmn"               \
+  "Wtn"               \
+  "TTGJets"           \
+  "TGJets"            \
+  "GGJets"            \
+  "WWG"               \
+  "WZ"                \
+  "ZZ"
 
 do
  hadd \

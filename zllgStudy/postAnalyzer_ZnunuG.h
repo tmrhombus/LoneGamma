@@ -39,15 +39,25 @@ public :
    std::vector<TString> ptbinnames;  //7 = (6-1)+1+1
    std::vector<TString> selbinnames; //2
 
-   TH1F h_sig_et[7][2], 
-        h_sig_uncorret[7][2], 
-        h_sig_eta[7][2], 
-        h_sig_sieieF5x5[7][2], 
-        h_sig_pfMET[7][2],
-        h_sig_leptoMET[7][2],
-        h_sig_dilep_mass[7][2],
-        h_sig_diele_mass[7][2],
-        h_sig_dimu_mass[7][2];
+   TH1F h_ele_et[7][2], 
+        h_ele_uncorret[7][2], 
+        h_ele_eta[7][2], 
+        h_ele_sieieF5x5[7][2], 
+        h_ele_pfMET[7][2],
+        h_ele_leptoMET[7][2],
+        h_ele_dilep_mass[7][2],
+        h_ele_diele_mass[7][2],
+        h_ele_dimu_mass[7][2];
+
+   TH1F h_mu_et[7][2], 
+        h_mu_uncorret[7][2], 
+        h_mu_eta[7][2], 
+        h_mu_sieieF5x5[7][2], 
+        h_mu_pfMET[7][2],
+        h_mu_leptoMET[7][2],
+        h_mu_dilep_mass[7][2],
+        h_mu_diele_mass[7][2],
+        h_mu_dimu_mass[7][2];
 
    TH1F h_gen_et[7][2], 
         h_gen_eta[7][2], 
@@ -86,6 +96,8 @@ public :
    double event_weight;
 
    // RECO bools
+   bool passMM;
+
    bool passSpike;
    bool passMET110;
    bool passMET170;
@@ -948,10 +960,12 @@ public :
    virtual void     Init(TTree *tree, Bool_t isMC);
    virtual void     Loop(TString outfilename, Bool_t isMC,
                          Double_t lumi, Double_t nrEvents,
-                         Double_t crossSec, Bool_t isZnnG, Bool_t ewkZG);
+                         Double_t crossSec, Bool_t isZnnG, Bool_t ewkZG,
+                         Bool_t isEle, Bool_t isJet);
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
-   virtual vector<int> getPhoCand(double phoPtCut=175., double phoEtaCut=1.4442);
+   virtual vector<int> getPhoCand(double phoPtCut=175., double phoEtaCut=1.4442, Bool_t isEle=kFALSE);
+   virtual vector<int> getPhoJetCand(double phoPtCut=175., double phoEtaCut=1.4442);
    vector<int>      selectedJets(int pho_index);
    //vector<int>      selectedGenJets(int pho_index);
    double           dR(double eta1, double phi1, double eta2, double phi2);
@@ -959,7 +973,7 @@ public :
    bool             passdphiJetMET(std::vector<int> *jets, double mephi);
    //bool             passGendphiJetMET(std::vector<int> *jets, double mephi);
    virtual void     makeDilep(int pho_index, TLorentzVector *fv_1, TLorentzVector *fv_2,
-                                             TLorentzVector *fv_ee, TLorentzVector *fv_mm);
+                                             TLorentzVector *fv_ee, TLorentzVector *fv_mm, bool *passMM);
    //virtual void     makeGenDilep(int pho_index,                 //
    //  std::vector<int> elelist, std::vector<int> mulist,         //
    //  TLorentzVector *fv_1, TLorentzVector *fv_2,                //
@@ -970,9 +984,9 @@ public :
    Double_t         EAchargedworst(Double_t eta);
    Double_t         EAneutral(Double_t eta);
    Double_t         EAphoton(Double_t eta);
-   Bool_t           FillSigHistograms(int ptbin, int selbin, int photonIndex, double weight);
+   Bool_t           FillSigHistograms(int ptbin, int selbin, int photonIndex, double weight, bool passMM);
    //Bool_t           FillGenHistograms(int ptbin, int selbin, int photonIndex, double weight); //
-   virtual void     callFillSigHist(int selbin, int lastptbin, int inclptbin, int candphotonindex, float event_weight);
+   virtual void     callFillSigHist(int selbin, int lastptbin, int inclptbin, int candphotonindex, float event_weight, bool passMM);
    //virtual void     callFillGenHist(int selbin, int lastptbin, int inclptbin, int candphotonindex, float event_weight);
    Bool_t           WriteHistograms(int ptbin, int selbin);
 
@@ -1048,15 +1062,25 @@ void postAnalyzer_ZnunuG::Init(TTree *tree, Bool_t isMC)
     for(unsigned int j=0; j<selbinnames.size(); ++j){
 //     // set up names
 
-     TString histname_sig_et  = "h_sig_et_"+ptbinnames[i]+selbinnames[j];
-     TString histname_sig_uncorret  = "h_sig_uncorret_"+ptbinnames[i]+selbinnames[j];
-     TString histname_sig_eta = "h_sig_eta_"+ptbinnames[i]+selbinnames[j];
-     TString histname_sig_sieieF5x5 = "h_sig_sieieF5x5_"+ptbinnames[i]+selbinnames[j];
-     TString histname_sig_pfMET = "h_sig_pfMET_"+ptbinnames[i]+selbinnames[j];
-     TString histname_sig_leptoMET = "h_sig_leptoMET_"+ptbinnames[i]+selbinnames[j];
-     TString histname_sig_dilep_mass = "h_sig_dilep_mass_"+ptbinnames[i]+selbinnames[j];
-     TString histname_sig_diele_mass = "h_sig_diele_mass_"+ptbinnames[i]+selbinnames[j];
-     TString histname_sig_dimu_mass = "h_sig_dimu_mass_"+ptbinnames[i]+selbinnames[j];
+     TString histname_mu_et  = "h_mu_et_"+ptbinnames[i]+selbinnames[j];
+     TString histname_mu_uncorret  = "h_mu_uncorret_"+ptbinnames[i]+selbinnames[j];
+     TString histname_mu_eta = "h_mu_eta_"+ptbinnames[i]+selbinnames[j];
+     TString histname_mu_sieieF5x5 = "h_mu_sieieF5x5_"+ptbinnames[i]+selbinnames[j];
+     TString histname_mu_pfMET = "h_mu_pfMET_"+ptbinnames[i]+selbinnames[j];
+     TString histname_mu_leptoMET = "h_mu_leptoMET_"+ptbinnames[i]+selbinnames[j];
+     TString histname_mu_dilep_mass = "h_mu_dilep_mass_"+ptbinnames[i]+selbinnames[j];
+     TString histname_mu_diele_mass = "h_mu_diele_mass_"+ptbinnames[i]+selbinnames[j];
+     TString histname_mu_dimu_mass = "h_mu_dimu_mass_"+ptbinnames[i]+selbinnames[j];
+
+     TString histname_ele_et  = "h_ele_et_"+ptbinnames[i]+selbinnames[j];
+     TString histname_ele_uncorret  = "h_ele_uncorret_"+ptbinnames[i]+selbinnames[j];
+     TString histname_ele_eta = "h_ele_eta_"+ptbinnames[i]+selbinnames[j];
+     TString histname_ele_sieieF5x5 = "h_ele_sieieF5x5_"+ptbinnames[i]+selbinnames[j];
+     TString histname_ele_pfMET = "h_ele_pfMET_"+ptbinnames[i]+selbinnames[j];
+     TString histname_ele_leptoMET = "h_ele_leptoMET_"+ptbinnames[i]+selbinnames[j];
+     TString histname_ele_dilep_mass = "h_ele_dilep_mass_"+ptbinnames[i]+selbinnames[j];
+     TString histname_ele_diele_mass = "h_ele_diele_mass_"+ptbinnames[i]+selbinnames[j];
+     TString histname_ele_dimu_mass = "h_ele_dimu_mass_"+ptbinnames[i]+selbinnames[j];
 
      TString histname_gen_et  = "h_gen_et_"+ptbinnames[i]+selbinnames[j];
      TString histname_gen_eta = "h_gen_eta_"+ptbinnames[i]+selbinnames[j];
@@ -1070,43 +1094,83 @@ void postAnalyzer_ZnunuG::Init(TTree *tree, Bool_t isMC)
      Int_t  binnumpt = sizeof(binspt)/sizeof(Float_t) - 1; // or just = 9
 
      // reserve histograms
-     h_sig_et[i][j].Clear();
-     h_sig_et[i][j] = TH1F(histname_sig_et,"Photon Transverse Energy",binnumpt,binspt);
-     //h_sig_et[i][j] = TH1F(histname_sig_et,"Photon Transverse Energy",165,175.,1000.);
-     h_sig_et[i][j].Sumw2();
+     // Electron
+     h_ele_et[i][j].Clear();
+     h_ele_et[i][j] = TH1F(histname_ele_et,"Photon Transverse Energy",binnumpt,binspt);
+     //h_ele_et[i][j] = TH1F(histname_ele_et,"Photon Transverse Energy",165,175.,1000.);
+     h_ele_et[i][j].Sumw2();
      //
-     h_sig_uncorret[i][j].Clear();
-     h_sig_uncorret[i][j] = TH1F(histname_sig_uncorret,"Uncorrected Photon Transverse Energy",binnumpt,binspt);
-     //h_sig_uncorret[i][j] = TH1F(histname_sig_uncorret,"Uncorrected Photon Transverse Energy",165,175.,1000.);
-     h_sig_uncorret[i][j].Sumw2();
+     h_ele_uncorret[i][j].Clear();
+     h_ele_uncorret[i][j] = TH1F(histname_ele_uncorret,"Uncorrected Photon Transverse Energy",binnumpt,binspt);
+     //h_ele_uncorret[i][j] = TH1F(histname_ele_uncorret,"Uncorrected Photon Transverse Energy",165,175.,1000.);
+     h_ele_uncorret[i][j].Sumw2();
      //
-     h_sig_eta[i][j].Clear();
-     h_sig_eta[i][j] = TH1F(histname_sig_eta,"Leading Photon Eta",10,-2.,2.);
-     h_sig_eta[i][j].Sumw2();
+     h_ele_eta[i][j].Clear();
+     h_ele_eta[i][j] = TH1F(histname_ele_eta,"Leading Photon Eta",10,-2.,2.);
+     h_ele_eta[i][j].Sumw2();
      //
-     h_sig_sieieF5x5[i][j].Clear();
-     h_sig_sieieF5x5[i][j] = TH1F(histname_sig_sieieF5x5,"Leading Photon SigmaIetaIeta",50,0.,0.025);
-     h_sig_sieieF5x5[i][j].Sumw2();
+     h_ele_sieieF5x5[i][j].Clear();
+     h_ele_sieieF5x5[i][j] = TH1F(histname_ele_sieieF5x5,"Leading Photon SigmaIetaIeta",50,0.,0.025);
+     h_ele_sieieF5x5[i][j].Sumw2();
      //
-     h_sig_pfMET[i][j].Clear();
-     h_sig_pfMET[i][j] = TH1F(histname_sig_pfMET,"ParticleFlow MET",binnumpt,binspt);
-     h_sig_pfMET[i][j].Sumw2();
+     h_ele_pfMET[i][j].Clear();
+     h_ele_pfMET[i][j] = TH1F(histname_ele_pfMET,"ParticleFlow MET",binnumpt,binspt);
+     h_ele_pfMET[i][j].Sumw2();
      //
-     h_sig_leptoMET[i][j].Clear();
-     h_sig_leptoMET[i][j] = TH1F(histname_sig_leptoMET,"PF MET + dilepton",binnumpt,binspt);
-     h_sig_leptoMET[i][j].Sumw2();
+     h_ele_leptoMET[i][j].Clear();
+     h_ele_leptoMET[i][j] = TH1F(histname_ele_leptoMET,"PF MET + dilepton",binnumpt,binspt);
+     h_ele_leptoMET[i][j].Sumw2();
      //
-     h_sig_dilep_mass[i][j].Clear();
-     h_sig_dilep_mass[i][j] = TH1F(histname_sig_dilep_mass,"mass dilepton (MET)",15,60.,120.);
-     h_sig_dilep_mass[i][j].Sumw2();
+     h_ele_dilep_mass[i][j].Clear();
+     h_ele_dilep_mass[i][j] = TH1F(histname_ele_dilep_mass,"mass dilepton (MET)",15,60.,120.);
+     h_ele_dilep_mass[i][j].Sumw2();
      //
-     h_sig_dimu_mass[i][j].Clear();
-     h_sig_dimu_mass[i][j] = TH1F(histname_sig_dimu_mass,"mass dimuon (MET)",15,60.,120.);
-     h_sig_dimu_mass[i][j].Sumw2();
+     h_ele_dimu_mass[i][j].Clear();
+     h_ele_dimu_mass[i][j] = TH1F(histname_ele_dimu_mass,"mass dimuon (MET)",15,60.,120.);
+     h_ele_dimu_mass[i][j].Sumw2();
      //
-     h_sig_diele_mass[i][j].Clear();
-     h_sig_diele_mass[i][j] = TH1F(histname_sig_diele_mass,"mass diele (MET)",15,60.,120.);
-     h_sig_diele_mass[i][j].Sumw2();
+     h_ele_diele_mass[i][j].Clear();
+     h_ele_diele_mass[i][j] = TH1F(histname_ele_diele_mass,"mass diele (MET)",15,60.,120.);
+     h_ele_diele_mass[i][j].Sumw2();
+
+     // Muon
+     h_mu_et[i][j].Clear();
+     h_mu_et[i][j] = TH1F(histname_mu_et,"Photon Transverse Energy",binnumpt,binspt);
+     //h_mu_et[i][j] = TH1F(histname_mu_et,"Photon Transverse Energy",165,175.,1000.);
+     h_mu_et[i][j].Sumw2();
+     //
+     h_mu_uncorret[i][j].Clear();
+     h_mu_uncorret[i][j] = TH1F(histname_mu_uncorret,"Uncorrected Photon Transverse Energy",binnumpt,binspt);
+     //h_mu_uncorret[i][j] = TH1F(histname_mu_uncorret,"Uncorrected Photon Transverse Energy",165,175.,1000.);
+     h_mu_uncorret[i][j].Sumw2();
+     //
+     h_mu_eta[i][j].Clear();
+     h_mu_eta[i][j] = TH1F(histname_mu_eta,"Leading Photon Eta",10,-2.,2.);
+     h_mu_eta[i][j].Sumw2();
+     //
+     h_mu_sieieF5x5[i][j].Clear();
+     h_mu_sieieF5x5[i][j] = TH1F(histname_mu_sieieF5x5,"Leading Photon SigmaIetaIeta",50,0.,0.025);
+     h_mu_sieieF5x5[i][j].Sumw2();
+     //
+     h_mu_pfMET[i][j].Clear();
+     h_mu_pfMET[i][j] = TH1F(histname_mu_pfMET,"ParticleFlow MET",binnumpt,binspt);
+     h_mu_pfMET[i][j].Sumw2();
+     //
+     h_mu_leptoMET[i][j].Clear();
+     h_mu_leptoMET[i][j] = TH1F(histname_mu_leptoMET,"PF MET + dilepton",binnumpt,binspt);
+     h_mu_leptoMET[i][j].Sumw2();
+     //
+     h_mu_dilep_mass[i][j].Clear();
+     h_mu_dilep_mass[i][j] = TH1F(histname_mu_dilep_mass,"mass dilepton (MET)",15,60.,120.);
+     h_mu_dilep_mass[i][j].Sumw2();
+     //
+     h_mu_dimu_mass[i][j].Clear();
+     h_mu_dimu_mass[i][j] = TH1F(histname_mu_dimu_mass,"mass dimuon (MET)",15,60.,120.);
+     h_mu_dimu_mass[i][j].Sumw2();
+     //
+     h_mu_diele_mass[i][j].Clear();
+     h_mu_diele_mass[i][j] = TH1F(histname_mu_diele_mass,"mass diele (MET)",15,60.,120.);
+     h_mu_diele_mass[i][j].Sumw2();
 
 
      h_gen_et[i][j].Clear();
@@ -1984,38 +2048,63 @@ Int_t postAnalyzer_ZnunuG::Cut(Long64_t entry)
 // return kTRUE;
 //}
 
-Bool_t postAnalyzer_ZnunuG::FillSigHistograms(int ptbin, int selbin, int photonIndex, double weight){
+Bool_t postAnalyzer_ZnunuG::FillSigHistograms(int ptbin, int selbin, int photonIndex, double weight, bool passMM){
  Float_t uncorphoet = ((*phoSCRawE)[photonIndex]/TMath::CosH((*phoSCEta)[photonIndex]));
- h_sig_uncorret[ptbin][selbin].Fill(uncorphoet, weight );
- h_sig_et[ptbin][selbin].Fill( phoEt->at(photonIndex), weight );
- h_sig_eta[ptbin][selbin].Fill( phoEta->at(photonIndex), weight );
- h_sig_sieieF5x5[ptbin][selbin].Fill( phoSigmaIEtaIEtaFull5x5->at(photonIndex), weight );
- h_sig_pfMET[ptbin][selbin].Fill( pfMET, weight );
- h_sig_leptoMET[ptbin][selbin].Fill( leptoMET, weight );
- h_sig_dilep_mass[ptbin][selbin].Fill( dilep_mass, weight );
- h_sig_dimu_mass[ptbin][selbin].Fill( fourVec_mm.M(), weight );
- h_sig_diele_mass[ptbin][selbin].Fill( fourVec_ee.M(), weight );
+
+ if(passMM){
+  h_mu_uncorret[ptbin][selbin].Fill(uncorphoet, weight );
+  h_mu_et[ptbin][selbin].Fill( phoEt->at(photonIndex), weight );
+  h_mu_eta[ptbin][selbin].Fill( phoEta->at(photonIndex), weight );
+  h_mu_sieieF5x5[ptbin][selbin].Fill( phoSigmaIEtaIEtaFull5x5->at(photonIndex), weight );
+  h_mu_pfMET[ptbin][selbin].Fill( pfMET, weight );
+  h_mu_leptoMET[ptbin][selbin].Fill( leptoMET, weight );
+  h_mu_dilep_mass[ptbin][selbin].Fill( dilep_mass, weight );
+  h_mu_dimu_mass[ptbin][selbin].Fill( fourVec_mm.M(), weight );
+  h_mu_diele_mass[ptbin][selbin].Fill( fourVec_ee.M(), weight );
+ }
+ else{
+  h_ele_uncorret[ptbin][selbin].Fill(uncorphoet, weight );
+  h_ele_et[ptbin][selbin].Fill( phoEt->at(photonIndex), weight );
+  h_ele_eta[ptbin][selbin].Fill( phoEta->at(photonIndex), weight );
+  h_ele_sieieF5x5[ptbin][selbin].Fill( phoSigmaIEtaIEtaFull5x5->at(photonIndex), weight );
+  h_ele_pfMET[ptbin][selbin].Fill( pfMET, weight );
+  h_ele_leptoMET[ptbin][selbin].Fill( leptoMET, weight );
+  h_ele_dilep_mass[ptbin][selbin].Fill( dilep_mass, weight );
+  h_ele_dimu_mass[ptbin][selbin].Fill( fourVec_mm.M(), weight );
+  h_ele_diele_mass[ptbin][selbin].Fill( fourVec_ee.M(), weight );
+ }
 
  return kTRUE;
 }
 
-Bool_t postAnalyzer_ZnunuG::WriteHistograms(int ptbin, int selbin){
- h_sig_et[ptbin][selbin].Write();
- h_sig_uncorret[ptbin][selbin].Write();
- h_sig_eta[ptbin][selbin].Write();
- h_sig_sieieF5x5[ptbin][selbin].Write();
- h_sig_pfMET[ptbin][selbin].Write();
- h_sig_leptoMET[ptbin][selbin].Write();  
- h_sig_dilep_mass[ptbin][selbin].Write();
- h_sig_dimu_mass[ptbin][selbin].Write(); 
- h_sig_diele_mass[ptbin][selbin].Write();
 
- h_gen_et[ptbin][selbin].Write();
- h_gen_eta[ptbin][selbin].Write();
- h_gen_leptoMET[ptbin][selbin].Write();  
- h_gen_dilep_mass[ptbin][selbin].Write();
- h_gen_dimu_mass[ptbin][selbin].Write(); 
- h_gen_diele_mass[ptbin][selbin].Write();
+Bool_t postAnalyzer_ZnunuG::WriteHistograms(int ptbin, int selbin){
+ h_ele_et[ptbin][selbin].Write();
+ h_ele_uncorret[ptbin][selbin].Write();
+ h_ele_eta[ptbin][selbin].Write();
+ h_ele_sieieF5x5[ptbin][selbin].Write();
+ h_ele_pfMET[ptbin][selbin].Write();
+ h_ele_leptoMET[ptbin][selbin].Write();  
+ h_ele_dilep_mass[ptbin][selbin].Write();
+ h_ele_dimu_mass[ptbin][selbin].Write(); 
+ h_ele_diele_mass[ptbin][selbin].Write();
+
+ h_mu_et[ptbin][selbin].Write();
+ h_mu_uncorret[ptbin][selbin].Write();
+ h_mu_eta[ptbin][selbin].Write();
+ h_mu_sieieF5x5[ptbin][selbin].Write();
+ h_mu_pfMET[ptbin][selbin].Write();
+ h_mu_leptoMET[ptbin][selbin].Write();  
+ h_mu_dilep_mass[ptbin][selbin].Write();
+ h_mu_dimu_mass[ptbin][selbin].Write(); 
+ h_mu_diele_mass[ptbin][selbin].Write();
+
+// h_gen_et[ptbin][selbin].Write();
+// h_gen_eta[ptbin][selbin].Write();
+// h_gen_leptoMET[ptbin][selbin].Write();  
+// h_gen_dilep_mass[ptbin][selbin].Write();
+// h_gen_dimu_mass[ptbin][selbin].Write(); 
+// h_gen_diele_mass[ptbin][selbin].Write();
 
  return kTRUE;
 }

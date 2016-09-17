@@ -30,8 +30,10 @@ void callZnunuGAnalyzer(void)
   Bool_t isMC=kTRUE;
   Bool_t isZnnG=kFALSE;
   Bool_t ewkZG=kTRUE;
-  TString outfilename=path+"/ZllG_ZllGMC.root";
-  TString inputListName=path+"/hdfslist_ZllGJets.txt";
+  Bool_t isEle=kTRUE;
+  Bool_t isJet=kTRUE;
+  TString outfilename=path+"/ZllG_WZ.root";
+  TString inputListName=path+"/hdfslist_WZ.txt";
 
 // Bool_t isMC=kTRUE;
 // Bool_t isZnnG=kTRUE;
@@ -66,7 +68,7 @@ void callZnunuGAnalyzer(void)
 
  postAnalyzer_ZnunuG m;
  m.Init(theChain,isMC);
- m.Loop(outfilename,isMC,lumi,nrEvents,crossSec,isZnnG,ewkZG);
+ m.Loop(outfilename,isMC,lumi,nrEvents,crossSec,isZnnG,ewkZG,isEle,isJet);
 }
 
 #if !defined(__CINT__) && !defined(__ACLIC__)
