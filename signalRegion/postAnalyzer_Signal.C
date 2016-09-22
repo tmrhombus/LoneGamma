@@ -239,6 +239,10 @@ void postAnalyzer_Signal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, 
       && passdPhiJM
       && passdPhiPhoMET){
           printf("%i:%i:%lli \n",run,lumis,event);
+          if(!isMC){
+           std::cout<<"  uncorret: "<<uncorrectedPhoEt<<"  et: "<<phopt<<"  eta: "<<phoEta->at(candphotonindex)<<std::endl;
+           std::cout<<"  phi: "<<phoPhi->at(candphotonindex)<<"  met: "<<pfMET<<std::endl;
+          }
           nc++;
           for(unsigned int ptb=0; ptb<lastptbin-2; ++ptb){ // break into pT bins
            if(

@@ -40,6 +40,7 @@ public :
    std::vector<TString> sysbinnames; //0
 
    TH1F h_sig_et[7], 
+        h_sig_uncorret[7], 
         h_sig_eta[7], 
         h_sig_sieieF5x5[7], 
         h_sig_pfMET[7];
@@ -1035,6 +1036,7 @@ void postAnalyzer_Signal::Init(TTree *tree, Bool_t isMC)
      //TString histname_sig_dilep_mass = "h_sig_dilep_mass_"+ptbinnames[i]+sysbinnames[j];
 
      TString histname_sig_et  = "h_sig_et_"+ptbinnames[i];
+     TString histname_sig_uncorret = "h_sig_uncorret_"+ptbinnames[i];
      TString histname_sig_eta = "h_sig_eta_"+ptbinnames[i];
      TString histname_sig_sieieF5x5 = "h_sig_sieieF5x5_"+ptbinnames[i];
      TString histname_sig_pfMET = "h_sig_pfMET_"+ptbinnames[i];
@@ -1043,6 +1045,10 @@ void postAnalyzer_Signal::Init(TTree *tree, Bool_t isMC)
      h_sig_et[i].Clear();
      h_sig_et[i] = TH1F(histname_sig_et,"Photon Transverse Energy",165,175.,1000.);
      h_sig_et[i].Sumw2();
+     //
+     h_sig_uncorret[i].Clear();
+     h_sig_uncorret[i] = TH1F(histname_sig_uncorret,"Uncorrected p_{T}^{#gamma}",165,175.,1000.);
+     h_sig_uncorret[i].Sumw2();
      //
      h_sig_eta[i].Clear();
      h_sig_eta[i] = TH1F(histname_sig_eta,"Leading Photon Eta",100,-2.,2.);
@@ -1900,7 +1906,9 @@ Int_t postAnalyzer_Signal::Cut(Long64_t entry)
 //}
 
 Bool_t postAnalyzer_Signal::FillSigHistograms(int ptbin, int sysbin, int photonIndex, double weight){
+ Float_t uncorphoet = ((*phoSCRawE)[photonIndex]/TMath::CosH((*phoSCEta)[photonIndex]));
  h_sig_et[ptbin].Fill( phoEt->at(photonIndex), weight );
+ h_sig_uncorret[ptbin].Fill( uncorphoet, weight );
  h_sig_eta[ptbin].Fill( phoEta->at(photonIndex), weight );
  h_sig_sieieF5x5[ptbin].Fill( phoSigmaIEtaIEtaFull5x5->at(photonIndex), weight );
  h_sig_pfMET[ptbin].Fill( pfMET, weight );
@@ -1910,6 +1918,7 @@ Bool_t postAnalyzer_Signal::FillSigHistograms(int ptbin, int sysbin, int photonI
 
 Bool_t postAnalyzer_Signal::WriteHistograms(int ptbin, int sysbin){
  h_sig_et[ptbin].Write();
+ h_sig_uncorret[ptbin].Write();
  h_sig_eta[ptbin].Write();
  h_sig_sieieF5x5[ptbin].Write();
  h_sig_pfMET[ptbin].Write();
