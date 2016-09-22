@@ -5,7 +5,7 @@
 #include <TCanvas.h>
 
 void postAnalyzer_Signal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double_t nrEvents, Double_t crossSec,
-  Bool_t isZnnG, Bool_t isEle, Bool_t isHalo, Bool_t isSpike, Bool_t isJet)
+  Bool_t isZnnG, Bool_t isEle, Bool_t isHalo, Bool_t isSpike, Bool_t isJet, Bool_t ewkWG, Bool_t ewkZG)
 {
 
  TStopwatch sw; 
@@ -46,6 +46,12 @@ void postAnalyzer_Signal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, 
  int cf_passdPhiJM=0;
  int cf_passdPhiPhoMET=0;
 
+  TFile *f_ewk_corr = new TFile("ewk_corr.root");
+  TH1D *ewkZGCorrection = (TH1D*)f_ewk_corr->Get("zg");
+  cout<<"ewkZG Correction histogram loaded"<<endl;
+  TH1D *ewkWGCorrection = (TH1D*)f_ewk_corr->Get("wg");
+  cout<<"ewkWG Correction histogram loaded"<<endl;
+
  if (fChain == 0) return;
 
  Long64_t nentries = fChain->GetEntriesFast();
@@ -69,31 +75,51 @@ void postAnalyzer_Signal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, 
   //for(unsigned int sysb=0; sysb<lastsysbin; ++sysb){
   // phoCand[sysb] = getPhoCand(175,1.4442);
   //}
-  phoCand = getPhoCand(175,1.4442);
   if(isJet){ phoCand = getPhoJetCand(175,1.4442); }
+  else{ phoCand = getPhoCand(175,1.4442); }
    if(phoCand.size()>0)
      {
       n_phokin++; //
       int candphotonindex = phoCand.at(0);
 
+      Float_t uncorrectedPhoEt = ((*phoSCRawE)[candphotonindex]/TMath::CosH((*phoSCEta)[candphotonindex]));
       double phopt = phoEt->at(candphotonindex) ;
 
       //=1.0 for real data
       event_weight=1.0;
+      crossSecScl = crossSec;
       if(isZnnG){
-       if      ( phopt < 190 ) {crossSec=14.4;}
-       else if ( phopt < 250 ) {crossSec=29.7;}
-       else if ( phopt < 400 ) {crossSec=17.5;}
-       else if ( phopt < 700 ) {crossSec=3.7;}
-       else                    {crossSec=0.3;}
-      }
-      if(isMC){ event_weight=lumi*crossSec/nrEvents; }
+       if      ( uncorrectedPhoEt < 190 ) {crossSecScl*=1.39;}  // {crossSecScl=14.4*1.39;}
+       else if ( uncorrectedPhoEt < 250 ) {crossSecScl*=1.35;}  // {crossSecScl=29.7*1.35;}
+       else if ( uncorrectedPhoEt < 400 ) {crossSecScl*=1.30;}  // {crossSecScl=17.5*1.30;}
+       else if ( uncorrectedPhoEt < 700 ) {crossSecScl*=1.23;}  // {crossSecScl=3.7*1.23;}
+       else                               {crossSecScl*=1.23;}  // {crossSecScl=0.3*1.23;}
+      } 
+      if(isMC){ event_weight=0.96*lumi*crossSecScl*(1.013 - 0.0001168*uncorrectedPhoEt)/nrEvents; }
+      if(ewkZG){ 
+       Double_t EWK_percent_adjustment = ewkZGCorrection->GetBinContent(ewkZGCorrection->GetXaxis()->FindBin(uncorrectedPhoEt));
+       event_weight*=(1.0+.01*EWK_percent_adjustment) ; 
+      }  
+      if(ewkWG){ 
+       Double_t EWK_percent_adjustment = ewkWGCorrection->GetBinContent(ewkWGCorrection->GetXaxis()->FindBin(uncorrectedPhoEt));
+       event_weight*=(1.0+.01*EWK_percent_adjustment) ; 
+      }  
   
       // if event passes MonoPhoton triggers (HLT_Photon165_HE10_v)
       // https://github.com/cmkuo/ggAnalysis/blob/master/ggNtuplizer/plugins/ggNtuplizer_globalEvent.cc#L179
-      bool passTrig =( (HLTPho>>12&1) == 1);
+      bool passTrig =( 
+       ( (HLTPho>>7&1) == 1 ) ||
+       ( (HLTPho>>8&1) == 1 ) ||
+       ( (HLTPho>>9&1) == 1 ) ||
+       ( (HLTPho>>10&1) == 1 ) ||
+       ( (HLTPho>>11&1) == 1 ) ||
+       ( (HLTPho>>12&1) == 1 )
+      );
+      //bool passTrig =( (HLTPho>>12&1) == 1);
+      if(isMC){ passTrig=true; }
 
       bool passShape = phoSigmaIEtaIEtaFull5x5->at(candphotonindex)  <  0.0102;
+      if(isJet){ passShape = true; }
       if(isHalo){ passShape = phoSigmaIEtaIEtaFull5x5->at(candphotonindex)  <  0.0165; }
       if(isSpike){ passShape = phoSigmaIEtaIEtaFull5x5->at(candphotonindex)  >  0.0102; }
 
@@ -105,7 +131,7 @@ void postAnalyzer_Signal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, 
       int ieta = 5;
       //bool passSpike = true; // if isMC
       bool passSpike = !(phoIPhi->at(candphotonindex) == iphi && phoIEta->at(candphotonindex) == ieta) ;
-      if(isSpike){ passSpike = !(phoIPhi->at(candphotonindex) == iphi && phoIEta->at(candphotonindex) == ieta) ; }
+      if(isSpike){ passSpike = true ; }
 
       // isMC
       //bool passNoncoll = (phoSigmaIEtaIEtaFull5x5->at(candphotonindex) > 0.001)
@@ -115,8 +141,20 @@ void postAnalyzer_Signal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, 
       //                && (phoSigmaIPhiIPhiFull5x5->at(candphotonindex) > 0.001)
       //                && (fabs(phoseedTimeFull5x5->at(candphotonindex)) < 3.);
 
+      //  if(phoSigmaIPhiIPhiFull5x5->size() != phoseedTimeFull5x5->size()){
+      //   std::cout<<phoSigmaIEtaIEtaFull5x5->size()<<std::endl;
+      //   std::cout<<phoSigmaIPhiIPhiFull5x5->size()<<std::endl;
+      //   std::cout<<phoseedTimeFull5x5->size()<<std::endl;
+      //   std::cout<<" diff size run:lumis:event "
+      //    <<run<<":"<<lumis<<":"<<event<< std::endl; 
+      //  }
+      bool passSeedTime = false;
+      if( phoseedTimeFull5x5->size() > candphotonindex ){ passSeedTime = (fabs(phoseedTimeFull5x5->at(candphotonindex)) < 3.); }
       bool passNoncoll = ( (phoSigmaIEtaIEtaFull5x5->at(candphotonindex) > 0.001)
-                        && (phoSigmaIPhiIPhiFull5x5->at(candphotonindex) > 0.001) );
+                        && (phoSigmaIPhiIPhiFull5x5->at(candphotonindex) > 0.001) 
+                        && (phoR9->at(candphotonindex) < 1) 
+                        && passSeedTime
+                        );
                         //&& (fabs(phoseedTimeFull5x5->at(candphotonindex)) < 3.) );
 
 
@@ -131,7 +169,8 @@ void postAnalyzer_Signal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, 
 
 
       // MET requirements
-      bool passMETfilters = ( metFilters==0 || metFilters==4 ) ;
+      bool passMETfilters = ( metFilters==0 ) ;
+      if(isMC){ passMETfilters=true; }
       bool passMET = (pfMET > 170.) ;
 
       // dPhi( Jets, MET )
@@ -368,16 +407,18 @@ std::vector<int> postAnalyzer_Signal::getPhoCand(double phoPtCut, double phoEtaC
   //Loop over photons
   for(int p=0;p<nPho;p++)
     {
-      bool kinematic = (*phoEt)[p] > phoPtCut  && fabs((*phoSCEta)[p])<phoEtaCut;
+      double uncorrectedPhoEt = ((*phoSCRawE)[p]/TMath::CosH((*phoSCEta)[p]));
+
+      bool kinematic = uncorrectedPhoEt > phoPtCut && fabs((*phoSCEta)[p])<phoEtaCut;
 
       bool photonId = (
                        ((*phoHoverE)[p]                <  0.05   ) &&
                        ( TMath::Max( (*phoPFChIso)[p] - 0.0, 0.0) < 1.37 )  && 
-                       ( TMath::Max( ( (*phoPFChWorstIso)[p]  - rho*EAcharged((*phoSCEta)[p]) ), 0.0) < 1.37 )  &&
+                       ( TMath::Max( ( (*phoPFChWorstIso)[p]  - rho*EAchargedworst((*phoSCEta)[p]) ), 0.0) < 1.37 )  &&
                        ( TMath::Max( ( (*phoPFNeuIso)[p] - rho*EAneutral((*phoSCEta)[p]) ), 0.0) <
-                        (1.06 + (0.014 * (*phoEt)[p]) + (0.000019 * pow((*phoEt)[p], 2.0))) )  &&
+                        (1.06 + (0.014 * uncorrectedPhoEt) + (0.000019 * pow(uncorrectedPhoEt, 2.0))) )  &&
                        ( TMath::Max( ( (*phoPFPhoIso)[p] - rho*EAphoton((*phoSCEta)[p])  ), 0.0) < 
-                        (0.28 + (0.0053 * (*phoEt)[p])) ) 
+                        (0.28 + (0.0053 * uncorrectedPhoEt)) ) 
                       );
 
       if(photonId && kinematic){
@@ -398,18 +439,20 @@ std::vector<int> postAnalyzer_Signal::getPhoJetCand(double phoPtCut, double phoE
   //Loop over photons                                                                                                                                                             
   for(int p=0;p<nPho;p++)
     {
-      bool kinematic = (*phoEt)[p] > phoPtCut  && fabs((*phoSCEta)[p])<phoEtaCut;
+      Float_t uncorrectedPhoEt = ((*phoSCRawE)[p]/TMath::CosH((*phoSCEta)[p]));
+
+      bool kinematic = uncorrectedPhoEt > phoPtCut && fabs((*phoSCEta)[p])<phoEtaCut;
 
       bool photonId = (
                        ((*phoHoverE)[p]                <  0.05   ) &&
                        ((*phoSigmaIEtaIEtaFull5x5)[p]  <  0.0102 ) &&
                        ((*phohasPixelSeed)[p]              ==  0      ) &&
                        ( TMath::Max( (*phoPFChIso)[p] - 0.0, 0.0) < 1.37 )  && // wtf TMath - shouldn't do anything since we have worstCHiso ..
-                       ( TMath::Max( ( (*phoPFChWorstIso)[p]  - rho*EAcharged((*phoSCEta)[p]) ), 0.0) < 1.37 )  &&
+                       ( TMath::Max( ( (*phoPFChWorstIso)[p]  - rho*EAchargedworst((*phoSCEta)[p]) ), 0.0) < 1.37 )  &&
                        ( TMath::Max( ( (*phoPFNeuIso)[p] - rho*EAneutral((*phoSCEta)[p]) ), 0.0) <
-                        (1.06 + (0.014 * (*phoEt)[p]) + (0.000019 * pow((*phoEt)[p], 2.0))) )  &&
+                        (1.06 + (0.014 * uncorrectedPhoEt) + (0.000019 * pow(uncorrectedPhoEt, 2.0))) )  &&
                        ( TMath::Max( ( (*phoPFPhoIso)[p] - rho*EAphoton((*phoSCEta)[p])  ), 0.0) < 
-                        (0.28 + (0.0053 * (*phoEt)[p])) ) 
+                        (0.28 + (0.0053 * uncorrectedPhoEt)) ) 
                       );
 
 
@@ -417,23 +460,23 @@ std::vector<int> postAnalyzer_Signal::getPhoJetCand(double phoPtCut, double phoE
 
      bool passHoE = ( (*phoHoverE)[p] < 0.05 );
 
-     double vloosePFCharged= TMath::Min(5.0*(3.32) , 0.20*(*phoEt)[p]);
-     double vloosePFPhoton = TMath::Min(5.0*(0.81+ (0.0053 * (*phoEt)[p])) , 0.20*(*phoEt)[p]);
-     double vloosePFNeutral= TMath::Min(5.0*(1.92 + (0.014 * (*phoEt)[p]) + (0.000019 * pow((*phoEt)[p], 2.0))) , 0.20*(*phoEt)[p]);
+     double vloosePFCharged= TMath::Min(5.0*(3.32) , 0.20 *  uncorrectedPhoEt);
+     double vloosePFPhoton = TMath::Min(5.0*(0.81+ (0.0053 * uncorrectedPhoEt)) , 0.20*uncorrectedPhoEt);
+     double vloosePFNeutral= TMath::Min(5.0*(1.92 + (0.014 * uncorrectedPhoEt) + (0.000019 * pow(uncorrectedPhoEt, 2.0))) , 0.20*uncorrectedPhoEt);
      bool passVLooseIso = ( 
-                      ( TMath::Max( ( (*phoPFChWorstIso)[p]  - rho*EAcharged((*phoSCEta)[p]) ), 0.0) < vloosePFCharged )  &&  
+                      ( TMath::Max( ( (*phoPFChWorstIso)[p]  - rho*EAchargedworst((*phoSCEta)[p]) ), 0.0) < vloosePFCharged )  &&  
                       ( TMath::Max( ( (*phoPFChIso)[p] - 0.0 ), 0.0) < vloosePFCharged )  &&  
                       ( TMath::Max( ( (*phoPFNeuIso)[p] - rho*EAneutral((*phoSCEta)[p]) ), 0.0) < vloosePFNeutral )  &&  
                       ( TMath::Max( ( (*phoPFPhoIso)[p] - rho*EAphoton((*phoSCEta)[p])  ), 0.0) < vloosePFPhoton )
                      );  
      bool passLoosePIso = 
                      ( TMath::Max( ( (*phoPFPhoIso)[p] - rho*EAphoton((*phoSCEta)[p])  ), 0.0) <
-                       (0.81 + (0.0053 * (*phoEt)[p])) );
+                       (0.81 + (0.0053 * uncorrectedPhoEt)) );
      bool passLooseIso = (  // deno must fail this cut
                      ( TMath::Max( ( (*phoPFChIso)[p] - 0.0 ), 0.0) < 3.32 )  &&  
-                     ( TMath::Max( ( (*phoPFChWorstIso)[p]  - rho*EAcharged((*phoSCEta)[p]) ), 0.0) < 3.32 )  &&  
+                     ( TMath::Max( ( (*phoPFChWorstIso)[p]  - rho*EAchargedworst((*phoSCEta)[p]) ), 0.0) < 3.32 )  &&  
                      ( TMath::Max( ( (*phoPFNeuIso)[p] - rho*EAneutral((*phoSCEta)[p]) ), 0.0) <
-                       (1.92 + (0.014* (*phoEt)[p]) + (0.000019 * pow((*phoEt)[p], 2.0))))  &&  
+                       (1.92 + (0.014* uncorrectedPhoEt) + (0.000019 * pow(uncorrectedPhoEt, 2.0))))  &&  
                      passLoosePIso
                     );  
 
@@ -997,7 +1040,7 @@ std::vector<int> postAnalyzer_Signal::muon_passLooseID(int pho_index, float muPt
 // Effective area to be needed in PF Iso for photon ID
 // https://indico.cern.ch/event/455258/contribution/0/attachments/1173322/1695132/SP15_253rd.pdf -- slide-5
 // Worst Charged Hadron Isolation EA
-Double_t postAnalyzer_Signal::EAcharged(Double_t eta){
+Double_t postAnalyzer_Signal::EAchargedworst(Double_t eta){
   Float_t EffectiveArea = 0.0;
   if(fabs(eta) >= 0.0   && fabs(eta) < 1.0   ) EffectiveArea = 0.078;
   if(fabs(eta) >= 1.0   && fabs(eta) < 1.479 ) EffectiveArea = 0.089;
@@ -1005,18 +1048,18 @@ Double_t postAnalyzer_Signal::EAcharged(Double_t eta){
 }
 
 // standard EA
-//Double_t postAnalyzer_Signal::EAcharged(Double_t eta){
-//  Float_t EffectiveArea = 0.0;
-//  if(fabs(eta) >= 0.0   && fabs(eta) < 1.0   ) EffectiveArea = 0.0;
-//  if(fabs(eta) >= 1.0   && fabs(eta) < 1.479 ) EffectiveArea = 0.0;
-//  if(fabs(eta) >= 1.479 && fabs(eta) < 2.0   ) EffectiveArea = 0.0;
-//  if(fabs(eta) >= 2.0   && fabs(eta) < 2.2   ) EffectiveArea = 0.0;
-//  if(fabs(eta) >= 2.2   && fabs(eta) < 2.3   ) EffectiveArea = 0.0;
-//  if(fabs(eta) >= 2.3   && fabs(eta) < 2.4   ) EffectiveArea = 0.0;
-//  if(fabs(eta) >= 2.4                        ) EffectiveArea = 0.0;
-//
-//  return EffectiveArea;
-//}
+Double_t postAnalyzer_Signal::EAcharged(Double_t eta){
+  Float_t EffectiveArea = 0.0;
+  if(fabs(eta) >= 0.0   && fabs(eta) < 1.0   ) EffectiveArea = 0.0;
+  if(fabs(eta) >= 1.0   && fabs(eta) < 1.479 ) EffectiveArea = 0.0;
+  if(fabs(eta) >= 1.479 && fabs(eta) < 2.0   ) EffectiveArea = 0.0;
+  if(fabs(eta) >= 2.0   && fabs(eta) < 2.2   ) EffectiveArea = 0.0;
+  if(fabs(eta) >= 2.2   && fabs(eta) < 2.3   ) EffectiveArea = 0.0;
+  if(fabs(eta) >= 2.3   && fabs(eta) < 2.4   ) EffectiveArea = 0.0;
+  if(fabs(eta) >= 2.4                        ) EffectiveArea = 0.0;
+
+  return EffectiveArea;
+}
 
 Double_t postAnalyzer_Signal::EAneutral(Double_t eta){
   Float_t EffectiveArea = 0.; 

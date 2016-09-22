@@ -46,6 +46,8 @@ public :
 
    std::vector<int> phoCand;
 
+   Double_t crossSecScl;
+
    // variables constructed for histograms
    //TLorentzVector fourVec_e1, fourVec_e2; 
    //TLorentzVector fourVec_m1, fourVec_m2; 
@@ -307,14 +309,6 @@ public :
    vector<vector<float> > *eleBCSipip;
    vector<int>     *eleFiredTrgs;
    vector<unsigned short> *eleIDbit;
-   Int_t           npfHF;
-   vector<float>   *pfHFEn;
-   vector<float>   *pfHFECALEn;
-   vector<float>   *pfHFHCALEn;
-   vector<float>   *pfHFPt;
-   vector<float>   *pfHFEta;
-   vector<float>   *pfHFPhi;
-   vector<float>   *pfHFIso;
    Int_t           nMu;
    vector<float>   *muPt;
    vector<float>   *muEn;
@@ -733,14 +727,6 @@ public :
    TBranch        *b_eleBCSipip;   //!
    TBranch        *b_eleFiredTrgs;   //!
    TBranch        *b_eleIDbit;   //!
-   TBranch        *b_npfHF;   //!
-   TBranch        *b_pfHFEn;   //!
-   TBranch        *b_pfHFECALEn;   //!
-   TBranch        *b_pfHFHCALEn;   //!
-   TBranch        *b_pfHFPt;   //!
-   TBranch        *b_pfHFEta;   //!
-   TBranch        *b_pfHFPhi;   //!
-   TBranch        *b_pfHFIso;   //!
    TBranch        *b_nMu;   //!
    TBranch        *b_muPt;   //!
    TBranch        *b_muEn;   //!
@@ -937,7 +923,8 @@ public :
                          Double_t lumi, Double_t nrEvents,
                          Double_t crossSec, Bool_t isZnnG,
                          Bool_t isEle, Bool_t isHalo,
-                         Bool_t isSpike, Bool_t isJet);
+                         Bool_t isSpike, Bool_t isJet,
+                         Bool_t ewkWG, Bool_t ewkZG);
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
    virtual vector<int> getPhoCand(double phoPtCut=175., double phoEtaCut=1.4442);
@@ -954,6 +941,7 @@ public :
    //  TLorentzVector *fv_ee, TLorentzVector *fv_mm);             //
    vector<int>      electron_passLooseID(int pho_index, float elePtCut);
    vector<int>      muon_passLooseID(int pho_index, float muPtCut);
+   Double_t         EAchargedworst(Double_t eta);
    Double_t         EAcharged(Double_t eta);
    Double_t         EAneutral(Double_t eta);
    Double_t         EAphoton(Double_t eta);
@@ -1691,14 +1679,6 @@ void postAnalyzer_Signal::Init(TTree *tree, Bool_t isMC)
    fChain->SetBranchAddress("eleBCSipip", &eleBCSipip, &b_eleBCSipip);
    fChain->SetBranchAddress("eleFiredTrgs", &eleFiredTrgs, &b_eleFiredTrgs);
    fChain->SetBranchAddress("eleIDbit", &eleIDbit, &b_eleIDbit);
-   fChain->SetBranchAddress("npfHF", &npfHF, &b_npfHF);
-   fChain->SetBranchAddress("pfHFEn", &pfHFEn, &b_pfHFEn);
-   fChain->SetBranchAddress("pfHFECALEn", &pfHFECALEn, &b_pfHFECALEn);
-   fChain->SetBranchAddress("pfHFHCALEn", &pfHFHCALEn, &b_pfHFHCALEn);
-   fChain->SetBranchAddress("pfHFPt", &pfHFPt, &b_pfHFPt);
-   fChain->SetBranchAddress("pfHFEta", &pfHFEta, &b_pfHFEta);
-   fChain->SetBranchAddress("pfHFPhi", &pfHFPhi, &b_pfHFPhi);
-   fChain->SetBranchAddress("pfHFIso", &pfHFIso, &b_pfHFIso);
    fChain->SetBranchAddress("nMu", &nMu, &b_nMu);
    fChain->SetBranchAddress("muPt", &muPt, &b_muPt);
    fChain->SetBranchAddress("muEn", &muEn, &b_muEn);

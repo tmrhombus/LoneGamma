@@ -15,23 +15,63 @@ void callSignalAnalyzer(void)
  TChain *theChain = new TChain("ggNtuplizer/EventTree"); ;
  theChain->Reset();
  
- Double_t lumi=2.24;
- Double_t nrEvents=10000;
- Double_t crossSec=40000;
+ Double_t lumi=12900.;
+ Double_t nrEvents=12900.;
+ Double_t crossSec=1.;
  
  TString path = "../test";
 
- Bool_t isMC=kFALSE;
- Bool_t isZnnG=kFALSE;
- Bool_t isEle=kFALSE;
- Bool_t isHalo=kFALSE;
- Bool_t isSpike=kTRUE;
- Bool_t isJet=kFALSE;
+ //Bool_t isMC=kFALSE;
+ //Bool_t isZnnG=kFALSE;
+ //Bool_t isEle=kFALSE;
+ //Bool_t isHalo=kFALSE;
+ //Bool_t isSpike=kTRUE;
+ //Bool_t isJet=kFALSE;
+ //Bool_t ewkWG=kFALSE;
+ //Bool_t ewkZG=kFALSE;
 
- TString outfilename=path+"/Datafull.root";
+ //TString outfilename=path+"/Datafull.root";
  //TString inputListName=path+"/filenames_data.txt";
  //TString inputListName=path+"/hdfslist_SinglePhoton.txt";
- TString inputListName=path+"/filenames_SinglePhoton2016_10.txt";
+ //TString inputListName=path+"/filenames_SinglePhoton2016_10.txt";
+
+  Bool_t isMC=kFALSE;
+  Bool_t isZnnG=kFALSE;
+  Bool_t ewkZG=kFALSE;
+  Bool_t ewkWG=kFALSE;
+  Bool_t isHalo=kFALSE;
+  Bool_t isSpike=kFALSE;
+  Bool_t isEle=kFALSE;
+  Bool_t isJet=kFALSE;
+  TString outfilename=path+"/ZnnG_Data_on10.root";
+  //TString inputListName=path+"/SinglePhotonData_callpostAnalyzer_Signal-ggtree_data_692.inputs";
+  TString inputListName=path+"/filenames_SinglePhoton2016_10.txt";
+
+// Bool_t isMC = kTRUE ;
+// Bool_t isZnnG = kTRUE ;
+// Bool_t isEle = kFALSE;
+// Bool_t isHalo = kFALSE;
+// Bool_t isSpike = kFALSE;
+// Bool_t isJet = kFALSE;
+// Bool_t ewkWG = kFALSE;
+// Bool_t ewkZG = kTRUE;
+//        lumi = 12900. ;
+//        nrEvents = 375920 ;
+//        crossSec = 0.1903 ;
+//  TString outfilename=path+"/ZnnG_ZnnGJets.root";
+//  TString inputListName=path+"/hdfslist_ZnnGJets.txt";
+
+
+//  Bool_t isMC=kTRUE;
+//  Bool_t isZnnG=kFALSE;
+//  Bool_t ewkZG=kTRUE;
+//  Bool_t ewkWG=kFALSE;
+//  Bool_t isHalo=kFALSE;
+//  Bool_t isSpike=kTRUE;
+//  Bool_t isEle=kFALSE;
+//  Bool_t isJet=kFALSE;
+//  TString outfilename=path+"/ZnnG_GJets.root";
+//  TString inputListName=path+"/hdfslist_GJetsHT200to400.txt";
 
 // Bool_t isMC=kTRUE;
 // Bool_t isZnnG=kTRUE;
@@ -70,7 +110,7 @@ void callSignalAnalyzer(void)
 
  postAnalyzer_Signal m;
  m.Init(theChain,isMC);
- m.Loop(outfilename,isMC,lumi,nrEvents,crossSec,isZnnG,isEle,isHalo,isSpike,isJet);
+ m.Loop(outfilename,isMC,lumi,nrEvents,crossSec,isZnnG,isEle,isHalo,isSpike,isJet,ewkWG,ewkZG);
 }
 
 #if !defined(__CINT__) && !defined(__ACLIC__)

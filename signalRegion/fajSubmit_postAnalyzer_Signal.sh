@@ -2,7 +2,7 @@
 
 #voms-proxy-init --voms cms --valid 100:00
 
-domc=false
+domc=true
 dodata=true
 dosubmit=true
 
@@ -12,7 +12,7 @@ printf "Started at `date`\n\n"
 mkdir -p "${submitbase}/gitignore/${version}/lists"
 mkdir -p "${submitbase}/gitignore/${version}/submit"
 
-lumi=2320. # /pb
+lumi=12900. # /pb
 
 if [ ${domc} = true ]
 then
@@ -21,16 +21,18 @@ then
 
  for mc_samplename in \
   "GJetsHT"   \
-  "QCDPt"     \
-  "ZllGJets"  \
-  "ZnnGJets"  \
   "ZllJetsHT" \
-  "ZnnJetsHT" \
+  "ZnnGJets"  \
+  "ZllGJets"  \
   "WlnGJets"  \
-  "Wen"       \
   "Wmn"       \
   "Wtn"       \
-  "TTGJets" 
+  "WWG"       \
+  "TTGJets"   \
+  "GGJets"    \
+  "TGJets"    \
+  "WZ"        \
+  "ZZ"
 
  do
 
@@ -67,17 +69,32 @@ then
   # sample specific parameters..
   treename="ggNtuplizer/EventTree"
   isMC="kTRUE"
-  isZnnG="kFALSE"
-  if [ ${submitname} = "ZnnGJets" ]
-   then 
-   isZnnG="kTRUE" 
-  fi
   isEle="kFALSE"
   isHalo="kFALSE"
   isSpike="kFALSE"
   isJet="kFALSE"
-  nrE="$(grep -P ${submitname} ${initevents} | sed -n -e "s@${submitname} Events: @@p")"
-  xc="$(grep -P ${submitname}  ${initevents} | sed -n -e "s@${submitname} XC: @@p")"
+
+  isZnnG="kFALSE"
+  ewkZG="kFALSE"
+  ewkWG="kFALSE"
+  if [ ${submitname} = "ZnnGJets" ]
+   then 
+   isZnnG="kTRUE" 
+   ewkZG="kTRUE"
+  fi
+
+  if [ ${submitname} = "ZllGJets" ]
+   then 
+   ewkZG="kTRUE"
+  fi
+
+  if [ ${submitname} = "WlnGJets" ]
+   then 
+   ewkWG="kTRUE"
+  fi
+
+  nrE="$(grep -P ${submitname} ${initevents} | sed -n -e "s@ ${submitname} Events: @@p")"
+  xc="$(grep -P ${submitname}  ${initevents} | sed -n -e "s@ ${submitname} XC: @@p")"
    #printf "\nxc is ${xc}\n"
 
   # make correct executable xx_callpostAnalyzer_Signal
@@ -90,6 +107,8 @@ then
   sed -i "s@ISHALO@${isHalo}@g"           "${submitbase}/gitignore/${version}/submit/${submitname}_callpostAnalyzer_Signal.cc"
   sed -i "s@ISSPIKE@${isSpike}@g"         "${submitbase}/gitignore/${version}/submit/${submitname}_callpostAnalyzer_Signal.cc"
   sed -i "s@ISJET@${isJet}@g"             "${submitbase}/gitignore/${version}/submit/${submitname}_callpostAnalyzer_Signal.cc"
+  sed -i "s@EWKZG@${ewkZG}@g"             "${submitbase}/gitignore/${version}/submit/${submitname}_callpostAnalyzer_Signal.cc"
+  sed -i "s@EWKWG@${ewkWG}@g"             "${submitbase}/gitignore/${version}/submit/${submitname}_callpostAnalyzer_Signal.cc"
   sed -i "s@CROSSSEC@${xc}@g"             "${submitbase}/gitignore/${version}/submit/${submitname}_callpostAnalyzer_Signal.cc"
   sed -i "s@NREVENTS@${nrE}@g"            "${submitbase}/gitignore/${version}/submit/${submitname}_callpostAnalyzer_Signal.cc"
   sed -i "s@LUMI@${lumi}@g"               "${submitbase}/gitignore/${version}/submit/${submitname}_callpostAnalyzer_Signal.cc"
@@ -106,7 +125,7 @@ then
    --input-file-list=${xrdlist} \
    --input-files-per-job=100 \
    --use-hdfs \
-   --extra-inputs=${submitbase}/postAnalyzer_Signal.C,${submitbase}/postAnalyzer_Signal.h \
+   --extra-inputs=${submitbase}/postAnalyzer_Signal.C,${submitbase}/postAnalyzer_Signal.h,${submitbase}/ewk_corr.root \
    ${version} \
    "${submitbase}/gitignore/${version}/submit/${submitname}_callpostAnalyzer_Signal.cc"
 
@@ -151,6 +170,9 @@ then
     isHalo="kFALSE"
     isSpike="kFALSE"
     isJet="kFALSE"
+    isZnnG="kFALSE"
+    ewkZG="kFALSE"
+    ewkWG="kFALSE"
     if [ ${datacut} = "Ele" ]
     then 
      isEle="kTRUE"
@@ -185,6 +207,8 @@ then
     sed -i "s@ISHALO@${isHalo}@g"               "${submitbase}/gitignore/${version}/submit/${submitname}_callpostAnalyzer_Signal.cc"
     sed -i "s@ISSPIKE@${isSpike}@g"             "${submitbase}/gitignore/${version}/submit/${submitname}_callpostAnalyzer_Signal.cc"
     sed -i "s@ISJET@${isJet}@g"                 "${submitbase}/gitignore/${version}/submit/${submitname}_callpostAnalyzer_Signal.cc"
+    sed -i "s@EWKZG@${ewkZG}@g"                 "${submitbase}/gitignore/${version}/submit/${submitname}_callpostAnalyzer_Signal.cc"
+    sed -i "s@EWKWG@${ewkWG}@g"                 "${submitbase}/gitignore/${version}/submit/${submitname}_callpostAnalyzer_Signal.cc"
     sed -i "s@CROSSSEC@${xc}@g"                 "${submitbase}/gitignore/${version}/submit/${submitname}_callpostAnalyzer_Signal.cc"
     sed -i "s@NREVENTS@${nrE}@g"                "${submitbase}/gitignore/${version}/submit/${submitname}_callpostAnalyzer_Signal.cc"
     sed -i "s@LUMI@${lumi}@g"                   "${submitbase}/gitignore/${version}/submit/${submitname}_callpostAnalyzer_Signal.cc"
@@ -201,7 +225,7 @@ then
       --input-file-list=${xrdlist} \
       --input-files-per-job=100 \
       --use-hdfs \
-      --extra-inputs=${submitbase}/postAnalyzer_Signal.C,${submitbase}/postAnalyzer_Signal.h \
+      --extra-inputs=${submitbase}/postAnalyzer_Signal.C,${submitbase}/postAnalyzer_Signal.h,${submitbase}/ewk_corr.root \
       ${version} \
       "${submitbase}/gitignore/${version}/submit/${submitname}_callpostAnalyzer_Signal.cc"
   
