@@ -32,8 +32,8 @@ void callZnunuGAnalyzer(void)
   Bool_t ewkZG=kTRUE;
   Bool_t isEle=kTRUE;
   Bool_t isJet=kTRUE;
-  TString outfilename=path+"/ZllG_WZ.root";
-  TString inputListName=path+"/hdfslist_WZ.txt";
+  TString outfilename=path+"/ZllG_ZllG.root";
+  TString inputListName=path+"/hdfslist_ZllGJets.txt";
 
 // Bool_t isMC=kTRUE;
 // Bool_t isZnnG=kTRUE;

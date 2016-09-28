@@ -68,6 +68,8 @@ public :
         h_gen_dimu_mass[7][2];
 
    std::vector<int> phoCand;
+ 
+   Double_t crossSecScl;
 
    // variables constructed for histograms
    //TLorentzVector fourVec_e1, fourVec_e2; 

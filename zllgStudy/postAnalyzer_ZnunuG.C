@@ -94,15 +94,15 @@ void postAnalyzer_ZnunuG::Loop(TString outfilename, Bool_t isMC,
       // Event Weight
       //=1.0 for real data
       event_weight=1.0;
+      crossSecScl = crossSec;
       if(isZnnG){
-       if      ( uncorphopt < 190 ) {crossSec*=1.39;}  // {crossSec=14.4*1.39;}
-       else if ( uncorphopt < 250 ) {crossSec*=1.35;}  // {crossSec=29.7*1.35;}
-       else if ( uncorphopt < 400 ) {crossSec*=1.30;}  // {crossSec=17.5*1.30;}
-       else if ( uncorphopt < 700 ) {crossSec*=1.23;}  // {crossSec=3.7*1.23;}
-       else                         {crossSec*=1.23;}  // {crossSec=0.3*1.23;}
+       if      ( uncorphopt < 190 ) {crossSecScl*=1.39;}  // {crossSecScl=14.4*1.39;}
+       else if ( uncorphopt < 250 ) {crossSecScl*=1.35;}  // {crossSecScl=29.7*1.35;}
+       else if ( uncorphopt < 400 ) {crossSecScl*=1.30;}  // {crossSecScl=17.5*1.30;}
+       else if ( uncorphopt < 700 ) {crossSecScl*=1.23;}  // {crossSecScl=3.7*1.23;}
+       else                         {crossSecScl*=1.23;}  // {crossSecScl=0.3*1.23;}
       } 
-      //if(isMC){ event_weight=lumi*crossSec/nrEvents; }
-      if(isMC){ event_weight=lumi*crossSec*(1.013 - 0.0001168*uncorphopt)/nrEvents; }
+      if(isMC){ event_weight=0.96*lumi*crossSecScl*(1.013 - 0.0001168*uncorphopt)/nrEvents; }
       if(ewkZG){ 
        Double_t EWK_percent_adjustment = ewkZGCorrection->GetBinContent(ewkZGCorrection->GetXaxis()->FindBin(uncorphopt));
        event_weight*=(1.0+.01*EWK_percent_adjustment) ; 
@@ -141,22 +141,23 @@ void postAnalyzer_ZnunuG::Loop(TString outfilename, Bool_t isMC,
       // Spike Cleaning
       int iphi = 41; 
       int ieta = 5;
-      //passSpike = !(phoIPhi->at(candphotonindex) == iphi && phoIEta->at(candphotonindex) == ieta) ;
-      //if(isMC){ passSpike = true ; }
-      passSpike = true; 
+      //passSpike = true; 
+      passSpike = !(phoIPhi->at(candphotonindex) == iphi && phoIEta->at(candphotonindex) == ieta) ;
+      //if(isSpike){ passSpike = true ; }
+      if(isMC){ passSpike = true ; }
 
       // TRIGGER (HLT_Photon165_HE10_v)
       // https://github.com/cmkuo/ggAnalysis/blob/master/ggNtuplizer/plugins/ggNtuplizer_globalEvent.cc#L179
-      //passTrig = (
-      // ((HLTPho>>7&1) == 1) ||
-      // ((HLTPho>>8&1) == 1) ||
-      // ((HLTPho>>9&1) == 1) ||
-      // ((HLTPho>>10&1) == 1) ||
-      // ((HLTPho>>11&1) == 1) ||
-      // ((HLTPho>>12&1) == 1) ||
-      // ((HLTPho>>22&1) == 1)
-      //) ;
-      passTrig = ( (HLTPho>>12&1) == 1);
+      passTrig = (
+       ((HLTPho>>7&1) == 1) ||
+       ((HLTPho>>8&1) == 1) ||
+       ((HLTPho>>9&1) == 1) ||
+       ((HLTPho>>10&1) == 1) ||
+       ((HLTPho>>11&1) == 1) ||
+       ((HLTPho>>12&1) == 1) ||
+       ((HLTPho>>22&1) == 1)
+      ) ;
+      //passTrig = ( (HLTPho>>12&1) == 1);
       if(isMC){ passTrig = true ; }
  
       // dPhi( Jets, MET )
