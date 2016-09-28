@@ -53,11 +53,11 @@ with open(inlist) as f:
  ## https://cms-pdmv.cern.ch/mcm/requests?produce=%2FZLLGJets_MonoPhoton_PtG-130_TuneCUETP8M1_13TeV-madgraph%2FRunIIWinter15GS-MCRUN2_71_V1-v1%2FGEN-SIM&page=0&shown=262271
 if    samplename == "SinglePhoton"      : xc="1."
 elif  samplename == "DoubleElectron"    : xc="1."
-elif  samplename == "GJetsHT40to100"    : xc="20790."     # a LO  #Gamma_jets  // james has 20730??
+elif  samplename == "GJetsHT40to100"    : xc="20790."     # a LO  #Gamma_jets
 elif  samplename == "GJetsHT100to200"   : xc="9238."      # a LO  #Gamma_jets  
 elif  samplename == "GJetsHT200to400"   : xc="2305."      # a LO  #Gamma_jets  
 elif  samplename == "GJetsHT400to600"   : xc="274.4"      # a LO  #Gamma_jets  
-elif  samplename == "GJetsHT600toInf"   : xc="93.46"      # a LO  #Gamma_jets // james has 93.38??
+elif  samplename == "GJetsHT600toInf"   : xc="93.46"      # a LO  #Gamma_jets
 elif  samplename == "QCDPt15to20"       : xc="2302200.0"  # a LO  #QCD 1279000000 * 0.0018
 elif  samplename == "QCDPt20to30"       : xc="5352960.0"  # a LO  #QCD  557600000 * 0.0096
 elif  samplename == "QCDPt30to50"       : xc="9928000.0"  # a LO  #QCD  136000000 * 0.073
@@ -66,16 +66,16 @@ elif  samplename == "QCDPt80to120"      : xc="350000.0"   # a LO  #QCD  2800000 
 elif  samplename == "QCDPt120to170"     : xc="62964.0"    # a LO  #QCD  477000 * 0.132
 elif  samplename == "QCDPt170to300"     : xc="18810.0"    # a LO  #QCD  114000 * 0.165
 elif  samplename == "QCDPt300toInf"     : xc="1350.0"     # a LO  #QCD  9000 * 0.15
-elif  samplename == "ZllGJets"          : xc="0.1859"     # x   1.3 * 0.143 
-elif  samplename == "ZnnGJets"          : xc="0.1903"     # x    k-factors
-elif  samplename == "ZllJetsHT100to200" : xc="181.302"    # x    147.40*1.23   
-elif  samplename == "ZllJetsHT200to400" : xc="50.418"     # x    40.99*1.23   
-elif  samplename == "ZllJetsHT400to600" : xc="6.984"      # x    5.678*1.23
-elif  samplename == "ZllJetsHT600toInf" : xc="2.704"      # x    2.198*1.23
-elif  samplename == "ZnnJetsHT100to200" : xc="344.83"     # x    280.35*1.23   
-elif  samplename == "ZnnJetsHT200to400" : xc="95.53"      # x    77.67*1.23   
-elif  samplename == "ZnnJetsHT400to600" : xc="13.20"      # x    10.73*1.23
-elif  samplename == "ZnnJetsHT600toInf" : xc="5.06"       # x    4.116*1.23
+elif  samplename == "ZllGJets"          : xc="0.1859"     # c   1.3 * 0.143 
+elif  samplename == "ZnnGJets"          : xc="0.1903"     # ?    k-factors
+elif  samplename == "ZllJetsHT100to200" : xc="181.302"    # a    147.40*1.23   
+elif  samplename == "ZllJetsHT200to400" : xc="50.418"     # a    40.99*1.23   
+elif  samplename == "ZllJetsHT400to600" : xc="6.984"      # a    5.678*1.23
+elif  samplename == "ZllJetsHT600toInf" : xc="2.704"      # a    2.198*1.23
+elif  samplename == "ZnnJetsHT100to200" : xc="344.83"     # a    280.35*1.23   
+elif  samplename == "ZnnJetsHT200to400" : xc="95.53"      # a    77.67*1.23   
+elif  samplename == "ZnnJetsHT400to600" : xc="13.20"      # a    10.73*1.23
+elif  samplename == "ZnnJetsHT600toInf" : xc="5.06"       # a    4.116*1.23
 elif  samplename == "WlnGJets"          : xc="0.889"      # "0.6637" x 1.34 
 #elif  samplename == "Wen"               : xc="174."       # 20508.9
 elif  samplename == "Wmn"               : xc="174."       # 20508.9
