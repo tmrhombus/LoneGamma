@@ -15,9 +15,13 @@ thedir="${submitbase}/gitignore/${version}/eventcomp"
 for samplename in \
  "SinglePhotonData"
 do
- grep -h 'Total Passing RECO : ' /nfs_scratch/tperry/${version}*${samplename}_callpostAnalyzer_Signal/*/*out > ${thedir}/events_${samplename}_v.txt
+ #grep -h 'Total Passing RECO : ' /nfs_scratch/tperry/${version}*${samplename}_callpostAnalyzer_Signal/*/*out > ${thedir}/events_${samplename}_v.txt
 
-# grep -h '[0-9][0-9][0-9][0-9][0-9][0-9]:[0-9][0-9]*:[0-9]' /nfs_scratch/tperry/${version}*${samplename}_callpostAnalyzer_Signal/*/*out > ${thedir}/events_${samplename}.txt
+ grep -h '[0-9][0-9][0-9][0-9][0-9][0-9]:[0-9][0-9]*:[0-9]\|Total Passing RECO' /nfs_scratch/tperry/${version}*${samplename}_callpostAnalyzer_Signal/*/*out > ${thedir}/events_${samplename}_w.txt
+
+ #grep -h -A 2 '[0-9][0-9][0-9][0-9][0-9][0-9]:[0-9][0-9]*:[0-9]' /nfs_scratch/tperry/${version}*${samplename}_callpostAnalyzer_Signal/*/*out > ${thedir}/events_${samplename}.txt
+
+
 # sed -i 's/\s*$//' ${thedir}/events_${samplename}.txt
 # 
 # grep -v -F -x -f eventlist_400.txt ${thedir}/events_${samplename}.txt > ${thedir}/events_menothey.txt

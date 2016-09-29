@@ -54,7 +54,7 @@ do
    analyzed_diff=$(($nfs_analyzed-$hdfs_analyzed))
    hdfstot=$((${hdfstot}+${hdfs_analyzed}))
    nfstot=$((${nfstot}+${nfs_analyzed}))
-  printf "  ${samplename}\t ${nfs_analyzed}\t ${hdfs_analyzed}\t ${analyzed_diff} incomplete analyzers\n"
+  printf "  %20s %20s %20s %20s incomplete analyzers\n" ${samplename} ${nfs_analyzed} ${hdfs_analyzed} ${analyzed_diff}
  fi
 done # for samplename in "GJets_*" "SingleP"
 
@@ -63,17 +63,8 @@ printf "%s \n" "-----------------------------------------"
 diftot=$((${nfstot}-${hdfstot}))
 printf "  Total: nfs: ${nfstot}  hdfs:  ${hdfstot}  left:  ${diftot}\n\n"
 
-#hadd \
-# ${submitbase}/gitignore/${version}/analyzed/analyzed_ZllJets.root \
-# ${submitbase}/gitignore/${version}/analyzed/analyzed_ZllJetsHT*.root 
-#
-#hadd \
-# ${submitbase}/gitignore/${version}/analyzed/analyzed_GJets.root \
-# ${submitbase}/gitignore/${version}/analyzed/analyzed_GJetsHT*.root 
-
-
 
 ##### for checking individual files
-#### grep -l "exited with status 0" /nfs_scratch/tperry/Earth_DataA_8TeVEle-Ele-PATData/*/*out > dataAEle_good.txt
-#### ls /nfs_scratch/tperry/Earth_DataA_8TeVEle-Ele-PATData/*/*out > dataAEle_all.txt
-#### grep -Fvf good_dataAEle.txt all_dataAEle.txt > dataAEle_bad.txt
+# grep -l "exited with status 0" /nfs_scratch/tperry/jaumesse-*/*/*out > dataAEle_good.txt
+# ls /nfs_scratch/tperry/jaumesse-*/*/*out > dataAEle_all.txt
+# grep -Fvf dataAEle_good.txt dataAEle_all.txt > dataAEle_bad.txt

@@ -132,6 +132,7 @@ void postAnalyzer_Signal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, 
       //bool passSpike = true; // if isMC
       bool passSpike = !(phoIPhi->at(candphotonindex) == iphi && phoIEta->at(candphotonindex) == ieta) ;
       if(isSpike){ passSpike = true ; }
+      if(isMC){ passSpike = true ; }
 
       // isMC
       //bool passNoncoll = (phoSigmaIEtaIEtaFull5x5->at(candphotonindex) > 0.001)
@@ -246,15 +247,19 @@ void postAnalyzer_Signal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, 
           nc++;
           for(unsigned int ptb=0; ptb<lastptbin-2; ++ptb){ // break into pT bins
            if(
-              (phoEt->at(candphotonindex) > ptbins[ptb]) &&
-              (phoEt->at(candphotonindex) < ptbins[ptb+1])
+              //(phoEt->at(candphotonindex) > ptbins[ptb]) &&
+              //(phoEt->at(candphotonindex) < ptbins[ptb+1])
+              ( uncorrectedPhoEt > ptbins[ptb]) &&
+              ( uncorrectedPhoEt < ptbins[ptb+1])
              ){
             FillSigHistograms(ptb, 0, candphotonindex, event_weight);
            } // end if passes pt cuts then fill
           } // end pt bin loop
           if(  // do an inclusive pT plot from bins
-             (phoEt->at(candphotonindex) > ptbins[0]) &&
-             (phoEt->at(candphotonindex) < ptbins[inclptbin])
+             //(phoEt->at(candphotonindex) > ptbins[0]) &&
+             //(phoEt->at(candphotonindex) < ptbins[inclptbin])
+             ( uncorrectedPhoEt > ptbins[0]) &&
+             ( uncorrectedPhoEt < ptbins[inclptbin])
             ){
            FillSigHistograms(lastptbin-1, 0, candphotonindex, event_weight);
           }

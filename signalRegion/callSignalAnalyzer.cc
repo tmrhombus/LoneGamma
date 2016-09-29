@@ -43,9 +43,18 @@ void callSignalAnalyzer(void)
   Bool_t isSpike=kFALSE;
   Bool_t isEle=kFALSE;
   Bool_t isJet=kFALSE;
-  TString outfilename=path+"/ZnnG_Data_on10.root";
-  //TString inputListName=path+"/SinglePhotonData_callpostAnalyzer_Signal-ggtree_data_692.inputs";
-  TString inputListName=path+"/filenames_SinglePhoton2016_10.txt";
+   ///TString outfilename=path+"/ZnnG_Data_204.root";
+   ///TString inputListName=path+"/SinglePhotonData_callpostAnalyzer_Signal-ggtree_data_204.inputs";
+   TString outfilename=path+"/ZnnG_Data_204_small.root";
+   TString inputListName=path+"/SinglePhotonData_callpostAnalyzer_Signal-ggtree_data_204.some";
+ // TString outfilename=path+"/ZnnG_Data_2101.root";
+ // TString inputListName=path+"/SinglePhotonData_callpostAnalyzer_Signal-ggtree_data_2101.inputs";
+//  TString outfilename=path+"/ZnnG_Data_3401.root";
+//  TString inputListName=path+"/SinglePhotonData_callpostAnalyzer_Signal-ggtree_data_3401.inputs";
+
+  //TString inputListName=path+"/filenames_SinglePhoton2016_10.txt";
+
+
 
 // Bool_t isMC = kTRUE ;
 // Bool_t isZnnG = kTRUE ;
