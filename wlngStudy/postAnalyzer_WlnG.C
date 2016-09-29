@@ -92,15 +92,15 @@ void postAnalyzer_WlnG::Loop(TString outfilename, Bool_t isMC,
       // Event Weight
       //=1.0 for real data
       event_weight=1.0;
+      crossSecScl = crossSec;
       if(isZnnG){
-       if      ( uncorphopt < 190 ) {crossSec*=1.39;}  // {crossSec=14.4*1.39;}
-       else if ( uncorphopt < 250 ) {crossSec*=1.35;}  // {crossSec=29.7*1.35;}
-       else if ( uncorphopt < 400 ) {crossSec*=1.30;}  // {crossSec=17.5*1.30;}
-       else if ( uncorphopt < 700 ) {crossSec*=1.23;}  // {crossSec=3.7*1.23;}
-       else                         {crossSec*=1.23;}  // {crossSec=0.3*1.23;}
+       if      ( uncorphopt < 190 ) {crossSecScl*=1.39;}  // {crossSec=14.4*1.39;}
+       else if ( uncorphopt < 250 ) {crossSecScl*=1.35;}  // {crossSec=29.7*1.35;}
+       else if ( uncorphopt < 400 ) {crossSecScl*=1.30;}  // {crossSec=17.5*1.30;}
+       else if ( uncorphopt < 700 ) {crossSecScl*=1.23;}  // {crossSec=3.7*1.23;}
+       else                         {crossSecScl*=1.23;}  // {crossSec=0.3*1.23;}
       } 
-      //if(isMC){ event_weight=lumi*crossSec/nrEvents; }
-      if(isMC){ event_weight=lumi*crossSec*(1.013 - 0.0001168*uncorphopt)/nrEvents; }
+      if(isMC){ event_weight=0.96*lumi*crossSecScl*(1.013 - 0.0001168*uncorphopt)/nrEvents; }
       if(ewkWG){ 
        Double_t EWK_percent_adjustment = ewkWGCorrection->GetBinContent(ewkWGCorrection->GetXaxis()->FindBin(uncorphopt));
        event_weight*=(1.0+.01*EWK_percent_adjustment) ; 
@@ -147,22 +147,22 @@ void postAnalyzer_WlnG::Loop(TString outfilename, Bool_t isMC,
       // Spike Cleaning
       int iphi = 41; 
       int ieta = 5;
-      //passSpike = !(phoIPhi->at(candphotonindex) == iphi && phoIEta->at(candphotonindex) == ieta) ;
-      //if(isMC){ passSpike = true ; }
-      passSpike = true; 
+      passSpike = !(phoIPhi->at(candphotonindex) == iphi && phoIEta->at(candphotonindex) == ieta) ;
+      if(isMC){ passSpike = true ; }
+      //passSpike = true; 
 
       // TRIGGER (HLT_Photon165_HE10_v)
       // https://github.com/cmkuo/ggAnalysis/blob/master/ggNtuplizer/plugins/ggNtuplizer_globalEvent.cc#L179
-      //passTrig = (
-      // ((HLTPho>>7&1) == 1) ||
-      // ((HLTPho>>8&1) == 1) ||
-      // ((HLTPho>>9&1) == 1) ||
-      // ((HLTPho>>10&1) == 1) ||
-      // ((HLTPho>>11&1) == 1) ||
-      // ((HLTPho>>12&1) == 1) ||
-      // ((HLTPho>>22&1) == 1)
-      //) ;
-      passTrig = ( (HLTPho>>12&1) == 1);
+      passTrig = (
+       ((HLTPho>>7&1) == 1) ||
+       ((HLTPho>>8&1) == 1) ||
+       ((HLTPho>>9&1) == 1) ||
+       ((HLTPho>>10&1) == 1) ||
+       ((HLTPho>>11&1) == 1) ||
+       ((HLTPho>>12&1) == 1) ||
+       ((HLTPho>>22&1) == 1)
+      ) ;
+      //passTrig = ( (HLTPho>>12&1) == 1);
       if(isMC){ passTrig = true ; }
  
       // dPhi( Jets, MET )
@@ -185,13 +185,13 @@ void postAnalyzer_WlnG::Loop(TString outfilename, Bool_t isMC,
       if( passdPhiJM     ) {  n_passdPhiJM     ++ ; }
       if( passdPhiPhoMET ) {  n_passdPhiPhoMET ++ ; }
 
-      if( baseline && passMET170_e ){
+      if( baseline && passMET170_e && passE ){
        nrec_m170_e++; 
        callFillSigHist(0, lastptbin, inclptbin, candphotonindex, event_weight, passE, passM); 
        std::cout<<" nrec_m170_e<< run:lumis:event "
         <<run<<":"<<lumis<<":"<<event<< std::endl; 
        }
-      if( baseline && passMET170_m ){
+      if( baseline && passMET170_m && passM ){
        nrec_m170_m++; 
        callFillSigHist(1, lastptbin, inclptbin, candphotonindex, event_weight, passE, passM); 
        std::cout<<" nrec_m170_m<< run:lumis:event "
@@ -1088,17 +1088,18 @@ Double_t postAnalyzer_WlnG::EAphoton(Double_t eta){
 
 //-------------------------callFillSigHist
 void postAnalyzer_WlnG::callFillSigHist(int selbin, int lastptbin, int inclptbin, int candphotonindex, float event_weight, bool passE, bool passM){
+ Float_t uncorrectedPhoEt = ((*phoSCRawE)[candphotonindex]/TMath::CosH((*phoSCEta)[candphotonindex]));
  for(unsigned int ptb=0; ptb<lastptbin-2; ++ptb){ // break into pT bins
   if(
-     (phoEt->at(candphotonindex) > ptbins[ptb]) &&
-     (phoEt->at(candphotonindex) < ptbins[ptb+1])
+     ( uncorrectedPhoEt > ptbins[ptb]) &&
+     ( uncorrectedPhoEt < ptbins[ptb+1])
     ){
    FillSigHistograms(ptb, selbin, candphotonindex, event_weight, passE, passM);
   } // end if passes pt cuts then fill
  } // end pt bin loop
  if(  // do an inclusive pT plot from bins
-    (phoEt->at(candphotonindex) > ptbins[0]) &&
-    (phoEt->at(candphotonindex) < ptbins[inclptbin])
+    ( uncorrectedPhoEt > ptbins[0]) &&
+    ( uncorrectedPhoEt < ptbins[inclptbin])
    ){
   FillSigHistograms(lastptbin-1, selbin, candphotonindex, event_weight, passE, passM);
  }

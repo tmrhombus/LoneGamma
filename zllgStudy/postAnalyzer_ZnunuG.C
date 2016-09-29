@@ -183,13 +183,13 @@ void postAnalyzer_ZnunuG::Loop(TString outfilename, Bool_t isMC,
       if( baseline && passMET110 ){
        nrec_m110++; 
        callFillSigHist(0, lastptbin, inclptbin, candphotonindex, event_weight, passMM); 
-       std::cout<<" nrec_m110<< run:lumis:event "
+       std::cout<<" nrec_m110 << run:lumis:event "
         <<run<<":"<<lumis<<":"<<event<< std::endl; 
        }
       if( baseline && passMET170 ){
        nrec_m170++; 
        callFillSigHist(1, lastptbin, inclptbin, candphotonindex, event_weight, passMM); 
-       std::cout<<" nrec_m110<< run:lumis:event "
+       std::cout<<" nrec_m170 << run:lumis:event "
         <<run<<":"<<lumis<<":"<<event<< std::endl; 
        }
      } //end if phoCand[0].size()>0
@@ -937,17 +937,18 @@ Double_t postAnalyzer_ZnunuG::EAphoton(Double_t eta){
 
 //-------------------------callFillSigHist
 void postAnalyzer_ZnunuG::callFillSigHist(int selbin, int lastptbin, int inclptbin, int candphotonindex, float event_weight, bool passMM){
+ Float_t uncorrectedPhoEt = ((*phoSCRawE)[candphotonindex]/TMath::CosH((*phoSCEta)[candphotonindex]));
  for(unsigned int ptb=0; ptb<lastptbin-2; ++ptb){ // break into pT bins
   if(
-     (phoEt->at(candphotonindex) > ptbins[ptb]) &&
-     (phoEt->at(candphotonindex) < ptbins[ptb+1])
+     ( uncorrectedPhoEt > ptbins[ptb]) &&
+     ( uncorrectedPhoEt < ptbins[ptb+1])
     ){
    FillSigHistograms(ptb, selbin, candphotonindex, event_weight, passMM);
   } // end if passes pt cuts then fill
  } // end pt bin loop
  if(  // do an inclusive pT plot from bins
-    (phoEt->at(candphotonindex) > ptbins[0]) &&
-    (phoEt->at(candphotonindex) < ptbins[inclptbin])
+    ( uncorrectedPhoEt > ptbins[0]) &&
+    ( uncorrectedPhoEt < ptbins[inclptbin])
    ){
   FillSigHistograms(lastptbin-1, selbin, candphotonindex, event_weight, passMM);
  }

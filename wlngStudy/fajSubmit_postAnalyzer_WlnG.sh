@@ -6,6 +6,7 @@ domc=true
 dodata=true
 dosubmit=true
 
+
 START=$(date +%s);
 printf "Started at `date`\n\n"
 

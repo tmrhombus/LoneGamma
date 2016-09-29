@@ -1,0 +1,27 @@
+
+submitbase: /afs/hep.wisc.edu/cms/tperry/LoneG_slc6_530_CMSSW_8_0_8/src/LoneGamma/zllgStudy
+version: jaumesse
+[3g                   H                    H                    H                    H
+ 		 /nfs 	 /hdfs 	 stauts 
+ ----------------------------------------- ----------------------------------------- 
+          SinglePhoton                   66                   66                    0 incomplete analyzers
+        GJetsHT40to100                    2                    2                    0 incomplete analyzers
+       GJetsHT100to200                    2                    2                    0 incomplete analyzers
+       GJetsHT200to400                    3                    3                    0 incomplete analyzers
+       GJetsHT400to600                    1                    1                    0 incomplete analyzers
+       GJetsHT600toInf                    1                    1                    0 incomplete analyzers
+          QCDPt80to120                    9                    8                    1 incomplete analyzers
+         QCDPt120to170                   10                    6                    4 incomplete analyzers
+         QCDPt170to300                    3                    3                    0 incomplete analyzers
+         QCDPt300toInf                    2                    1                    1 incomplete analyzers
+              ZllGJets                    1                    1                    0 incomplete analyzers
+              ZnnGJets                    1                    1                    0 incomplete analyzers
+     ZllJetsHT100to200                    2                    2                    0 incomplete analyzers
+     ZllJetsHT200to400                    3                    3                    0 incomplete analyzers
+     ZllJetsHT400to600                    1                    1                    0 incomplete analyzers
+     ZllJetsHT600toInf                    1                    1                    0 incomplete analyzers
+              WlnGJets                    1                    1                    0 incomplete analyzers
+               TTGJets                    2                    2                    0 incomplete analyzers
+ ----------------------------------------- ----------------------------------------- 
+  Total: nfs: 111  hdfs:  105  left:  6
+

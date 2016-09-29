@@ -14,28 +14,36 @@ void callWlnGAnalyzer(void)
 
  TChain *theChain = new TChain("ggNtuplizer/EventTree"); ;
  theChain->Reset();
- 
- Double_t lumi=2.6;
- Double_t nrEvents=10000;
- Double_t crossSec=40000;
+
+ Double_t lumi = 12900. ;
+ Double_t nrEvents = 375920 ;
+ Double_t crossSec = 0.1903 ;
  
  TString path = "../test";
 
-  Bool_t isMC=kFALSE;
-  Bool_t isZnnG=kFALSE;
-  Bool_t ewkWG=kFALSE;
-  Bool_t isEle=kFALSE;
-  Bool_t isJet=kFALSE;
-  TString inputListName=path+"/filenames_SinglePhoton2016_10.txt";
-  TString outfilename=path+"/WlnG_Data.root";
-
-//  Bool_t isMC=kTRUE;
+//  Bool_t isMC=kFALSE;
 //  Bool_t isZnnG=kFALSE;
-//  Bool_t ewkWG=kTRUE;
+//  Bool_t ewkWG=kFALSE;
 //  Bool_t isEle=kFALSE;
 //  Bool_t isJet=kFALSE;
-//  TString outfilename=path+"/WlnGG_WG.root";
-//  TString inputListName=path+"/hdfslist_WlnGJets.txt";
+//  TString inputListName=path+"/filenames_SinglePhoton2016_10.txt";
+//  TString outfilename=path+"/WlnG_Data.root";
+
+// Bool_t isMC = kTRUE ;
+// Bool_t isZnnG = kTRUE ;
+// Bool_t ewkWG = kFALSE ;
+// Bool_t isEle = kFALSE ;
+// Bool_t isJet = kFALSE ;
+//  TString inputListName=path+"/hdfslist_ZnnGJets.txt";
+//  TString outfilename=path+"/WlnG_ZnnG.root";
+
+  Bool_t isMC=kTRUE;
+  Bool_t isZnnG=kFALSE;
+  Bool_t ewkWG=kTRUE;
+  Bool_t isEle=kFALSE;
+  Bool_t isJet=kFALSE;
+  TString outfilename=path+"/WlnGG_WG.root";
+  TString inputListName=path+"/hdfslist_WlnGJets.txt";
 
 //  Bool_t isMC=kTRUE;
 //  Bool_t isZnnG=kFALSE;

@@ -1,6 +1,4 @@
-#export version="jaumesse"
-#export version="nofermi"
-export version="dhave"
+export version="bstate"
 export submitbase="${CMSSW_BASE}/src/LoneGamma/wlngStudy"
 
 export analyzed="${submitbase}/gitignore/${version}/analyzed"

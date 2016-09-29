@@ -21,19 +21,21 @@ void callZnunuGAnalyzer(void)
  
  TString path = "../test";
 
-//  Bool_t isMC=kFALSE;
-//  Bool_t isZnnG=kFALSE;
-//  Bool_t ewkZG=kFALSE;
-//  TString inputListName=path+"/filenames_SinglePhoton2016_10.txt";
-//  TString outfilename=path+"/ZllG_Data.root";
-
-  Bool_t isMC=kTRUE;
+  Bool_t isMC=kFALSE;
   Bool_t isZnnG=kFALSE;
-  Bool_t ewkZG=kTRUE;
-  Bool_t isEle=kTRUE;
-  Bool_t isJet=kTRUE;
-  TString outfilename=path+"/ZllG_ZllG.root";
-  TString inputListName=path+"/hdfslist_ZllGJets.txt";
+  Bool_t ewkZG=kFALSE;
+  Bool_t isEle=kFALSE;
+  Bool_t isJet=kFALSE;
+  TString inputListName=path+"/filenames_SinglePhoton2016_10.txt";
+  TString outfilename=path+"/ZllG_Data.root";
+
+//  Bool_t isMC=kTRUE;
+//  Bool_t isZnnG=kFALSE;
+//  Bool_t ewkZG=kTRUE;
+//  Bool_t isEle=kTRUE;
+//  Bool_t isJet=kTRUE;
+//  TString outfilename=path+"/ZllG_ZllG.root";
+//  TString inputListName=path+"/hdfslist_ZllGJets.txt";
 
 // Bool_t isMC=kTRUE;
 // Bool_t isZnnG=kTRUE;

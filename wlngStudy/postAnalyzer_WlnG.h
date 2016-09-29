@@ -67,6 +67,7 @@ public :
         h_gen_diele_mass[7][2],
         h_gen_dimu_mass[7][2];
 
+   Double_t crossSecScl;
    std::vector<int> phoCand;
 
    std::vector<int> tightEles;

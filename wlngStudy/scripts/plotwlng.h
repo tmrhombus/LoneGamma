@@ -1,5 +1,5 @@
-#ifndef plotzllg_h
-#define plotzllg_h
+#ifndef plotwlng_h
+#define plotwlng_h
  
 #include <TROOT.h>
 #include <TFile.h>
@@ -85,7 +85,7 @@ using namespace ROOT;
 using namespace RooFit;
  
  
-class plotzllg {
+class plotwlng {
 public :
 
    TString inpath;
@@ -164,20 +164,20 @@ public :
 
    TString histname;
 
-   plotzllg();
-   virtual ~plotzllg();
+   plotwlng();
+   virtual ~plotwlng();
    virtual void Loop();
    //My functions
 };
 #endif
  
-#ifdef plotzllg_cxx
-plotzllg::plotzllg()
+#ifdef plotwlng_cxx
+plotwlng::plotwlng()
 {            
 }
 
 
-plotzllg::~plotzllg()
+plotwlng::~plotwlng()
 {
 }
 #endif 

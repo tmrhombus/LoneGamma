@@ -46,6 +46,6 @@ hadd \
  ${submitbase}/gitignore/${version}/analyzed/analyzed_GJets.root \
  ${submitbase}/gitignore/${version}/analyzed/analyzed_GJetsHT*.root 
 
-hadd \
- ${submitbase}/gitignore/${version}/analyzed/analyzed_QCD.root \
- ${submitbase}/gitignore/${version}/analyzed/analyzed_QCDPt*.root 
+##hadd \
+## ${submitbase}/gitignore/${version}/analyzed/analyzed_QCD.root \
+## ${submitbase}/gitignore/${version}/analyzed/analyzed_QCDPt*.root 

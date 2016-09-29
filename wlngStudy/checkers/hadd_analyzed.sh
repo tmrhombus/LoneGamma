@@ -7,6 +7,7 @@ mkdir -p ${submitbase}/gitignore/${version}/plots
 printf "${submitbase}/gitignore/${version}/analyzed \n"
 printf "${submitbase}/gitignore/${version}/plots \n"
 
+  #"WZ"                \
 for samplename in \
   "SinglePhotonData"  \
   "SinglePhotonEle"   \
@@ -29,7 +30,6 @@ for samplename in \
   "TGJets"            \
   "GGJets"            \
   "WWG"               \
-  "WZ"                \
   "ZZ"
 
 do

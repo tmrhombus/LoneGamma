@@ -1,7 +1,7 @@
-#define plotzllg_cxx 
-#include "plotzllg.h"
+#define plotwlng_cxx 
+#include "plotwlng.h"
 
-void plotzllg::Loop()
+void plotwlng::Loop()
 {
 
  char* submitbase;
@@ -33,11 +33,11 @@ void plotzllg::Loop()
  name_ZnnGJets          =  "analyzed_ZnnGJets.root";
  
  file_SinglePhotonData  =  new TFile(inpath+"/"+name_SinglePhotonData,"READ");
- file_GJets         =  new TFile(inpath+"/"+name_GJets,"READ");
- file_TTGJets       =  new TFile(inpath+"/"+name_TTGJets,"READ");
- file_TGJets        =  new TFile(inpath+"/"+name_TGJets,"READ");
- file_ZllGJets      =  new TFile(inpath+"/"+name_ZllGJets,"READ");
- file_ZllJets       =  new TFile(inpath+"/"+name_ZllJets,"READ");
+ file_GJets             =  new TFile(inpath+"/"+name_GJets,"READ");
+ file_TTGJets           =  new TFile(inpath+"/"+name_TTGJets,"READ");
+ file_TGJets            =  new TFile(inpath+"/"+name_TGJets,"READ");
+ file_ZllGJets          =  new TFile(inpath+"/"+name_ZllGJets,"READ");
+ file_ZllJets           =  new TFile(inpath+"/"+name_ZllJets,"READ");
  file_GGJets            = new TFile(inpath+"/"+name_GGJets,"READ");
  file_SinglePhotonEle   = new TFile(inpath+"/"+name_SinglePhotonEle,"READ");
  file_SinglePhotonJet   = new TFile(inpath+"/"+name_SinglePhotonJet,"READ");
@@ -136,6 +136,8 @@ void plotzllg::Loop()
   Int_t rebin = rebins[v];
    for(unsigned int s=0; s<selectionnames.size(); ++s){
    TString selectionname = selectionnames[s];
+    if(lepton=="mu"){ selectionname+="_m"; }
+    if(lepton=="ele"){ selectionname+="_e"; }
     for(unsigned int p=0; p<ptrangenames.size(); ++p){
     TString ptrangename = ptrangenames[p];
 
@@ -147,6 +149,7 @@ void plotzllg::Loop()
     //histname = "h_mu_"+tailname;
     file_out =  new TFile(outpath+"/"+outname+".root","RECREATE");
 
+    printf(histname+"\n");
     printf(outname+"\n");
 
     data_obs = (TH1F*)file_SinglePhotonData->Get(histname)->Clone("data_obs");
@@ -166,6 +169,7 @@ void plotzllg::Loop()
     h_Wtn      = (TH1F*)file_Wtn             ->Get(histname)->Clone("h_Wtn")      ;     
     h_ZZ       = (TH1F*)file_ZZ              ->Get(histname)->Clone("h_ZZ")       ;      
     h_ZnnGJets = (TH1F*)file_ZnnGJets        ->Get(histname)->Clone("h_ZnnGJets") ;
+    printf(" \n");
 
     data_obs  ->SetMarkerStyle( 20 );  
     data_obs  ->SetMarkerSize( 1 );  
@@ -221,26 +225,26 @@ void plotzllg::Loop()
     h_ZZ      ->SetLineWidth( 2 );
     h_ZnnGJets->SetLineWidth( 2 );
 
-  Int_t ci1  = 1001;
-  Int_t ci2  = 1002;
-  Int_t ci3  = 1003;
-  Int_t ci4  = 1004;
-  Int_t ci5  = 1005;
-  Int_t ci6  = 1006;
-  Int_t ci7  = 1007;
-  Int_t ci8  = 1008;
-  Int_t ci9  = 1009;
-  Int_t ci10 = 1010;
-  TColor *color1  = new TColor( ci1,178./255,223./255,138./255);
-  TColor *color2  = new TColor( ci2, 51./255,160./255, 44./255);
-  TColor *color3  = new TColor( ci3,251./255,154./255,153./255);
-  TColor *color4  = new TColor( ci4,227./255, 26./255, 28./255);
-  TColor *color5  = new TColor( ci5,166./255,206./255,227./255);
-  TColor *color6  = new TColor( ci6, 31./255,120./255,180./255);
-  TColor *color7  = new TColor( ci7,177./255, 89./255, 40./255);
-  TColor *color8  = new TColor( ci8,236./255,208./255,120./255);
-  TColor *color9  = new TColor( ci9,253./255,191./255,111./255);
-  TColor *color10 = new TColor(ci10,255./255,127./255, 0./255);
+//  Int_t ci1  = 1001;
+//  Int_t ci2  = 1002;
+//  Int_t ci3  = 1003;
+//  Int_t ci4  = 1004;
+//  Int_t ci5  = 1005;
+//  Int_t ci6  = 1006;
+//  Int_t ci7  = 1007;
+//  Int_t ci8  = 1008;
+//  Int_t ci9  = 1009;
+//  Int_t ci10 = 1010;
+//  TColor *color1  = new TColor( ci1,178./255,223./255,138./255);
+//  TColor *color2  = new TColor( ci2, 51./255,160./255, 44./255);
+//  TColor *color3  = new TColor( ci3,251./255,154./255,153./255);
+//  TColor *color4  = new TColor( ci4,227./255, 26./255, 28./255);
+//  TColor *color5  = new TColor( ci5,166./255,206./255,227./255);
+//  TColor *color6  = new TColor( ci6, 31./255,120./255,180./255);
+//  TColor *color7  = new TColor( ci7,177./255, 89./255, 40./255);
+//  TColor *color8  = new TColor( ci8,236./255,208./255,120./255);
+//  TColor *color9  = new TColor( ci9,253./255,191./255,111./255);
+//  TColor *color10 = new TColor(ci10,255./255,127./255, 0./255);
   //  leg->AddEntry( h_GJets   ,"#gamma+jets", "f");
   //  leg->AddEntry( h_TTGJets ,"t#bar{t}#gamma+jets", "f");
   //  leg->AddEntry( h_TGJets  ,"t#gamma+jets", "f");
@@ -251,7 +255,7 @@ void plotzllg::Loop()
   //  leg->AddEntry( h_EFake   , "e#rightarrow fake","f" );
   //  //leg->AddEntry( h_JFake   , "jet#rightarrow fake","f" );
   //  leg->AddEntry( h_WWG     , "WW#gamma","f" );
-  ////  //leg->AddEntry( h_WZ      , "WZ","f" );
+  //  //leg->AddEntry( h_WZ      , "WZ","f" );
   //  //leg->AddEntry( h_Wmn     , "W(#mu#nu)","f" );
   //  //leg->AddEntry( h_Wtn     , "W(#tau#nu)","f" );
   //  leg->AddEntry( h_ZZ      , "ZZ","f" );
@@ -343,7 +347,6 @@ void plotzllg::Loop()
     //thestack->Add( h_JFake    );
     thestack->Add( h_WWG      );
     //thestack->Add( h_WZ       );
-    thestack->Add( h_WlnGJets );
     thestack->Add( h_Wmn      );
     thestack->Add( h_Wtn      );
     thestack->Add( h_ZZ       );
@@ -354,7 +357,7 @@ void plotzllg::Loop()
     leg->AddEntry( data_obs  ,"data", "lep");
     leg->AddEntry( h_GJets   ,"#gamma+jets", "f");
     leg->AddEntry( h_TTGJets ,"t#bar{t}#gamma+jets", "f");
-    leg->AddEntry( h_TGJets  ,"t#gamma+jets", "f");
+    //leg->AddEntry( h_TGJets  ,"t#gamma+jets", "f");
     leg->AddEntry( h_WlnGJets,"W(l#nu)#gamma+jets", "f");
     leg->AddEntry( h_ZllGJets,"Z(ll)#gamma+jets", "f");
     leg->AddEntry( h_ZllJets ,"Z(ll)+jets", "f");
@@ -373,10 +376,11 @@ void plotzllg::Loop()
     data_obs->SetXTitle(TString(data_obs->GetTitle())+" [GeV]");
     data_obs->SetTitle("");
     data_obs->SetYTitle("Events / Bin");
-    data_obs->SetMaximum(100);
+    data_obs->SetMaximum(1000);
     if(dobygev){
      data_obs->SetYTitle("Events / GeV");
-    data_obs->SetMaximum(10);
+     data_obs->SetMaximum(10);
+     data_obs->SetMinimum(0.001);
     }
     data_obs->GetYaxis()->SetTitleOffset(1.4);
 
