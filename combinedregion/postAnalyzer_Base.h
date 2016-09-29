@@ -45,26 +45,6 @@ public :
         h_sig_sieieF5x5[7], 
         h_sig_pfMET[7];
 
-   TH1F h_ele_et[7][2],
-        h_ele_uncorret[7][2],
-        h_ele_eta[7][2],
-        h_ele_sieieF5x5[7][2],
-        h_ele_pfMET[7][2],
-        h_ele_leptoMET[7][2],
-        h_ele_dilep_mass[7][2],
-        h_ele_diele_mass[7][2],
-        h_ele_dimu_mass[7][2];
-
-   TH1F h_mu_et[7][2],
-        h_mu_uncorret[7][2],
-        h_mu_eta[7][2],
-        h_mu_sieieF5x5[7][2],
-        h_mu_pfMET[7][2],
-        h_mu_leptoMET[7][2],
-        h_mu_dilep_mass[7][2],
-        h_mu_diele_mass[7][2],
-        h_mu_dimu_mass[7][2];
-
    std::vector<int> phoCand;
 
    Double_t crossSecScl;
@@ -967,9 +947,9 @@ public :
    Double_t         EAneutral(Double_t eta);
    Double_t         EAphoton(Double_t eta);
    Bool_t           FillSigHistograms(int ptbin, int sysbin, int photonIndex, double weight);
-   Bool_t           FillSigHistogramsLep(int ptbin, int sysbin, int photonIndex, double weight, bool passM);
+   //Bool_t           FillSigHistogramsLep(int ptbin, int sysbin, int photonIndex, double weight, bool passM);
    virtual void     callFillSigHist(int selbin, int lastptbin, int inclptbin, int candphotonindex, float event_weight);
-   virtual void     callFillSigHistLep(int selbin, int lastptbin, int inclptbin, int candphotonindex, float event_weight, bool passM);
+   //virtual void     callFillSigHistLep(int selbin, int lastptbin, int inclptbin, int candphotonindex, float event_weight, bool passM);
    //Bool_t           FillGenHistograms(int ptbin, int sysbin, int photonIndex, double weight); //
    Bool_t           WriteHistograms(int ptbin, int sysbin);
 
@@ -1064,25 +1044,25 @@ void postAnalyzer_Base::Init(TTree *tree, Bool_t isMC)
      TString histname_sig_sieieF5x5 = "h_sig_sieieF5x5_"+ptbinnames[i];
      TString histname_sig_pfMET = "h_sig_pfMET_"+ptbinnames[i];
 
-     TString histname_mu_et  = "h_mu_et_"+ptbinnames[i]+selbinnames[j];
-     TString histname_mu_uncorret  = "h_mu_uncorret_"+ptbinnames[i]+selbinnames[j];
-     TString histname_mu_eta = "h_mu_eta_"+ptbinnames[i]+selbinnames[j];
-     TString histname_mu_sieieF5x5 = "h_mu_sieieF5x5_"+ptbinnames[i]+selbinnames[j];
-     TString histname_mu_pfMET = "h_mu_pfMET_"+ptbinnames[i]+selbinnames[j];
-     TString histname_mu_leptoMET = "h_mu_leptoMET_"+ptbinnames[i]+selbinnames[j];
-     TString histname_mu_dilep_mass = "h_mu_dilep_mass_"+ptbinnames[i]+selbinnames[j];
-     TString histname_mu_diele_mass = "h_mu_diele_mass_"+ptbinnames[i]+selbinnames[j];
-     TString histname_mu_dimu_mass = "h_mu_dimu_mass_"+ptbinnames[i]+selbinnames[j];
-
-     TString histname_ele_et  = "h_ele_et_"+ptbinnames[i]+selbinnames[j];
-     TString histname_ele_uncorret  = "h_ele_uncorret_"+ptbinnames[i]+selbinnames[j];
-     TString histname_ele_eta = "h_ele_eta_"+ptbinnames[i]+selbinnames[j];
-     TString histname_ele_sieieF5x5 = "h_ele_sieieF5x5_"+ptbinnames[i]+selbinnames[j];
-     TString histname_ele_pfMET = "h_ele_pfMET_"+ptbinnames[i]+selbinnames[j];
-     TString histname_ele_leptoMET = "h_ele_leptoMET_"+ptbinnames[i]+selbinnames[j];
-     TString histname_ele_dilep_mass = "h_ele_dilep_mass_"+ptbinnames[i]+selbinnames[j];
-     TString histname_ele_diele_mass = "h_ele_diele_mass_"+ptbinnames[i]+selbinnames[j];
-     TString histname_ele_dimu_mass = "h_ele_dimu_mass_"+ptbinnames[i]+selbinnames[j];
+//     TString histname_mu_et  = "h_mu_et_"+ptbinnames[i]+selbinnames[j];
+//     TString histname_mu_uncorret  = "h_mu_uncorret_"+ptbinnames[i]+selbinnames[j];
+//     TString histname_mu_eta = "h_mu_eta_"+ptbinnames[i]+selbinnames[j];
+//     TString histname_mu_sieieF5x5 = "h_mu_sieieF5x5_"+ptbinnames[i]+selbinnames[j];
+//     TString histname_mu_pfMET = "h_mu_pfMET_"+ptbinnames[i]+selbinnames[j];
+//     TString histname_mu_leptoMET = "h_mu_leptoMET_"+ptbinnames[i]+selbinnames[j];
+//     TString histname_mu_dilep_mass = "h_mu_dilep_mass_"+ptbinnames[i]+selbinnames[j];
+//     TString histname_mu_diele_mass = "h_mu_diele_mass_"+ptbinnames[i]+selbinnames[j];
+//     TString histname_mu_dimu_mass = "h_mu_dimu_mass_"+ptbinnames[i]+selbinnames[j];
+//
+//     TString histname_ele_et  = "h_ele_et_"+ptbinnames[i]+selbinnames[j];
+//     TString histname_ele_uncorret  = "h_ele_uncorret_"+ptbinnames[i]+selbinnames[j];
+//     TString histname_ele_eta = "h_ele_eta_"+ptbinnames[i]+selbinnames[j];
+//     TString histname_ele_sieieF5x5 = "h_ele_sieieF5x5_"+ptbinnames[i]+selbinnames[j];
+//     TString histname_ele_pfMET = "h_ele_pfMET_"+ptbinnames[i]+selbinnames[j];
+//     TString histname_ele_leptoMET = "h_ele_leptoMET_"+ptbinnames[i]+selbinnames[j];
+//     TString histname_ele_dilep_mass = "h_ele_dilep_mass_"+ptbinnames[i]+selbinnames[j];
+//     TString histname_ele_diele_mass = "h_ele_diele_mass_"+ptbinnames[i]+selbinnames[j];
+//     TString histname_ele_dimu_mass = "h_ele_dimu_mass_"+ptbinnames[i]+selbinnames[j];
 
      // reserve histograms
      h_sig_et[i].Clear();
@@ -1960,61 +1940,61 @@ Bool_t postAnalyzer_Base::FillSigHistograms(int ptbin, int sysbin, int photonInd
 }
 
 
-Bool_t postAnalyzer_Base::FillSigHistogramsLep(int ptbin, int selbin, int photonIndex, double weight, bool passM){
- Float_t uncorphoet = ((*phoSCRawE)[photonIndex]/TMath::CosH((*phoSCEta)[photonIndex]));
-
- if(passM){
-  h_mu_uncorret[ptbin][selbin].Fill(uncorphoet, weight );
-  h_mu_et[ptbin][selbin].Fill( phoEt->at(photonIndex), weight );
-  h_mu_eta[ptbin][selbin].Fill( phoEta->at(photonIndex), weight );
-  h_mu_sieieF5x5[ptbin][selbin].Fill( phoSigmaIEtaIEtaFull5x5->at(photonIndex), weight );
-  h_mu_pfMET[ptbin][selbin].Fill( pfMET, weight );
-  h_mu_leptoMET[ptbin][selbin].Fill( leptoMET, weight );
-  h_mu_dilep_mass[ptbin][selbin].Fill( dilep_mass, weight );
-  h_mu_dimu_mass[ptbin][selbin].Fill( fourVec_mm.M(), weight );
-  h_mu_diele_mass[ptbin][selbin].Fill( fourVec_ee.M(), weight );
- }
- else{
-  h_ele_uncorret[ptbin][selbin].Fill(uncorphoet, weight );
-  h_ele_et[ptbin][selbin].Fill( phoEt->at(photonIndex), weight );
-  h_ele_eta[ptbin][selbin].Fill( phoEta->at(photonIndex), weight );
-  h_ele_sieieF5x5[ptbin][selbin].Fill( phoSigmaIEtaIEtaFull5x5->at(photonIndex), weight );
-  h_ele_pfMET[ptbin][selbin].Fill( pfMET, weight );
-  h_ele_leptoMET[ptbin][selbin].Fill( leptoMET, weight );
-  h_ele_dilep_mass[ptbin][selbin].Fill( dilep_mass, weight );
-  h_ele_dimu_mass[ptbin][selbin].Fill( fourVec_mm.M(), weight );
-  h_ele_diele_mass[ptbin][selbin].Fill( fourVec_ee.M(), weight );
- }
-
- return kTRUE;
-}
-
-
-
-Bool_t postAnalyzer_Base::WriteHistogramsLep(int ptbin, int sysbin){
-
-  h_ele_uncorret[ptbin][selbin]  .Write(); 
-  h_ele_et[ptbin][selbin]        .Write(); 
-  h_ele_eta[ptbin][selbin]       .Write(); 
-  h_ele_sieieF5x5[ptbin][selbin] .Write(); 
-  h_ele_pfMET[ptbin][selbin]     .Write(); 
-  h_ele_leptoMET[ptbin][selbin]  .Write(); 
-  h_ele_dilep_mass[ptbin][selbin].Write(); 
-  h_ele_dimu_mass[ptbin][selbin] .Write(); 
-  h_ele_diele_mass[ptbin][selbin].Write(); 
-
-  h_mu_uncorret[ptbin][selbin]  .Write(); 
-  h_mu_et[ptbin][selbin]        .Write(); 
-  h_mu_eta[ptbin][selbin]       .Write(); 
-  h_mu_sieieF5x5[ptbin][selbin] .Write(); 
-  h_mu_pfMET[ptbin][selbin]     .Write(); 
-  h_mu_leptoMET[ptbin][selbin]  .Write(); 
-  h_mu_dilep_mass[ptbin][selbin].Write(); 
-  h_mu_dimu_mass[ptbin][selbin] .Write(); 
-  h_mu_diele_mass[ptbin][selbin].Write(); 
-
- return kTRUE;
-}
+///Bool_t postAnalyzer_Base::FillSigHistogramsLep(int ptbin, int selbin, int photonIndex, double weight, bool passM){
+/// Float_t uncorphoet = ((*phoSCRawE)[photonIndex]/TMath::CosH((*phoSCEta)[photonIndex]));
+///
+/// if(passM){
+///  h_mu_uncorret[ptbin][selbin].Fill(uncorphoet, weight );
+///  h_mu_et[ptbin][selbin].Fill( phoEt->at(photonIndex), weight );
+///  h_mu_eta[ptbin][selbin].Fill( phoEta->at(photonIndex), weight );
+///  h_mu_sieieF5x5[ptbin][selbin].Fill( phoSigmaIEtaIEtaFull5x5->at(photonIndex), weight );
+///  h_mu_pfMET[ptbin][selbin].Fill( pfMET, weight );
+///  h_mu_leptoMET[ptbin][selbin].Fill( leptoMET, weight );
+///  h_mu_dilep_mass[ptbin][selbin].Fill( dilep_mass, weight );
+///  h_mu_dimu_mass[ptbin][selbin].Fill( fourVec_mm.M(), weight );
+///  h_mu_diele_mass[ptbin][selbin].Fill( fourVec_ee.M(), weight );
+/// }
+/// else{
+///  h_ele_uncorret[ptbin][selbin].Fill(uncorphoet, weight );
+///  h_ele_et[ptbin][selbin].Fill( phoEt->at(photonIndex), weight );
+///  h_ele_eta[ptbin][selbin].Fill( phoEta->at(photonIndex), weight );
+///  h_ele_sieieF5x5[ptbin][selbin].Fill( phoSigmaIEtaIEtaFull5x5->at(photonIndex), weight );
+///  h_ele_pfMET[ptbin][selbin].Fill( pfMET, weight );
+///  h_ele_leptoMET[ptbin][selbin].Fill( leptoMET, weight );
+///  h_ele_dilep_mass[ptbin][selbin].Fill( dilep_mass, weight );
+///  h_ele_dimu_mass[ptbin][selbin].Fill( fourVec_mm.M(), weight );
+///  h_ele_diele_mass[ptbin][selbin].Fill( fourVec_ee.M(), weight );
+/// }
+///
+/// return kTRUE;
+///}
+///
+///
+///
+///Bool_t postAnalyzer_Base::WriteHistogramsLep(int ptbin, int sysbin){
+///
+///  h_ele_uncorret[ptbin][selbin]  .Write(); 
+///  h_ele_et[ptbin][selbin]        .Write(); 
+///  h_ele_eta[ptbin][selbin]       .Write(); 
+///  h_ele_sieieF5x5[ptbin][selbin] .Write(); 
+///  h_ele_pfMET[ptbin][selbin]     .Write(); 
+///  h_ele_leptoMET[ptbin][selbin]  .Write(); 
+///  h_ele_dilep_mass[ptbin][selbin].Write(); 
+///  h_ele_dimu_mass[ptbin][selbin] .Write(); 
+///  h_ele_diele_mass[ptbin][selbin].Write(); 
+///
+///  h_mu_uncorret[ptbin][selbin]  .Write(); 
+///  h_mu_et[ptbin][selbin]        .Write(); 
+///  h_mu_eta[ptbin][selbin]       .Write(); 
+///  h_mu_sieieF5x5[ptbin][selbin] .Write(); 
+///  h_mu_pfMET[ptbin][selbin]     .Write(); 
+///  h_mu_leptoMET[ptbin][selbin]  .Write(); 
+///  h_mu_dilep_mass[ptbin][selbin].Write(); 
+///  h_mu_dimu_mass[ptbin][selbin] .Write(); 
+///  h_mu_diele_mass[ptbin][selbin].Write(); 
+///
+/// return kTRUE;
+///}
 
 Bool_t postAnalyzer_Base::WriteHistograms(int ptbin, int sysbin){
  h_sig_et[ptbin].Write();
@@ -2426,27 +2406,27 @@ void postAnalyzer_Base::callFillSigHist(int selbin, int lastptbin, int inclptbin
  return;
 }
 
-//-------------------------callFillSigHistLep
-void postAnalyzer_Base::callFillSigHistLep(int selbin, int lastptbin, int inclptbin, int candphotonindex, float event_weight, bool passM){
- Float_t uncorrectedPhoEt = ((*phoSCRawE)[candphotonindex]/TMath::CosH((*phoSCEta)[candphotonindex]));
- for(unsigned int ptb=0; ptb<lastptbin-2; ++ptb){ // break into pT bins
-  if( 
-     ( uncorrectedPhoEt > ptbins[ptb]) &&
-     ( uncorrectedPhoEt < ptbins[ptb+1])
-    ){  
-   FillSigHistogramsLep(ptb, selbin, candphotonindex, event_weight, passM);
-  } // end if passes pt cuts then fill
- } // end pt bin loop
- if(  // do an inclusive pT plot from bins
-    ( uncorrectedPhoEt > ptbins[0]) &&
-    ( uncorrectedPhoEt < ptbins[inclptbin])
-   ){  
-  FillSigHistogramsLep(lastptbin-1, selbin, candphotonindex, event_weight, passM);
- }
- // and one fully inclusive in pT
- FillSigHistogramsLep(lastptbin, selbin, candphotonindex, event_weight, passM);
- return;
-}
+////-------------------------callFillSigHistLep
+//void postAnalyzer_Base::callFillSigHistLep(int selbin, int lastptbin, int inclptbin, int candphotonindex, float event_weight, bool passM){
+// Float_t uncorrectedPhoEt = ((*phoSCRawE)[candphotonindex]/TMath::CosH((*phoSCEta)[candphotonindex]));
+// for(unsigned int ptb=0; ptb<lastptbin-2; ++ptb){ // break into pT bins
+//  if( 
+//     ( uncorrectedPhoEt > ptbins[ptb]) &&
+//     ( uncorrectedPhoEt < ptbins[ptb+1])
+//    ){  
+//   FillSigHistogramsLep(ptb, selbin, candphotonindex, event_weight, passM);
+//  } // end if passes pt cuts then fill
+// } // end pt bin loop
+// if(  // do an inclusive pT plot from bins
+//    ( uncorrectedPhoEt > ptbins[0]) &&
+//    ( uncorrectedPhoEt < ptbins[inclptbin])
+//   ){  
+//  FillSigHistogramsLep(lastptbin-1, selbin, candphotonindex, event_weight, passM);
+// }
+// // and one fully inclusive in pT
+// FillSigHistogramsLep(lastptbin, selbin, candphotonindex, event_weight, passM);
+// return;
+//}
 
 
 
