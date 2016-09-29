@@ -4,12 +4,10 @@
 
 #include "postAnalyzer_Base.h"
 
-
 class analyzeSignal : public postAnalyzer_Base {
 
  public:
-///   analyzeSignal();
-///   virtual ~analyzeSignal();
+
    virtual void     Loop(TString outfilename, Bool_t isMC,
                          Double_t lumi, Double_t nrEvents,
                          Double_t crossSec, Bool_t isZnnG,
