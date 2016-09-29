@@ -17,11 +17,12 @@ printf " \t\t /nfs \t /hdfs \t stauts \n"
 printf "%s " " -----------------------------------------"
 printf "%s \n" "-----------------------------------------"
 
+ #"QCDPt15to20" \
+ #"QCDPt20to30" \
+ #"QCDPt30to50" \
+ #"QCDPt50to80" \
+ #"DoubleElectron" 
 for samplename in \
- "QCDPt15to20" \
- "QCDPt20to30" \
- "QCDPt30to50" \
- "QCDPt50to80" \
  "QCDPt80to120" \
  "QCDPt120to170" \
  "QCDPt170to300" \
@@ -31,8 +32,7 @@ for samplename in \
  "GJetsHT200to400" \
  "GJetsHT400to600" \
  "GJetsHT600toInf" \
- "SinglePhoton" \
- "DoubleElectron" 
+ "SinglePhoton" 
 do
 
  # analyzed
@@ -52,8 +52,3 @@ printf "%s \n" "-----------------------------------------"
 diftot=$((${nfstot}-${hdfstot}))
 printf "  Total: nfs: ${nfstot}  hdfs:  ${hdfstot}  left:  ${diftot}\n\n"
 
-
-##### for checking individual files
-#### grep -l "exited with status 0" /nfs_scratch/tperry/Earth_DataA_8TeVEle-Ele-PATData/*/*out > dataAEle_good.txt
-#### ls /nfs_scratch/tperry/Earth_DataA_8TeVEle-Ele-PATData/*/*out > dataAEle_all.txt
-#### grep -Fvf good_dataAEle.txt all_dataAEle.txt > dataAEle_bad.txt

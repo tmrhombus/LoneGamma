@@ -582,7 +582,7 @@ void plot::getFraction(
    lumi->SetTextColor(kBlack);
    lumi->SetTextAlign(31);
    lumi->SetTextFont(42);
-   lumi->DrawTextNDC(0.9,0.91,"2.60 /fb (13 TeV)");
+   lumi->DrawTextNDC(0.9,0.91,"5.6 /fb (13 TeV)");
    xframe->addObject(lumi);
 
    TText* ptrange = new TText(1,1,"") ;
@@ -764,8 +764,9 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
   //hdatanum->IntegralAndError(1, sieiebin, err_num_uncor[ptb]);
   hdatanum->IntegralAndError(1, sieiebin, tmp_err_num_corr);
   //err_num_corr[varcounter] = sqrt( err_num_corr[varcounter]*err_num_corr[varcounter] + 
-  err_num_corr[ptb] = sqrt( tmp_err_num_corr*tmp_err_num_corr + 
-                              corrErr[ptb]*corrErr[ptb] );
+  err_num_corr[ptb] = sqrt( corrErr[ptb]*corrErr[ptb] );
+  ///err_num_corr[ptb] = sqrt( tmp_err_num_corr*tmp_err_num_corr + 
+  ///                            corrErr[ptb]*corrErr[ptb] );
   hdataden->IntegralAndError(1, sieiebin, err_den[ptb]);
   //err_den[ptb]=0;
 
@@ -845,7 +846,7 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
   lumi->SetTextColor(kBlack);
   lumi->SetTextAlign(31);
   lumi->SetTextFont(42);
-  lumi->DrawTextNDC(0.9,0.91,"2.60 /fb (13 TeV)");
+  lumi->DrawTextNDC(0.9,0.91,"5.6 /fb (13 TeV)");
   //xframe->addObject(lumi);
 
   TLegend *leg2 = new TLegend(0.55,0.6,0.88,0.88 );
@@ -933,7 +934,7 @@ void plot::getCorrectedFakeRatio(TFile* datafile,  //<----data file
 
   title->DrawTextNDC(0.17,0.87,"CMS");
   extra->DrawTextNDC(0.17,0.81,"Preliminary");
-  lumi->DrawTextNDC(0.9,0.91,"2.60 /fb (13 TeV)");
+  lumi->DrawTextNDC(0.9,0.91,"5.6 /fb (13 TeV)");
 
   TLegend *leg3 = new TLegend(0.55,0.6,0.88,0.88 );
   leg3->SetFillColor(kWhite);
@@ -1156,7 +1157,7 @@ void plot::getCorrectedFakeRatioErrUpDown(TFile* datafile,  //<----data file
   lumi->SetTextColor(kBlack);
   lumi->SetTextAlign(31);
   lumi->SetTextFont(42);
-  lumi->DrawTextNDC(0.9,0.91,"2.60 /fb (13 TeV)");
+  lumi->DrawTextNDC(0.9,0.91,"5.6 /fb (13 TeV)");
   //xframe->addObject(lumi);
 
   TLegend *leg2 = new TLegend(0.55,0.6,0.88,0.88 );
@@ -1236,7 +1237,7 @@ void plot::getCorrectedFakeRatioErrUpDown(TFile* datafile,  //<----data file
 
   title->DrawTextNDC(0.17,0.87,"CMS");
   extra->DrawTextNDC(0.17,0.81,"Preliminary");
-  lumi->DrawTextNDC(0.9,0.91,"2.60 /fb (13 TeV)");
+  lumi->DrawTextNDC(0.9,0.91,"5.6 /fb (13 TeV)");
 
   TLegend *leg3 = new TLegend(0.55,0.6,0.88,0.88 );
   leg3->SetFillColor(kWhite);
@@ -1332,12 +1333,12 @@ void plot::drawAllRates(TString extraname){
   lumi->SetTextColor(kBlack);
   lumi->SetTextAlign(31);
   lumi->SetTextFont(42);
-  //lumi->DrawTextNDC(0.9,0.91,"2.60 /fb (13 TeV)");
+  //lumi->DrawTextNDC(0.9,0.91,"5.6 /fb (13 TeV)");
   //xframe->addObject(lumi);
 
   title->DrawTextNDC(0.17,0.87,"CMS");
   extra->DrawTextNDC(0.17,0.81,"Preliminary");
-  lumi->DrawTextNDC(0.9,0.91,"2.60 /fb (13 TeV)");
+  lumi->DrawTextNDC(0.9,0.91,"5.6 /fb (13 TeV)");
 
   ////////// Draw points first, then lines
 
@@ -1647,12 +1648,12 @@ void plot::drawAllRatesRelative(TString extraname){
   lumi->SetTextColor(kBlack);
   lumi->SetTextAlign(31);
   lumi->SetTextFont(42);
-  //lumi->DrawTextNDC(0.9,0.91,"2.60 /fb (13 TeV)");
+  //lumi->DrawTextNDC(0.9,0.91,"5.6 /fb (13 TeV)");
   //xframe->addObject(lumi);
 
   title->DrawTextNDC(0.17,0.87,"CMS");
   extra->DrawTextNDC(0.17,0.81,"Preliminary");
-  lumi->DrawTextNDC(0.9,0.91,"2.60 /fb (13 TeV)");
+  lumi->DrawTextNDC(0.9,0.91,"5.6 /fb (13 TeV)");
 
   ////////// Draw points first, then lines
 
@@ -1871,12 +1872,12 @@ void plot::drawAllRatesRelativeHist(TString extraname){
   lumi->SetTextColor(kBlack);
   lumi->SetTextAlign(31);
   lumi->SetTextFont(42);
-  //lumi->DrawTextNDC(0.9,0.91,"2.60 /fb (13 TeV)");
+  //lumi->DrawTextNDC(0.9,0.91,"5.6 /fb (13 TeV)");
   //xframe->addObject(lumi);
 
   title->DrawTextNDC(0.17,0.87,"CMS");
   extra->DrawTextNDC(0.17,0.81,"Preliminary");
-  lumi->DrawTextNDC(0.9,0.91,"2.60 /fb (13 TeV)");
+  lumi->DrawTextNDC(0.9,0.91,"5.6 /fb (13 TeV)");
 
   ////////// Draw points first, then lines
 
@@ -2106,7 +2107,7 @@ void plot::drawAllRatesRelativeHist(TString extraname){
 
   title->DrawTextNDC(0.17,0.87,"CMS");
   extra->DrawTextNDC(0.17,0.81,"Preliminary");
-  lumi->DrawTextNDC(0.9,0.91,"2.60 /fb (13 TeV)");
+  lumi->DrawTextNDC(0.9,0.91,"5.6 /fb (13 TeV)");
 
   h_sys0->Draw("hist,same");
   h_sys1->Draw("hist,same");

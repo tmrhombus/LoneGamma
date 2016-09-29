@@ -12,7 +12,7 @@ import os
 
 infilenames = [
 "analyzed_SinglePhoton",
-"analyzed_DoubleElectron",
+#"analyzed_DoubleElectron",
 "analyzed_GJetsMerged",
 "analyzed_QCDMerged",
 #"purity_GJets_Merged",
@@ -27,7 +27,7 @@ infilenames = [
 
 outfilenames = [
 "mrg4bins_SinglePhoton",
-"mrg4bins_DoubleElectron",
+#"mrg4bins_DoubleElectron",
 "mrg4bins_GJets",
 "mrg4bins_QCD",
 #"purity_mrg4bins_GJets",

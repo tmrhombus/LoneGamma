@@ -26,15 +26,17 @@ void callQCDAnalyzer(void)
  //TString outfilename=path+"/QCDs_GJMC.root";
  //TString inputListName=path+"/filenames_GJMC_10.txt";
 
-  // QCDMC
- Bool_t isMC=kTRUE;  Bool_t isEle=kFALSE;
- TString outfilename=path+"/QCDs_QCDMC.root";
- TString inputListName=path+"/filenames_QCD_10.txt";
+//  // QCDMC
+// Bool_t isMC=kTRUE;  Bool_t isEle=kFALSE;
+// TString outfilename=path+"/QCDs_QCDMC.root";
+// //TString inputListName=path+"/filenames_QCD_10.txt";
+// TString inputListName=path+"/QCDtest.txt";
+// //TString inputListName=path+"/QCDPt120to170_callpostAnalyzer_QCD-ggtree_mc_1.inputs";
 
-//  // Data Photon
-// Bool_t isMC=kFALSE;  Bool_t isEle=kFALSE;
-// TString outfilename=path+"/QCDs_Data.root";
-// TString inputListName=path+"/filenames_SinglePhoton2016_10.txt";
+  // Data Photon
+ Bool_t isMC=kFALSE;  Bool_t isEle=kFALSE;
+ TString outfilename=path+"/QCDs_Data.root";
+ TString inputListName=path+"/filenames_SinglePhoton2016_10.txt";
 
 //  // Data Ele
 // Bool_t isMC=kFALSE;  Bool_t isEle=kTRUE;

@@ -14,10 +14,10 @@ mkdir -p "${submitbase}/gitignore/${version}/submit"
 
 if [ ${grablists} = true ]
 then
- cp "${submitbase}/gitignore/Domb/lists/"*txt "${submitbase}/gitignore/${version}/lists/"
+ cp "${submitbase}/gitignore/Lists/lists/"*txt "${submitbase}/gitignore/${version}/lists/"
 fi
 
-lumi=2320. # /pb
+lumi=2200. # /pb
 
 if [ ${domc} = true ]
 then

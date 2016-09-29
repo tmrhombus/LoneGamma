@@ -7,12 +7,12 @@ dodata=true
 dosubmit=true
 
 START=$(date +%s);
-printf "Started at `date`"
+printf "Started at `date`\n\n"
 
 mkdir -p "${submitbase}/gitignore/${version}/lists"
 mkdir -p "${submitbase}/gitignore/${version}/submit"
 
-lumi=2600. # /pb
+lumi=5600. # /pb
 
 if [ ${domc} = true ]
 then
