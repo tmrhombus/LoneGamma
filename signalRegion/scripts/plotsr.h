@@ -162,6 +162,23 @@ public :
    TH1F* h_ZZ       ;    
    TH1F* h_ZnnGJets ;
 
+   TH1* hr_data_obs;
+   TH1* hr_GJets    ;   
+   TH1* hr_TTGJets  ;   
+   TH1* hr_TGJets   ;   
+   TH1* hr_ZllGJets ;   
+   TH1* hr_ZllJets  ;   
+   TH1* hr_GGJets   ;   
+   TH1* hr_EFake    ;   
+   TH1* hr_JFake    ;   
+   TH1* hr_WWG      ;    
+   TH1* hr_WZ       ;    
+   TH1* hr_WlnGJets ;
+   TH1* hr_Wmn      ;    
+   TH1* hr_Wtn      ;    
+   TH1* hr_ZZ       ;    
+   TH1* hr_ZnnGJets ;
+
    TString histname;
 
    plotsr();

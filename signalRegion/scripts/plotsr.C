@@ -49,8 +49,8 @@ void plotsr::Loop()
  file_ZZ                = new TFile(inpath+"/"+name_ZZ,"READ");
  file_ZnnGJets          = new TFile(inpath+"/"+name_ZnnGJets,"READ");
 
-// variablenames.push_back("uncorret"  );
- variablenames.push_back("et"        ); 
+ variablenames.push_back("uncorret"  );
+// variablenames.push_back("et"        ); 
 // variablenames.push_back("eta"       ); 
 // variablenames.push_back("sieieF5x5" ); 
 // variablenames.push_back("pfMET"     ); 
@@ -89,7 +89,8 @@ void plotsr::Loop()
 // selectionnames.push_back("m110");
  selectionnames.push_back("m170");
 
- ptrangenames.push_back("175to1000");
+ ptrangenames.push_back("allpt");
+ //ptrangenames.push_back("175to1000");
 
  dolog = true;
  //dolog = false;
@@ -126,6 +127,27 @@ void plotsr::Loop()
  lumi->SetTextAlign(31);
  lumi->SetTextFont(42);
 
+//  Int_t ci1  = 1001;
+//  Int_t ci2  = 1002;
+//  Int_t ci3  = 1003;
+//  Int_t ci4  = 1004;
+//  Int_t ci5  = 1005;
+//  Int_t ci6  = 1006;
+//  Int_t ci7  = 1007;
+//  Int_t ci8  = 1008;
+//  Int_t ci9  = 1009;
+//  Int_t ci10 = 1010;
+//  TColor *color1  = new TColor( ci1,178./255,223./255,138./255);
+//  TColor *color2  = new TColor( ci2, 51./255,160./255, 44./255);
+//  TColor *color3  = new TColor( ci3,251./255,154./255,153./255);
+//  TColor *color4  = new TColor( ci4,227./255, 26./255, 28./255);
+//  TColor *color5  = new TColor( ci5,166./255,206./255,227./255);
+//  TColor *color6  = new TColor( ci6, 31./255,120./255,180./255);
+//  TColor *color7  = new TColor( ci7,177./255, 89./255, 40./255);
+//  TColor *color8  = new TColor( ci8,236./255,208./255,120./255);
+//  TColor *color9  = new TColor( ci9,253./255,191./255,111./255);
+//  TColor *color10 = new TColor(ci10,255./255,127./255, 0./255);
+
   for(unsigned int v=0; v<variablenames.size(); ++v){
   TString variablename = variablenames[v];
   Int_t rebin = rebins[v];
@@ -147,37 +169,21 @@ void plotsr::Loop()
 
     data_obs = (TH1F*)file_SinglePhotonData->Get(histname)->Clone("data_obs");
 
-    printf("a\n");
     h_GJets    = (TH1F*)file_GJets           ->Get(histname)->Clone("h_GJets")    ;   
-    printf("b\n");
     h_TTGJets  = (TH1F*)file_TTGJets         ->Get(histname)->Clone("h_TTGJets")  ;   
-    printf("c\n");
-    h_TGJets   = (TH1F*)file_TTGJets         ->Get(histname)->Clone("h_TGJets")   ;   
-    printf("d\n");
+    h_TGJets   = (TH1F*)file_TGJets          ->Get(histname)->Clone("h_TGJets")   ;   
     h_ZllGJets = (TH1F*)file_ZllGJets        ->Get(histname)->Clone("h_ZllGJets") ;   
-    printf("e\n");
     h_ZllJets  = (TH1F*)file_ZllJets         ->Get(histname)->Clone("h_ZllJets")  ;  
-    printf("f\n");
     h_GGJets   = (TH1F*)file_GGJets          ->Get(histname)->Clone("h_GGJets")   ;  
-    printf("g\n");
     h_EFake    = (TH1F*)file_SinglePhotonEle ->Get(histname)->Clone("h_EFake")    ;   
-    printf("h\n");
     h_JFake    = (TH1F*)file_SinglePhotonJet ->Get(histname)->Clone("h_JFake")    ;   
-    printf("i\n");
     h_WWG      = (TH1F*)file_WWG             ->Get(histname)->Clone("h_WWG")      ;     
-    printf("j\n");
     h_WZ       = (TH1F*)file_WZ              ->Get(histname)->Clone("h_WZ")       ;      
-    printf("k\n");
     h_WlnGJets = (TH1F*)file_WlnGJets        ->Get(histname)->Clone("h_WlnGJets") ;
-    printf("l\n");
     h_Wmn      = (TH1F*)file_Wmn             ->Get(histname)->Clone("h_Wmn")      ;     
-    printf("m\n");
     h_Wtn      = (TH1F*)file_Wtn             ->Get(histname)->Clone("h_Wtn")      ;     
-    printf("n\n");
     h_ZZ       = (TH1F*)file_ZZ              ->Get(histname)->Clone("h_ZZ")       ;      
-    printf("o\n");
     h_ZnnGJets = (TH1F*)file_ZnnGJets        ->Get(histname)->Clone("h_ZnnGJets") ;
-    printf("p\n");
 
     data_obs  ->SetMarkerStyle( 20 );  
     data_obs  ->SetMarkerSize( 1 );  
@@ -233,26 +239,6 @@ void plotsr::Loop()
     h_ZZ      ->SetLineWidth( 2 );
     h_ZnnGJets->SetLineWidth( 2 );
 
-  Int_t ci1  = 1001;
-  Int_t ci2  = 1002;
-  Int_t ci3  = 1003;
-  Int_t ci4  = 1004;
-  Int_t ci5  = 1005;
-  Int_t ci6  = 1006;
-  Int_t ci7  = 1007;
-  Int_t ci8  = 1008;
-  Int_t ci9  = 1009;
-  Int_t ci10 = 1010;
-  TColor *color1  = new TColor( ci1,178./255,223./255,138./255);
-  TColor *color2  = new TColor( ci2, 51./255,160./255, 44./255);
-  TColor *color3  = new TColor( ci3,251./255,154./255,153./255);
-  TColor *color4  = new TColor( ci4,227./255, 26./255, 28./255);
-  TColor *color5  = new TColor( ci5,166./255,206./255,227./255);
-  TColor *color6  = new TColor( ci6, 31./255,120./255,180./255);
-  TColor *color7  = new TColor( ci7,177./255, 89./255, 40./255);
-  TColor *color8  = new TColor( ci8,236./255,208./255,120./255);
-  TColor *color9  = new TColor( ci9,253./255,191./255,111./255);
-  TColor *color10 = new TColor(ci10,255./255,127./255, 0./255);
   //  leg->AddEntry( h_GJets   ,"#gamma+jets", "f");
   //  leg->AddEntry( h_TTGJets ,"t#bar{t}#gamma+jets", "f");
   //  leg->AddEntry( h_TGJets  ,"t#gamma+jets", "f");
@@ -288,135 +274,170 @@ void plotsr::Loop()
 
     //if(lepton=="mu"){printf("lepton mu\n"  ); h_EFake->Scale( 0.5/h_EFake->Integral() );    }
     //if(lepton=="ele"){printf("lepton ele\n"); h_EFake->Scale( 0.1225/h_EFake->Integral() ); }
-    //h_JFake   ->Scale( h_JFake->Integral() );
+    h_JFake->Scale( 5.9/h_JFake->Integral(-1,-1) );
+    h_EFake->Scale( 52.7/h_EFake->Integral(-1,-1) );
+
+    Double_t xbins[6] = {175,190,250,400,700,1000};
+    TH1 *hr_data_obs = data_obs  ->Rebin(5,"hr_data_obs",xbins);    
+    TH1 *hr_GJets    = h_GJets   ->Rebin(5,"hr_GJets",   xbins);    
+    TH1 *hr_TTGJets  = h_TTGJets ->Rebin(5,"hr_TTGJets", xbins);    
+    TH1 *hr_TGJets   = h_TGJets  ->Rebin(5,"hr_TGJets",  xbins);    
+    TH1 *hr_WlnGJets = h_WlnGJets->Rebin(5,"hr_WlnGJets",xbins);    
+    TH1 *hr_ZllGJets = h_ZllGJets->Rebin(5,"hr_ZllGJets",xbins);    
+    TH1 *hr_ZllJets  = h_ZllJets ->Rebin(5,"hr_ZllJets", xbins);    
+    TH1 *hr_GGJets   = h_GGJets  ->Rebin(5,"hr_GGJets",  xbins);
+    TH1 *hr_EFake    = h_EFake   ->Rebin(5,"hr_EFake",   xbins);
+    TH1 *hr_JFake    = h_JFake   ->Rebin(5,"hr_JFake",   xbins);
+    TH1 *hr_WWG      = h_WWG     ->Rebin(5,"hr_WWG",     xbins);
+    TH1 *hr_WZ       = h_WZ      ->Rebin(5,"hr_WZ",      xbins);
+    TH1 *hr_Wmn      = h_Wmn     ->Rebin(5,"hr_Wmn",     xbins);
+    TH1 *hr_Wtn      = h_Wtn     ->Rebin(5,"hr_Wtn",     xbins);
+    TH1 *hr_ZZ       = h_ZZ      ->Rebin(5,"hr_ZZ",      xbins);
+    TH1 *hr_ZnnGJets = h_ZnnGJets->Rebin(5,"hr_ZnnGJets",xbins);
 
     if(dobygev){
      if(variablename=="et"      ||
         variablename=="uncorret"||
         variablename=="leptoMET"
        ){
-      Double_t xbins[6] = {175,190,250,400,700,1000};
+    //  Double_t xbins[6] = {175,190,250,400,700,1000};
+    //   TH1 *hr_data_obs = data_obs  ->Rebin(5,"hr_data_obs",xbins);    
+    //   TH1 *hr_GJets    = h_GJets   ->Rebin(5,"hr_GJets",   xbins);    
+    //   TH1 *hr_TTGJets  = h_TTGJets ->Rebin(5,"hr_TTGJets", xbins);    
+    //   TH1 *hr_TGJets   = h_TGJets  ->Rebin(5,"hr_TGJets",  xbins);    
+    //   TH1 *hr_WlnGJets = h_WlnGJets->Rebin(5,"hr_WlnGJets",xbins);    
+    //   TH1 *hr_ZllGJets = h_ZllGJets->Rebin(5,"hr_ZllGJets",xbins);    
+    //   TH1 *hr_ZllJets  = h_ZllJets ->Rebin(5,"hr_ZllJets", xbins);    
+    //   TH1 *hr_GGJets   = h_GGJets  ->Rebin(5,"hr_GGJets",  xbins);
+    //   TH1 *hr_EFake    = h_EFake   ->Rebin(5,"hr_EFake",   xbins);
+    //   TH1 *hr_JFake    = h_JFake   ->Rebin(5,"hr_JFake",   xbins);
+    //   TH1 *hr_WWG      = h_WWG     ->Rebin(5,"hr_WWG",     xbins);
+    //   TH1 *hr_WZ       = h_WZ      ->Rebin(5,"hr_WZ",      xbins);
+    //   TH1 *hr_Wmn      = h_Wmn     ->Rebin(5,"hr_Wmn",     xbins);
+    //   TH1 *hr_Wtn      = h_Wtn     ->Rebin(5,"hr_Wtn",     xbins);
+    //   TH1 *hr_ZZ       = h_ZZ      ->Rebin(5,"hr_ZZ",      xbins);
+    //   TH1 *hr_ZnnGJets = h_ZnnGJets->Rebin(5,"hr_ZnnGJets",xbins);
+ //std::cout<<hr_data_obs->GetSize()<<std::endl;
       for(int i=0; i<5; i++){
        int bnr = i+1;
        double divby = xbins[i+1] - xbins[i];
      
-       double cont_data_obs = data_obs  ->GetBinContent(bnr); 
-       double err_data_obs  = data_obs  ->GetBinError(bnr); 
+       double cont_data_obs = hr_data_obs  ->GetBinContent(bnr); 
+       double err_data_obs  = hr_data_obs  ->GetBinError(bnr); 
        double err_ratio = err_data_obs/cont_data_obs;
    
-       double cont_GJets    = h_GJets   ->GetBinContent(bnr); 
-       double cont_TTGJets  = h_TTGJets ->GetBinContent(bnr); 
-       double cont_TGJets   = h_TGJets  ->GetBinContent(bnr); 
-       double cont_WlnGJets = h_WlnGJets->GetBinContent(bnr); 
-       double cont_ZllGJets = h_ZllGJets->GetBinContent(bnr); 
-       double cont_ZllJets  = h_ZllJets ->GetBinContent(bnr); 
-       double cont_GGJets   = h_GGJets   ->GetBinContent(bnr);
-       double cont_EFake    = h_EFake    ->GetBinContent(bnr);
-       double cont_JFake    = h_JFake    ->GetBinContent(bnr);
-       double cont_WWG      = h_WWG      ->GetBinContent(bnr);
-       double cont_WZ       = h_WZ       ->GetBinContent(bnr);
-       double cont_Wmn      = h_Wmn      ->GetBinContent(bnr);
-       double cont_Wtn      = h_Wtn      ->GetBinContent(bnr);
-       double cont_ZZ       = h_ZZ       ->GetBinContent(bnr);
-       double cont_ZnnGJets = h_ZnnGJets ->GetBinContent(bnr);
+       double cont_GJets    = hr_GJets   ->GetBinContent(bnr); 
+       double cont_TTGJets  = hr_TTGJets ->GetBinContent(bnr); 
+       double cont_TGJets   = hr_TGJets  ->GetBinContent(bnr); 
+       double cont_WlnGJets = hr_WlnGJets->GetBinContent(bnr); 
+       double cont_ZllGJets = hr_ZllGJets->GetBinContent(bnr); 
+       double cont_ZllJets  = hr_ZllJets ->GetBinContent(bnr); 
+       double cont_GGJets   = hr_GGJets   ->GetBinContent(bnr);
+       double cont_EFake    = hr_EFake    ->GetBinContent(bnr);
+       double cont_JFake    = hr_JFake    ->GetBinContent(bnr);
+       double cont_WWG      = hr_WWG      ->GetBinContent(bnr);
+       double cont_WZ       = hr_WZ       ->GetBinContent(bnr);
+       double cont_Wmn      = hr_Wmn      ->GetBinContent(bnr);
+       double cont_Wtn      = hr_Wtn      ->GetBinContent(bnr);
+       double cont_ZZ       = hr_ZZ       ->GetBinContent(bnr);
+       double cont_ZnnGJets = hr_ZnnGJets ->GetBinContent(bnr);
      
-       data_obs  ->SetBinContent(bnr, cont_data_obs / divby );    
-       h_GJets   ->SetBinContent(bnr, cont_GJets    / divby );    
-       h_TTGJets ->SetBinContent(bnr, cont_TTGJets  / divby );    
-       h_TGJets  ->SetBinContent(bnr, cont_TGJets   / divby );    
-       h_WlnGJets->SetBinContent(bnr, cont_WlnGJets / divby );    
-       h_ZllGJets->SetBinContent(bnr, cont_ZllGJets / divby );    
-       h_ZllJets ->SetBinContent(bnr, cont_ZllJets  / divby );    
-       h_GGJets  ->SetBinContent(bnr, cont_GGJets   / divby );
-       h_EFake   ->SetBinContent(bnr, cont_EFake    / divby );
-       h_JFake   ->SetBinContent(bnr, cont_JFake    / divby );
-       h_WWG     ->SetBinContent(bnr, cont_WWG      / divby );
-       h_WZ      ->SetBinContent(bnr, cont_WZ       / divby );
-       h_Wmn     ->SetBinContent(bnr, cont_Wmn      / divby );
-       h_Wtn     ->SetBinContent(bnr, cont_Wtn      / divby );
-       h_ZZ      ->SetBinContent(bnr, cont_ZZ       / divby );
-       h_ZnnGJets->SetBinContent(bnr, cont_ZnnGJets / divby );
+       hr_data_obs->SetBinContent(bnr, cont_data_obs / divby );    
+       hr_GJets   ->SetBinContent(bnr, cont_GJets    / divby );    
+       hr_TTGJets ->SetBinContent(bnr, cont_TTGJets  / divby );    
+       hr_TGJets  ->SetBinContent(bnr, cont_TGJets   / divby );    
+       hr_WlnGJets->SetBinContent(bnr, cont_WlnGJets / divby );    
+       hr_ZllGJets->SetBinContent(bnr, cont_ZllGJets / divby );    
+       hr_ZllJets ->SetBinContent(bnr, cont_ZllJets  / divby );    
+       hr_GGJets  ->SetBinContent(bnr, cont_GGJets   / divby );
+       hr_EFake   ->SetBinContent(bnr, cont_EFake    / divby );
+       hr_JFake   ->SetBinContent(bnr, cont_JFake    / divby );
+       hr_WWG     ->SetBinContent(bnr, cont_WWG      / divby );
+       hr_WZ      ->SetBinContent(bnr, cont_WZ       / divby );
+       hr_Wmn     ->SetBinContent(bnr, cont_Wmn      / divby );
+       hr_Wtn     ->SetBinContent(bnr, cont_Wtn      / divby );
+       hr_ZZ      ->SetBinContent(bnr, cont_ZZ       / divby );
+       hr_ZnnGJets->SetBinContent(bnr, cont_ZnnGJets / divby );
      
-       data_obs ->SetBinError(bnr, cont_data_obs*err_ratio / divby );    
+       hr_data_obs ->SetBinError(bnr, cont_data_obs*err_ratio / divby );    
      
       }
      }
     } // dobygev
 
     THStack *thestack = new THStack("thestack","");
-    thestack->Add( h_GJets    );
-    thestack->Add( h_TTGJets  );
-    thestack->Add( h_TGJets  );
-    thestack->Add( h_WlnGJets );
-    thestack->Add( h_ZllGJets );
-    thestack->Add( h_ZllJets  );
-    thestack->Add( h_GGJets   );
-    thestack->Add( h_EFake    );
-    //thestack->Add( h_JFake    );
-    thestack->Add( h_WWG      );
-    thestack->Add( h_WZ       );
-    thestack->Add( h_WlnGJets );
-    thestack->Add( h_Wmn      );
-    thestack->Add( h_Wtn      );
-    thestack->Add( h_ZZ       );
-    thestack->Add( h_ZnnGJets );
+    thestack->Add( hr_GJets    );
+    thestack->Add( hr_TTGJets  );
+    //thestack->Add( hr_TGJets  );
+    thestack->Add( hr_WlnGJets );
+    thestack->Add( hr_ZllGJets );
+    thestack->Add( hr_ZllJets  );
+    thestack->Add( hr_GGJets   );
+    thestack->Add( hr_EFake    );
+    thestack->Add( hr_JFake    );
+    thestack->Add( hr_WWG      );
+    thestack->Add( hr_WZ       );
+    thestack->Add( hr_Wmn      );
+    thestack->Add( hr_Wtn      );
+    thestack->Add( hr_ZZ       );
+    thestack->Add( hr_ZnnGJets );
 
-    TLegend *leg = new TLegend(0.60,0.6,0.88,0.88 );
+    TLegend *leg = new TLegend(0.60,0.5,0.88,0.88 );
     leg->SetFillColor(kWhite);
-    leg->AddEntry( data_obs  ,"data", "lep");
-    leg->AddEntry( h_GJets   ,"#gamma+jets", "f");
-    leg->AddEntry( h_TTGJets ,"t#bar{t}#gamma+jets", "f");
-    leg->AddEntry( h_TGJets  ,"t#gamma+jets", "f");
-    leg->AddEntry( h_WlnGJets,"W(l#nu)#gamma+jets", "f");
-    leg->AddEntry( h_ZllGJets,"Z(ll)#gamma+jets", "f");
-    leg->AddEntry( h_ZllJets ,"Z(ll)+jets", "f");
-    //leg->AddEntry( h_GGJets  , "#gamma#gamma+jets","f" );
-    leg->AddEntry( h_EFake   , "e#rightarrow fake","f" );
-    //leg->AddEntry( h_JFake   , "jet#rightarrow fake","f" );
-    leg->AddEntry( h_WWG     , "WW#gamma","f" );
-    //leg->AddEntry( h_WZ      , "WZ","f" );
-    //leg->AddEntry( h_Wmn     , "W(#mu#nu)","f" );
-    //leg->AddEntry( h_Wtn     , "W(#tau#nu)","f" );
-    leg->AddEntry( h_ZZ      , "ZZ","f" );
-    //leg->AddEntry( h_ZnnGJets, "Z(#nu#nu)#gamma+jets","f" );
+    leg->AddEntry( hr_data_obs  ,"data", "lep");
+    leg->AddEntry( hr_GJets   ,"#gamma+jets", "f");
+    leg->AddEntry( hr_TTGJets ,"t#bar{t}#gamma+jets", "f");
+    //leg->AddEntry( hr_TGJets  ,"t#gamma+jets", "f");
+    leg->AddEntry( hr_WlnGJets,"W(l#nu)#gamma+jets", "f");
+    leg->AddEntry( hr_ZllGJets,"Z(ll)#gamma+jets", "f");
+    leg->AddEntry( hr_ZllJets ,"Z(ll)+jets", "f");
+    leg->AddEntry( hr_GGJets  , "#gamma#gamma+jets","f" );
+    leg->AddEntry( hr_EFake   , "e#rightarrow fake","f" );
+    leg->AddEntry( hr_JFake   , "jet#rightarrow fake","f" );
+    leg->AddEntry( hr_WWG     , "WW#gamma","f" );
+    leg->AddEntry( hr_WZ      , "WZ","f" );
+    leg->AddEntry( hr_Wmn     , "W(#mu#nu)","f" );
+    leg->AddEntry( hr_Wtn     , "W(#tau#nu)","f" );
+    leg->AddEntry( hr_ZZ      , "ZZ","f" );
+    leg->AddEntry( hr_ZnnGJets, "Z(#nu#nu)#gamma+jets","f" );
 
     canvas->cd();
 
-    data_obs->SetXTitle(TString(data_obs->GetTitle())+" [GeV]");
-    data_obs->SetTitle("");
-    data_obs->SetYTitle("Events / Bin");
-    data_obs->SetMaximum(100);
+    hr_data_obs->SetXTitle(TString(data_obs->GetTitle())+" [GeV]");
+    hr_data_obs->SetTitle("");
+    hr_data_obs->SetYTitle("Events / Bin");
+    hr_data_obs->SetMaximum(100);
     if(dobygev){
-     data_obs->SetYTitle("Events / GeV");
-    data_obs->SetMaximum(10);
+     hr_data_obs->SetYTitle("Events / GeV");
+    hr_data_obs->SetMaximum(10);
     }
-    data_obs->GetYaxis()->SetTitleOffset(1.4);
+    hr_data_obs->GetYaxis()->SetTitleOffset(1.4);
 
-    data_obs->Draw("");
+    hr_data_obs->Draw("");
     thestack->Draw("hist,sames");
-    data_obs->Draw("sames");
+    hr_data_obs->Draw("sames");
     leg->Draw("same");
 
     title->DrawTextNDC(0.17,0.87,"CMS");
     extra->DrawTextNDC(0.17,0.81,"Preliminary");
     lumi->DrawTextNDC(0.9,0.91,"12.9 /fb (13 TeV)");
 
-    data_obs  ->Write();
-    h_GJets   ->Write();   
-    h_TGJets  ->Write();   
-    h_TTGJets ->Write();   
-    h_WlnGJets->Write();   
-    h_ZllGJets->Write();   
-    h_ZllJets ->Write();  
-    h_GGJets  ->Write();
-    h_EFake   ->Write();
-    h_JFake   ->Write();
-    h_WWG     ->Write();
-    h_WZ      ->Write();
-    h_Wmn     ->Write();
-    h_Wtn     ->Write();
-    h_ZZ      ->Write();
-    h_ZnnGJets->Write();
+    hr_data_obs  ->Write();
+    hr_GJets   ->Write();   
+    hr_TGJets  ->Write();   
+    hr_TTGJets ->Write();   
+    hr_WlnGJets->Write();   
+    hr_ZllGJets->Write();   
+    hr_ZllJets ->Write();  
+    hr_GGJets  ->Write();
+    hr_EFake   ->Write();
+    hr_JFake   ->Write();
+    hr_WWG     ->Write();
+    hr_WZ      ->Write();
+    hr_Wmn     ->Write();
+    hr_Wtn     ->Write();
+    hr_ZZ      ->Write();
+    hr_ZnnGJets->Write();
 
     canvas->SaveAs(outpath+"/"+outname+".pdf");
 
@@ -437,6 +458,23 @@ void plotsr::Loop()
     h_Wtn     ->Delete();
     h_ZZ      ->Delete();
     h_ZnnGJets->Delete();
+
+    hr_data_obs  ->Delete();
+    hr_GJets   ->Delete();   
+    hr_TTGJets ->Delete();   
+    hr_TGJets  ->Delete();   
+    hr_WlnGJets->Delete();   
+    hr_ZllGJets->Delete();   
+    hr_ZllJets ->Delete();  
+    hr_GGJets  ->Delete();
+    hr_EFake   ->Delete();
+    hr_JFake   ->Delete();
+    hr_WWG     ->Delete();
+    hr_WZ      ->Delete();
+    hr_Wmn     ->Delete();
+    hr_Wtn     ->Delete();
+    hr_ZZ      ->Delete();
+    hr_ZnnGJets->Delete();
 
     file_out->Close();
 
