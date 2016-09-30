@@ -4,7 +4,7 @@
 
 domc=true
 dodata=true
-dosubmit=false
+dosubmit=true
 
 START=$(date +%s);
 printf "Started at `date`\n\n"
@@ -19,6 +19,8 @@ for region in \
  "WlnG" \
  "Signal"
 do
+
+ printf "\n Region ${region}\n-----------------------------\n\n"
  
  if [ ${domc} = true ]
  then
