@@ -941,16 +941,15 @@ public :
    //  TLorentzVector *fv_1, TLorentzVector *fv_2,                //
    //  TLorentzVector *fv_ee, TLorentzVector *fv_mm);             //
    vector<int>      electron_passLooseID(int pho_index, float elePtCut);
+   vector<int>      electron_passTightID(int pho_index, float elePtCut);
    vector<int>      muon_passLooseID(int pho_index, float muPtCut);
+   vector<int>      muon_passTightID(int pho_index, float muPtCut);
    Double_t         EAchargedworst(Double_t eta);
    Double_t         EAcharged(Double_t eta);
    Double_t         EAneutral(Double_t eta);
    Double_t         EAphoton(Double_t eta);
    Bool_t           FillSigHistograms(int ptbin, int sysbin, int photonIndex, double weight);
-   //Bool_t           FillSigHistogramsLep(int ptbin, int sysbin, int photonIndex, double weight, bool passM);
    virtual void     callFillSigHist(int selbin, int lastptbin, int inclptbin, int candphotonindex, float event_weight);
-   //virtual void     callFillSigHistLep(int selbin, int lastptbin, int inclptbin, int candphotonindex, float event_weight, bool passM);
-   //Bool_t           FillGenHistograms(int ptbin, int sysbin, int photonIndex, double weight); //
    Bool_t           WriteHistograms(int ptbin, int sysbin);
 
 };
@@ -2115,6 +2114,60 @@ std::vector<int> postAnalyzer_Base::muon_passLooseID(int pho_index, float muPtCu
   return mulist;
 }
 
+//-------------------------muon_passTightID
+std::vector<int> postAnalyzer_Base::muon_passTightID(int pho_index, float muPtCut)
+{
+  std::vector<int> mu_cands;
+  mu_cands.clear();
+
+  bool pass_PFMuon = false;
+  bool pass_globalMuon = false;
+  // bool pass_trackerMuon = false;
+  bool pass_chi2ndf = false;
+  bool pass_chamberHit = false;
+  bool pass_matchedStations = false;
+  bool pass_dxy = false;
+  bool pass_dz = false;
+  bool pass_pixelHits = false;
+  bool pass_trackLayers = false;
+  bool pass_iso = false;
+  //Explicitly stating types to avoid a TMath::Max conversion issue
+  Float_t zero = 0.0; 
+  Float_t muPhoPU = 999.9;
+  Float_t tightIso_combinedRelative = 999.9;
+  for(int i = 0; i < nMu; i++) 
+  {
+    pass_globalMuon = muIsGlobalMuon->at(i);
+    pass_PFMuon = muIsPFMuon->at(i);
+    // pass_trackerMuon = muIsTrackerMuon->at(i);
+    pass_chi2ndf = muChi2NDF->at(i) < 10.0;
+    pass_chamberHit = muMuonHits->at(i) > 0; 
+    pass_matchedStations = muStations->at(i) > 1; 
+    pass_dxy = fabs(muInnerD0->at(i)) < 0.2; 
+    pass_dz = fabs(muInnerDz->at(i)) < 0.5; 
+    pass_pixelHits = muPixelHits->at(i) > 0; 
+    pass_trackLayers = muTrkLayers->at(i) > 5; 
+
+    muPhoPU = muPFNeuIso->at(i) + muPFPhoIso->at(i) - 0.5*muPFPUIso->at(i);
+    tightIso_combinedRelative = (muPFChIso->at(i) + TMath::Max(zero,muPhoPU))/(muPt->at(i));
+    pass_iso = tightIso_combinedRelative < 0.15;
+    //Muon passes Tight Muon ID
+    if(pass_globalMuon && pass_PFMuon && pass_chi2ndf && pass_chamberHit && pass_matchedStations && pass_dxy && pass_dz && pass_pixelHits && pass_trackLayers)
+    {    
+      //Muon passes pt cut
+      if(muPt->at(i) > muPtCut)
+      {    
+        //Muon does not overlap photon
+        if(dR(muEta->at(i),muPhi->at(i),phoSCEta->at(pho_index),phoSCPhi->at(pho_index)) > 0.5) 
+        {    
+          mu_cands.push_back(i);
+        }    
+      }    
+    }    
+  }
+  return mu_cands;
+}
+
 
 //-------------------------electron_passLooseID
 std::vector<int> postAnalyzer_Base::electron_passLooseID(int pho_index, float elePtCut)
@@ -2210,6 +2263,100 @@ std::vector<int> postAnalyzer_Base::electron_passLooseID(int pho_index, float el
   return elelist;
 }
 
+//-------------------------electron_passTightID
+std::vector<int> postAnalyzer_Base::electron_passTightID(int pho_index, float elePtCut)
+{
+
+  std::vector<int> ele_cands;
+  ele_cands.clear();
+
+  bool pass_SigmaIEtaIEtaFull5x5 = false;
+  bool pass_dEtaIn = false;
+  bool pass_dPhiIn = false;
+  bool pass_HoverE = false;
+  bool pass_iso = false;
+  bool pass_ooEmooP = false;
+  bool pass_d0 = false;
+  bool pass_dz = false;
+  bool pass_missingHits = false;
+  bool pass_convVeto = false;
+  //Explicitly stating types to avoid a TMath::Max conversion issue
+  Float_t EA = 0.0;
+  Float_t zero = 0.0;
+  Float_t EAcorrIso = 999.9;
+  for(int i = 0; i < nEle; i++)
+  {
+    //Make sure these get reset for every electron
+    pass_SigmaIEtaIEtaFull5x5 = false;
+    pass_dEtaIn = false;
+    pass_dPhiIn = false;
+    pass_HoverE = false;
+    pass_iso = false;
+    pass_ooEmooP = false;
+    pass_d0 = false;
+    pass_dz = false;
+    pass_missingHits = false;
+    pass_convVeto = false;
+    //Find EA for corrected relative iso.
+    if(abs(eleSCEta->at(i)) <= 1.0)
+      EA = 0.1752;
+    else if(1.0 < abs(eleSCEta->at(i)) && abs(eleSCEta->at(i)) <= 1.479)
+      EA = 0.1862;
+    else if(1.479 < abs(eleSCEta->at(i)) && abs(eleSCEta->at(i)) <= 2.0)
+      EA = 0.1411;
+    else if(2.0 < abs(eleSCEta->at(i)) && abs(eleSCEta->at(i)) <= 2.2)
+      EA = 0.1534;
+    else if(2.2 < abs(eleSCEta->at(i)) && abs(eleSCEta->at(i)) <= 2.3)
+      EA = 0.1903;
+    else if(2.3 < abs(eleSCEta->at(i)) && abs(eleSCEta->at(i)) <= 2.4)
+      EA = 0.2243;
+    else if(2.4 < abs(eleSCEta->at(i)) && abs(eleSCEta->at(i)) < 2.5)
+      EA = 0.2687;
+    EAcorrIso = (elePFChIso->at(i) + TMath::Max(zero,elePFNeuIso->at(i) + elePFPhoIso->at(i) - rho*EA))/(elePt->at(i));
+
+    if(abs(eleSCEta->at(i)) <= 1.479)
+    {
+      pass_SigmaIEtaIEtaFull5x5 = eleSigmaIEtaIEtaFull5x5->at(i) < 0.0101;
+      pass_dEtaIn = abs(eledEtaAtVtx->at(i)) < 0.00926;
+      pass_dPhiIn = abs(eledPhiAtVtx->at(i)) < 0.0336;
+      pass_HoverE = eleHoverE->at(i) < 0.0597;
+      pass_iso = EAcorrIso < 0.0354;
+      pass_ooEmooP = eleEoverPInv->at(i) < 0.012;
+      pass_d0 = abs(eleD0->at(i)) < 0.0111;
+      pass_dz = abs(eleDz->at(i)) < 0.0466;
+      pass_missingHits = eleMissHits->at(i) <= 2;
+      pass_convVeto = eleConvVeto->at(i) == 1;
+    }
+    else if(1.479 < abs(eleSCEta->at(i)) < 2.5)
+    {
+      pass_SigmaIEtaIEtaFull5x5 = eleSigmaIEtaIEtaFull5x5->at(i) < 0.0279;
+      pass_dEtaIn = abs(eledEtaAtVtx->at(i)) < 0.00724;
+      pass_dPhiIn = abs(eledPhiAtVtx->at(i)) < 0.0918;
+      pass_HoverE = eleHoverE->at(i) < 0.0615;
+      pass_iso = EAcorrIso < 0.0646;
+      pass_ooEmooP = eleEoverPInv->at(i) < 0.00999;
+      pass_d0 = abs(eleD0->at(i)) < 0.0351;
+      pass_dz = abs(eleDz->at(i)) < 0.417;
+      pass_missingHits = eleMissHits->at(i) <= 1;
+      pass_convVeto = eleConvVeto->at(i) == 1;
+    }
+      //Electron passes Loose Electron ID cuts
+    if(pass_SigmaIEtaIEtaFull5x5 && pass_dEtaIn && pass_dPhiIn && pass_HoverE && pass_iso && pass_ooEmooP && pass_d0 && pass_dz && pass_missingHits && pass_convVeto)
+    {
+      //Electron passes pt cut
+      if(elePt->at(i) > elePtCut)
+      {
+        //Electron does not overlap photon
+        if(dR(eleSCEta->at(i),eleSCPhi->at(i),phoSCEta->at(pho_index),phoSCPhi->at(pho_index)) > 0.5)
+        {
+          ele_cands.push_back(i);
+        }
+      }
+    }
+  }
+  return ele_cands;
+}
+
 //-------------------------selectedJets
 std::vector<int> postAnalyzer_Base::selectedJets(int pho_index) {
 
@@ -2297,29 +2444,65 @@ std::vector<int> postAnalyzer_Base::getPhoCand(double phoPtCut, double phoEtaCut
   std::vector<int> pholist;
   pholist.clear();
 
-  //Loop over photons
+  //Loop over photons                                                                                                                                                             
   for(int p=0;p<nPho;p++)
-    {
-      double uncorrectedPhoEt = ((*phoSCRawE)[p]/TMath::CosH((*phoSCEta)[p]));
+    {    
+      Float_t uncorrectedPhoEt = ((*phoSCRawE)[p]/TMath::CosH((*phoSCEta)[p]));
 
       bool kinematic = uncorrectedPhoEt > phoPtCut && fabs((*phoSCEta)[p])<phoEtaCut;
 
+      bool passSeed = ((*phohasPixelSeed)[p] == 0);
+
       bool photonId = (
-                       ((*phoHoverE)[p]                <  0.05   ) &&
-                       ( TMath::Max( (*phoPFChIso)[p] - 0.0, 0.0) < 1.37 )  &&
+                       ((*phoHoverE)[p]                <  0.05   ) && 
+                       ((*phoSigmaIEtaIEtaFull5x5)[p]  <  0.0102 ) && 
+                       ( TMath::Max( ( (*phoPFChIso)[p]       - rho*EAcharged((*phoSCEta)[p]) ), 0.0) < 1.37 )  &&
                        ( TMath::Max( ( (*phoPFChWorstIso)[p]  - rho*EAchargedworst((*phoSCEta)[p]) ), 0.0) < 1.37 )  &&
                        ( TMath::Max( ( (*phoPFNeuIso)[p] - rho*EAneutral((*phoSCEta)[p]) ), 0.0) <
                         (1.06 + (0.014 * uncorrectedPhoEt) + (0.000019 * pow(uncorrectedPhoEt, 2.0))) )  &&
-                       ( TMath::Max( ( (*phoPFPhoIso)[p] - rho*EAphoton((*phoSCEta)[p])  ), 0.0) <
-                        (0.28 + (0.0053 * uncorrectedPhoEt)) )
-                      );
+                       ( TMath::Max( ( (*phoPFPhoIso)[p] - rho*EAphoton((*phoSCEta)[p])  ), 0.0) < 
+                        (0.28 + (0.0053 * uncorrectedPhoEt)) ) 
+                      );   
 
-      if(photonId && kinematic){
+      
+      bool noncoll = fabs((*phoseedTimeFull5x5)[p]) < 3. && 
+                     (*phomipTotEnergy)[p] < 4.9 && 
+                     (*phoSigmaIEtaIEtaFull5x5)[p] > 0.001 && 
+                     (*phoSigmaIPhiIPhiFull5x5)[p] > 0.001;
+
+      if(photonId && kinematic && noncoll && passSeed){
         pholist.push_back(p);
-      }
-    }
+      }    
+    }    
 
   return pholist;
+
+//  std::vector<int> pholist;
+//  pholist.clear();
+//
+//  //Loop over photons
+//  for(int p=0;p<nPho;p++)
+//    {
+//      double uncorrectedPhoEt = ((*phoSCRawE)[p]/TMath::CosH((*phoSCEta)[p]));
+//
+//      bool kinematic = uncorrectedPhoEt > phoPtCut && fabs((*phoSCEta)[p])<phoEtaCut;
+//
+//      bool photonId = (
+//                       ((*phoHoverE)[p]                <  0.05   ) &&
+//                       ( TMath::Max( (*phoPFChIso)[p] - 0.0, 0.0) < 1.37 )  &&
+//                       ( TMath::Max( ( (*phoPFChWorstIso)[p]  - rho*EAchargedworst((*phoSCEta)[p]) ), 0.0) < 1.37 )  &&
+//                       ( TMath::Max( ( (*phoPFNeuIso)[p] - rho*EAneutral((*phoSCEta)[p]) ), 0.0) <
+//                        (1.06 + (0.014 * uncorrectedPhoEt) + (0.000019 * pow(uncorrectedPhoEt, 2.0))) )  &&
+//                       ( TMath::Max( ( (*phoPFPhoIso)[p] - rho*EAphoton((*phoSCEta)[p])  ), 0.0) <
+//                        (0.28 + (0.0053 * uncorrectedPhoEt)) )
+//                      );
+//
+//      if(photonId && kinematic){
+//        pholist.push_back(p);
+//      }
+//    }
+//
+//  return pholist;
 
 }
 

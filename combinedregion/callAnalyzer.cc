@@ -1,8 +1,9 @@
 
-//#include "postAnalyzer_Base.C"
-#include "analyzeSignal.C"
+//#include "analyzeSignal.C"
+//#include "analyzeZllG.C"
+#include "analyzeWlnG.C"
 
-void callBaseAnalyzer(void)
+void callAnalyzer(void)
 {
 
  TChain *theChain = new TChain("ggNtuplizer/EventTree"); ;
@@ -28,27 +29,49 @@ void callBaseAnalyzer(void)
  //TString inputListName=path+"/hdfslist_SinglePhoton.txt";
  //TString inputListName=path+"/filenames_SinglePhoton2016_10.txt";
 
-  Bool_t isMC=kFALSE;
+//  Bool_t isMC=kFALSE;
+//  Bool_t isZnnG=kFALSE;
+//  Bool_t ewkZG=kFALSE;
+//  Bool_t ewkWG=kFALSE;
+//  Bool_t isHalo=kFALSE;
+//  Bool_t isSpike=kFALSE;
+//  Bool_t isEle=kFALSE;
+//  Bool_t isJet=kFALSE;
+//   ///TString outfilename=path+"/ZnnG_Data_204.root";
+//   ///TString inputListName=path+"/SinglePhotonData_callpostAnalyzer_Base-ggtree_data_204.inputs";
+//   TString outfilename=path+"/ZnnG_Datafew_2.root";
+//   TString inputListName=path+"/SPD.fewer";
+//  // TString outfilename=path+"/ZnnG_Data_204_small.root";
+//  // TString inputListName=path+"/SinglePhotonData_callpostAnalyzer_Signal-ggtree_data_204.some";
+// // TString outfilename=path+"/ZnnG_Data_2101.root";
+// // TString inputListName=path+"/SinglePhotonData_callpostAnalyzer_Signal-ggtree_data_2101.inputs";
+////  TString outfilename=path+"/ZnnG_Data_3401.root";
+////  TString inputListName=path+"/SinglePhotonData_callpostAnalyzer_Signal-ggtree_data_3401.inputs";
+//
+//  //TString inputListName=path+"/filenames_SinglePhoton2016_10.txt";
+
+
+//  Bool_t isMC=kTRUE;
+//  Bool_t isZnnG=kFALSE;
+//  Bool_t ewkZG=kTRUE;
+//  Bool_t ewkWG=kFALSE;
+//  Bool_t isEle=kFALSE;
+//  Bool_t isJet=kFALSE;
+//  Bool_t isHalo=kFALSE;
+//  Bool_t isSpike=kFALSE;
+//  TString outfilename=path+"/ZllG_ZllG_v2.root";
+//  TString inputListName=path+"/hdfslist_ZllGJets.txt";
+
+  Bool_t isMC=kTRUE;
   Bool_t isZnnG=kFALSE;
   Bool_t ewkZG=kFALSE;
-  Bool_t ewkWG=kFALSE;
-  Bool_t isHalo=kFALSE;
-  Bool_t isSpike=kFALSE;
+  Bool_t ewkWG=kTRUE;
   Bool_t isEle=kFALSE;
   Bool_t isJet=kFALSE;
-   ///TString outfilename=path+"/ZnnG_Data_204.root";
-   ///TString inputListName=path+"/SinglePhotonData_callpostAnalyzer_Base-ggtree_data_204.inputs";
-   TString outfilename=path+"/ZnnG_Datafew.root";
-   TString inputListName=path+"/SPD.fewer";
-  // TString outfilename=path+"/ZnnG_Data_204_small.root";
-  // TString inputListName=path+"/SinglePhotonData_callpostAnalyzer_Signal-ggtree_data_204.some";
- // TString outfilename=path+"/ZnnG_Data_2101.root";
- // TString inputListName=path+"/SinglePhotonData_callpostAnalyzer_Signal-ggtree_data_2101.inputs";
-//  TString outfilename=path+"/ZnnG_Data_3401.root";
-//  TString inputListName=path+"/SinglePhotonData_callpostAnalyzer_Signal-ggtree_data_3401.inputs";
-
-  //TString inputListName=path+"/filenames_SinglePhoton2016_10.txt";
-
+  Bool_t isHalo=kFALSE;
+  Bool_t isSpike=kFALSE;
+  TString outfilename=path+"/WlnGG_WG_v2.root";
+  TString inputListName=path+"/hdfslist_WlnGJets.txt";
 
 
 // Bool_t isMC = kTRUE ;
@@ -112,8 +135,17 @@ void callBaseAnalyzer(void)
   infilename_dump.push_back(infilename);
  } //while !inputList.eof()
 
-  analyzeSignal m;
+  //analyzeSignal m;
+  //m.Init(theChain,isMC);
+
+  //analyzeZllG m;
+  //m.Init(theChain,isMC);
+  //m.InitLep();
+
+  analyzeWlnG m;
   m.Init(theChain,isMC);
+  m.InitLep();
+
   m.Loop(outfilename,isMC,lumi,nrEvents,crossSec,isZnnG,isEle,isHalo,isSpike,isJet,ewkWG,ewkZG);
 }
 

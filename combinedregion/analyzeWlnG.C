@@ -1,10 +1,10 @@
-#define analyzeSignal_cxx
-#include "analyzeSignal.h"
+#define analyzeWlnG_cxx
+#include "analyzeWlnG.h"
 #include <TH2.h>
 #include <TStyle.h>
 #include <TCanvas.h>
 
-void analyzeSignal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double_t nrEvents, Double_t crossSec,
+void analyzeWlnG::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double_t nrEvents, Double_t crossSec,
   Bool_t isZnnG, Bool_t isEle, Bool_t isHalo, Bool_t isSpike, Bool_t isJet, Bool_t ewkWG, Bool_t ewkZG)
 {
 
@@ -15,9 +15,10 @@ void analyzeSignal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double
  Int_t dc = 0;
  gencount = 0;
 
+ nrec = 0;
+
  int inclptbin = ptbins.size()-1;
  int lastptbin = ptbinnames.size()-1;
- int lastsysbin = sysbinnames.size();
 
  int n_initial=0;
  int n_phokin=0;
@@ -33,6 +34,8 @@ void analyzeSignal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double
  int n_passMET=0;
  int n_passdPhiJM=0;
  int n_passdPhiPhoMET=0;
+ int n_passZWindow=0;
+ int n_passdimass20=0;
 
  int cf_passTrig=0;
  int cf_passShape=0;
@@ -45,6 +48,9 @@ void analyzeSignal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double
  int cf_passMET=0;
  int cf_passdPhiJM=0;
  int cf_passdPhiPhoMET=0;
+ int cf_passZWindow=0;
+ int cf_passdimass20=0;
+
 
   TFile *f_ewk_corr = new TFile("ewk_corr.root");
   TH1D *ewkZGCorrection = (TH1D*)f_ewk_corr->Get("zg");
@@ -68,7 +74,6 @@ void analyzeSignal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double
   Long64_t ientry = LoadTree(jentry);
   if (ientry < 0) break;
   nb = fChain->GetEntry(jentry);   nbytes += nb;
-
 
   //// vector of ints, each int corresponds to location in vector of photons of photon passing cut
   //// one such vector for each systematic bin
@@ -147,24 +152,49 @@ void analyzeSignal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double
       bool passMIP = phomipTotEnergy->at(candphotonindex) < 4.9;
       if(isHalo){ passMIP = phomipTotEnergy->at(candphotonindex) > 4.9; }
 
-      // lepton rejection
-      std::vector<int> elelist = electron_passLooseID(candphotonindex, 10.);
-      std::vector<int> mulist = muon_passLooseID(candphotonindex, 10.);
-      bool passLepRej = false;
-      if( elelist.size()==0 && mulist.size()==0 ){ passLepRej = true; }
+      // get electrons and muons and put into 4vectors
+      bool passM = false;
+      bool passE = false;
+      bool passL = false;
 
+      tightEles = electron_passTightID(candphotonindex,30.0);
+      looseEles = electron_passLooseID(candphotonindex,10.0);
+      tightMus  = muon_passTightID(candphotonindex,30.0);
+      looseMus  = muon_passLooseID(candphotonindex,10.0);
+
+      passE =( tightEles.size() == 1 && looseEles.size() == 1 && looseMus.size() == 0  ) ;  
+      passM =( tightMus.size() == 1  && looseMus.size() == 1  && looseEles.size() == 0 ) ;
+
+      fourVec_e.SetPtEtaPhiE(0,0,0,0);
+      fourVec_m.SetPtEtaPhiE(0,0,0,0);
+      if(passE){
+       fourVec_e.SetPtEtaPhiE(elePt->at(tightEles[0]),eleEta->at(tightEles[0]),elePhi->at(tightEles[0]),eleEn->at(tightEles[0]));
+      }    
+
+      if(passM){
+       fourVec_m.SetPtEtaPhiE(muPt->at(tightMus[0]),muEta->at(tightMus[0]),muPhi->at(tightMus[0]),muEn->at(tightMus[0]));
+      }    
+      if(passE || passM){passL=true;}
+
+      // Lepto MET Creation
+      fourVec_met.SetPtEtaPhiE(pfMET, 0., pfMETPhi, pfMET);
+      if(passE){ fourVec_leptomet = fourVec_met + fourVec_e; }
+      if(passM){ fourVec_leptomet = fourVec_met + fourVec_m; }
+
+      leptoMET = fourVec_leptomet.Pt();
+      leptoMEPhi = fourVec_leptomet.Phi();
 
       // MET SELECTIONS
       bool passMETfilters = ( metFilters==0 ) ;
       if(isMC){ passMETfilters = true ; }
-      bool passMET = (pfMET > 170.) ;
+      bool passMET = (leptoMET > 170.) ;
 
       // dPhi( Jets, MET )
       std::vector<int>  jetindexvector = selectedJets(candphotonindex);
-      bool passdPhiJM = passdphiJetMET(&jetindexvector, pfMETPhi);
+      bool passdPhiJM = passdphiJetMET(&jetindexvector, leptoMEPhi);
 
       // dPhi( photon, MET )
-      bool passdPhiPhoMET = ( DeltaPhi(phoPhi->at(candphotonindex),pfMETPhi)>2.0 ) ;
+      bool passdPhiPhoMET = ( DeltaPhi(phoPhi->at(candphotonindex),leptoMEPhi)>2.0 ) ;
 
       if(passTrig       ){ ++n_passTrig       ;}
       if(passShape      ){ ++n_passShape      ;}
@@ -172,7 +202,6 @@ void analyzeSignal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double
       if(passSpike      ){ ++n_passSpike      ;}
       if(passNoncoll    ){ ++n_passNoncoll    ;}
       if(passMIP        ){ ++n_passMIP        ;}
-      if(passLepRej     ){ ++n_passLepRej     ;}
       if(passMETfilters ){ ++n_passMETfilters ;}
       if(passMET        ){ ++n_passMET        ;}
       if(passdPhiJM     ){ ++n_passdPhiJM     ;}
@@ -190,17 +219,14 @@ void analyzeSignal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double
            ++cf_passNoncoll;
            if( passMIP ){ 
             ++cf_passMIP;
-            if( passLepRej ){ 
-             ++cf_passLepRej;
-             if( passMETfilters ){ 
-              ++cf_passMETfilters;
-              if( passMET ){ 
-               ++cf_passMET;
-               if( passdPhiJM ){ 
-                ++cf_passdPhiJM;
-                if( passdPhiPhoMET ){ 
-                 ++cf_passdPhiPhoMET;
-                }
+            if( passMETfilters ){ 
+             ++cf_passMETfilters;
+             if( passMET ){ 
+              ++cf_passMET;
+              if( passdPhiJM ){ 
+               ++cf_passdPhiJM;
+               if( passdPhiPhoMET ){ 
+                ++cf_passdPhiPhoMET;
                }
               }
              }
@@ -212,18 +238,18 @@ void analyzeSignal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double
        }
       }
 
-      // fill histograms
+       //fill histograms
       if (passTrig
       && passShape
       && passSeed
       && passSpike
       && passNoncoll
       && passMIP
-      && passLepRej
       && passMETfilters
       && passMET
       && passdPhiJM
-      && passdPhiPhoMET)
+      && passdPhiPhoMET
+      && passL)
       {
        printf("%i:%i:%lli \n",run,lumis,event);
        if(!isMC){
@@ -231,7 +257,7 @@ void analyzeSignal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double
         std::cout<<"  phi: "<<phoPhi->at(candphotonindex)<<"  met: "<<pfMET<<std::endl;
        }
        callFillSigHist(0, lastptbin, inclptbin, candphotonindex, event_weight);
-
+       callFillSigHistLep(0, lastptbin, inclptbin, candphotonindex, event_weight, passM);
        nc++;
       }
       // end fill histograms
@@ -242,7 +268,7 @@ void analyzeSignal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double
  // write these histograms to file
   std::cout<<std::endl;
   std::cout<<"Total Passing RECO : "<<nc<<std::endl;
-  std::cout<<"Total Passing GEN  : "<<gencount<<std::endl;
+  //std::cout<<"Total Passing GEN  : "<<gencount<<std::endl;
   std::cout<<"made it through, about to write"<<std::endl;
 
   printf("lumi         %f\n", lumi);
@@ -264,7 +290,6 @@ void analyzeSignal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double
   printf(" n_passSpike        %i\n", n_passSpike      );
   printf(" n_passNoncoll      %i\n", n_passNoncoll    );
   printf(" n_passMIP          %i\n", n_passMIP        );
-  printf(" n_passLepRej       %i\n", n_passLepRej     );
   printf(" n_passMETfilters   %i\n", n_passMETfilters );
   printf(" n_passMET          %i\n", n_passMET        );
   printf(" n_passdPhiJM       %i\n", n_passdPhiJM     );
@@ -276,17 +301,19 @@ void analyzeSignal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double
   printf(" cf_passSpike       %i\n", cf_passSpike      );
   printf(" cf_passNoncoll     %i\n", cf_passNoncoll    );
   printf(" cf_passMIP         %i\n", cf_passMIP        );
-  printf(" cf_passLepRej      %i\n", cf_passLepRej     );
   printf(" cf_passMETfilters  %i\n", cf_passMETfilters );
   printf(" cf_passMET         %i\n", cf_passMET        );
   printf(" cf_passdPhiJM      %i\n", cf_passdPhiJM     );
   printf(" cf_passdPhiPhoMET  %i\n", cf_passdPhiPhoMET );
+  printf(" cf_passZWindow     %i\n", cf_passZWindow    ); 
+  printf(" cf_passdimass20    %i\n", cf_passdimass20   ); 
 
  TFile *outfile = new TFile(outfilename,"RECREATE");
  outfile->cd();
  for(unsigned int i=0; i<ptbinnames.size(); ++i){
   for(unsigned int j=0; j<sysbinnames.size(); ++j){
    WriteHistograms(i,j);
+   WriteHistogramsLep(i,j);
   }
  }
  outfile->Close();
