@@ -109,6 +109,9 @@ void analyzeZllG::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double_t
        Double_t EWK_percent_adjustment = ewkWGCorrection->GetBinContent(ewkWGCorrection->GetXaxis()->FindBin(uncorrectedPhoEt));
        event_weight*=(1.0+.01*EWK_percent_adjustment) ; 
       }  
+
+      if(isEle){ event_weight*=0.0239 ; } // +- 0.0016(stat.) +-± 0.0012(fit model) +-± 0.0002(sample difference)
+      if(isJet){ event_weight*=0.028 ; }
   
       // if event passes MonoPhoton triggers (HLT_Photon165_HE10_v)
       // https://github.com/cmkuo/ggAnalysis/blob/master/ggNtuplizer/plugins/ggNtuplizer_globalEvent.cc#L179
