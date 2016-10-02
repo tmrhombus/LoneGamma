@@ -251,7 +251,7 @@ void analyzeZllG::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double_t
       && passMIP
       && passMETfilters
       && passMET
-      && passdPhiJM
+      //&& passdPhiJM
       && passdPhiPhoMET
       && passZWindow
       && passdimass20)
