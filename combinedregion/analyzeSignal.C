@@ -124,7 +124,7 @@ void analyzeSignal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double
       bool passShape = phoSigmaIEtaIEtaFull5x5->at(candphotonindex)  <  0.0102;
       if(isJet){ passShape = true; }
       if(isHalo){ passShape = phoSigmaIEtaIEtaFull5x5->at(candphotonindex)  <  0.0165; }
-      if(isSpike){ passShape = phoSigmaIEtaIEtaFull5x5->at(candphotonindex)  >  0.0102; }
+      if(isSpike){ passShape = phoSigmaIEtaIEtaFull5x5->at(candphotonindex)  <  0.001; }
 
       bool passSeed = phohasPixelSeed->at(candphotonindex) == 0;
       if(isEle){passSeed = phohasPixelSeed->at(candphotonindex) == 1; }

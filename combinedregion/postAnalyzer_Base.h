@@ -2444,18 +2444,15 @@ std::vector<int> postAnalyzer_Base::getPhoCand(double phoPtCut, double phoEtaCut
   std::vector<int> pholist;
   pholist.clear();
 
-  //Loop over photons                                                                                                                                                             
+  //Loop over photons                   
   for(int p=0;p<nPho;p++)
     {    
       Float_t uncorrectedPhoEt = ((*phoSCRawE)[p]/TMath::CosH((*phoSCEta)[p]));
 
       bool kinematic = uncorrectedPhoEt > phoPtCut && fabs((*phoSCEta)[p])<phoEtaCut;
 
-      bool passSeed = ((*phohasPixelSeed)[p] == 0);
-
       bool photonId = (
                        ((*phoHoverE)[p]                <  0.05   ) && 
-                       ((*phoSigmaIEtaIEtaFull5x5)[p]  <  0.0102 ) && 
                        ( TMath::Max( ( (*phoPFChIso)[p]       - rho*EAcharged((*phoSCEta)[p]) ), 0.0) < 1.37 )  &&
                        ( TMath::Max( ( (*phoPFChWorstIso)[p]  - rho*EAchargedworst((*phoSCEta)[p]) ), 0.0) < 1.37 )  &&
                        ( TMath::Max( ( (*phoPFNeuIso)[p] - rho*EAneutral((*phoSCEta)[p]) ), 0.0) <
@@ -2464,13 +2461,8 @@ std::vector<int> postAnalyzer_Base::getPhoCand(double phoPtCut, double phoEtaCut
                         (0.28 + (0.0053 * uncorrectedPhoEt)) ) 
                       );   
 
-      
-      bool noncoll = fabs((*phoseedTimeFull5x5)[p]) < 3. && 
-                     (*phomipTotEnergy)[p] < 4.9 && 
-                     (*phoSigmaIEtaIEtaFull5x5)[p] > 0.001 && 
-                     (*phoSigmaIPhiIPhiFull5x5)[p] > 0.001;
 
-      if(photonId && kinematic && noncoll && passSeed){
+      if(photonId && kinematic ){
         pholist.push_back(p);
       }    
     }    
