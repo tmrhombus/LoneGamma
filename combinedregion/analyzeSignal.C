@@ -139,8 +139,11 @@ void analyzeSignal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double
 
       bool passSeedTime = false;
       if( phoseedTimeFull5x5->size() > candphotonindex ){ passSeedTime = (fabs(phoseedTimeFull5x5->at(candphotonindex)) < 3.); }
-      bool passNoncoll = ( (phoSigmaIEtaIEtaFull5x5->at(candphotonindex) > 0.001)
-                        && (phoSigmaIPhiIPhiFull5x5->at(candphotonindex) > 0.001) 
+      bool passSpikeShape = ( (phoSigmaIEtaIEtaFull5x5->at(candphotonindex) > 0.001)
+                           && (phoSigmaIPhiIPhiFull5x5->at(candphotonindex) > 0.001) );
+      if(isSpike){ passSpikeShape = ! ( (phoSigmaIEtaIEtaFull5x5->at(candphotonindex) > 0.001)
+                           && (phoSigmaIPhiIPhiFull5x5->at(candphotonindex) > 0.001) ); }
+      bool passNoncoll = ( passSpikeShape 
                         && (phoR9->at(candphotonindex) < 1) 
                         && passSeedTime
                         );
