@@ -46,12 +46,6 @@ void analyzeSignal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double
  int cf_passdPhiJM=0;
  int cf_passdPhiPhoMET=0;
 
-//  TFile *f_ewk_corr = new TFile("ewk_corr.root");
-//  TH1D *ewkZGCorrection = (TH1D*)f_ewk_corr->Get("zg");
-//  cout<<"ewkZG Correction histogram loaded"<<endl;
-//  TH1D *ewkWGCorrection = (TH1D*)f_ewk_corr->Get("wg");
-//  cout<<"ewkWG Correction histogram loaded"<<endl;
-
   f_ewk_corr = new TFile("ewk_corr.root");
   ewkZGCorrection = (TH1D*)f_ewk_corr->Get("zg");
   cout<<"ewkZG Correction histogram loaded"<<endl;
@@ -97,64 +91,24 @@ void analyzeSignal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double
       passTrig = askPassTrig(isMC);
 
       passShape = askPassShape(candphotonindex,isJet,isHalo,isSpike) ;
-      //passShape = phoSigmaIEtaIEtaFull5x5->at(candphotonindex)  <  0.0102;
-      //if(isJet){ passShape = true; }
-      //if(isHalo){ passShape = phoSigmaIEtaIEtaFull5x5->at(candphotonindex)  <  0.0165; }
-      //if(isSpike){ passShape = phoSigmaIEtaIEtaFull5x5->at(candphotonindex)  <  0.001; }
 
       passSeed = askPassSeed(candphotonindex,isEle);
-      //passSeed = phohasPixelSeed->at(candphotonindex) == 0;
-      //if(isEle){passSeed = phohasPixelSeed->at(candphotonindex) == 1; }
 
       passSpike = askPassSpike(candphotonindex,isMC,isSpike);
-      //// spike cleaning
-      //int iphi = 41; 
-      //int ieta = 5;
-      ////bool passSpike = true; // if isMC
-      //passSpike = !(phoIPhi->at(candphotonindex) == iphi && phoIEta->at(candphotonindex) == ieta) ;
-      //if(isSpike){ passSpike = true ; }
-      //if(isMC){ passSpike = true ; }
 
       passNoncoll = askPassNonColl(candphotonindex,isSpike);
-      //bool passSeedTime = false;
-      //if( phoseedTimeFull5x5->size() > candphotonindex ){ passSeedTime = (fabs(phoseedTimeFull5x5->at(candphotonindex)) < 3.); }
-      //bool passSpikeShape = ( (phoSigmaIEtaIEtaFull5x5->at(candphotonindex) > 0.001)
-      //                     && (phoSigmaIPhiIPhiFull5x5->at(candphotonindex) > 0.001) );
-      //if(isSpike){ passSpikeShape = ! ( (phoSigmaIEtaIEtaFull5x5->at(candphotonindex) > 0.001)
-      //                     && (phoSigmaIPhiIPhiFull5x5->at(candphotonindex) > 0.001) ); }
-      //passNoncoll = ( passSpikeShape 
-      //                  && (phoR9->at(candphotonindex) < 1) 
-      //                  && passSeedTime
-      //                  );
-      //                  //&& (fabs(phoseedTimeFull5x5->at(candphotonindex)) < 3.) );
-
 
       passMIP = askPassMIP(candphotonindex,isHalo);
-      //passMIP = phomipTotEnergy->at(candphotonindex) < 4.9;
-      //if(isHalo){ passMIP = phomipTotEnergy->at(candphotonindex) > 4.9; }
 
       passLepRej = askPassLepRej(candphotonindex);
-      //// lepton rejection
-      //std::vector<int> elelist = electron_passLooseID(candphotonindex, 10.);
-      //std::vector<int> mulist = muon_passLooseID(candphotonindex, 10.);
-      //passLepRej = false;
-      //if( elelist.size()==0 && mulist.size()==0 ){ passLepRej = true; }
-
 
       passMET = askPassMET(pfMET,isMC);
-      //// MET SELECTIONS
-      //passMETfilters = ( metFilters==0 ) ;
-      //if(isMC){ passMETfilters = true ; }
-      //passMET = (pfMET > 170.) ;
 
       // dPhi( Jets, MET )
       passdPhiJM = askPassdPhiJM(candphotonindex,pfMETPhi);
-      //std::vector<int>  jetindexvector = selectedJets(candphotonindex);
-      //passdPhiJM = passdphiJetMET(&jetindexvector, pfMETPhi);
 
       // dPhi( photon, MET )
       passdPhiPhoMET = askPassdPhiPhoMET(candphotonindex,pfMETPhi);
-      //passdPhiPhoMET = ( DeltaPhi(phoPhi->at(candphotonindex),pfMETPhi)>2.0 ) ;
 
       if(passTrig       ){ ++n_passTrig       ;}
       if(passShape      ){ ++n_passShape      ;}
@@ -163,7 +117,6 @@ void analyzeSignal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double
       if(passNoncoll    ){ ++n_passNoncoll    ;}
       if(passMIP        ){ ++n_passMIP        ;}
       if(passLepRej     ){ ++n_passLepRej     ;}
-      //if(passMETfilters ){ ++n_passMETfilters ;}
       if(passMET        ){ ++n_passMET        ;}
       if(passdPhiJM     ){ ++n_passdPhiJM     ;}
       if(passdPhiPhoMET ){ ++n_passdPhiPhoMET ;}
@@ -182,18 +135,15 @@ void analyzeSignal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double
             ++cf_passMIP;
             if( passLepRej ){ 
              ++cf_passLepRej;
-             //if( passMETfilters ){ 
-              ++cf_passMETfilters;
-              if( passMET ){ 
-               ++cf_passMET;
-               if( passdPhiJM ){ 
-                ++cf_passdPhiJM;
-                if( passdPhiPhoMET ){ 
-                 ++cf_passdPhiPhoMET;
-                }
+             if( passMET ){ 
+              ++cf_passMET;
+              if( passdPhiJM ){ 
+               ++cf_passdPhiJM;
+               if( passdPhiPhoMET ){ 
+                ++cf_passdPhiPhoMET;
                }
               }
-             //}
+             }
             }
            }
           }
@@ -210,7 +160,6 @@ void analyzeSignal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double
       && passNoncoll
       && passMIP
       && passLepRej
-      //&& passMETfilters
       && passMET
       && passdPhiJM
       && passdPhiPhoMET)
@@ -221,7 +170,6 @@ void analyzeSignal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double
         std::cout<<"  phi: "<<phoPhi->at(candphotonindex)<<"  met: "<<pfMET<<std::endl;
        }
        callFillSigHist(0, lastptbin, inclptbin, candphotonindex, event_weight);
-
        nc++;
       }
       // end fill histograms
@@ -232,7 +180,6 @@ void analyzeSignal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double
  // write these histograms to file
   std::cout<<std::endl;
   std::cout<<"Total Passing RECO : "<<nc<<std::endl;
-  std::cout<<"Total Passing GEN  : "<<gencount<<std::endl;
   std::cout<<"made it through, about to write"<<std::endl;
 
   printf("lumi         %f\n", lumi);

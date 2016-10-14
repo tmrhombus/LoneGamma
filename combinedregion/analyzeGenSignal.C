@@ -47,10 +47,10 @@ void analyzeGenSignal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Dou
  int cf_passdPhiJM=0;
  int cf_passdPhiPhoMET=0;
 
-  TFile *f_ewk_corr = new TFile("ewk_corr.root");
-  TH1D *ewkZGCorrection = (TH1D*)f_ewk_corr->Get("zg");
+  f_ewk_corr = new TFile("ewk_corr.root");
+  ewkZGCorrection = (TH1D*)f_ewk_corr->Get("zg");
   cout<<"ewkZG Correction histogram loaded"<<endl;
-  TH1D *ewkWGCorrection = (TH1D*)f_ewk_corr->Get("wg");
+  ewkWGCorrection = (TH1D*)f_ewk_corr->Get("wg");
   cout<<"ewkWG Correction histogram loaded"<<endl;
 
  if (fChain == 0) return;
@@ -196,95 +196,33 @@ void analyzeGenSignal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Dou
       n_phokin++; //
       int candphotonindex = phoCand.at(0);
 
-      Float_t uncorrectedPhoEt = ((*phoSCRawE)[candphotonindex]/TMath::CosH((*phoSCEta)[candphotonindex]));
+      Double_t photonpt = ((*phoSCRawE)[candphotonindex]/TMath::CosH((*phoSCEta)[candphotonindex]));
+      //Float_t uncorrectedPhoEt = ((*phoSCRawE)[candphotonindex]/TMath::CosH((*phoSCEta)[candphotonindex]));
       double phopt = phoEt->at(candphotonindex) ;
 
-      //=1.0 for real data
-      event_weight=1.0;
-      crossSecScl = crossSec;
-      if(isZnnG){
-       if      ( uncorrectedPhoEt < 190 ) {crossSecScl*=1.39;} 
-       else if ( uncorrectedPhoEt < 250 ) {crossSecScl*=1.35;} 
-       else if ( uncorrectedPhoEt < 400 ) {crossSecScl*=1.30;} 
-       else if ( uncorrectedPhoEt < 700 ) {crossSecScl*=1.23;} 
-       else                               {crossSecScl*=1.23;} 
-      } 
-      if(isMC){ event_weight=0.96*lumi*crossSecScl*(1.013 - 0.0001168*uncorrectedPhoEt)/nrEvents; }
-      if(ewkZG){ 
-       Double_t EWK_percent_adjustment = ewkZGCorrection->GetBinContent(ewkZGCorrection->GetXaxis()->FindBin(uncorrectedPhoEt));
-       event_weight*=(1.0+.01*EWK_percent_adjustment) ; 
-      }  
-      if(ewkWG){ 
-       Double_t EWK_percent_adjustment = ewkWGCorrection->GetBinContent(ewkWGCorrection->GetXaxis()->FindBin(uncorrectedPhoEt));
-       event_weight*=(1.0+.01*EWK_percent_adjustment) ; 
-      }  
-
-      if(isEle){ event_weight*=0.0239 ; } // +- 0.0016(stat.) +-± 0.0012(fit model) +-± 0.0002(sample difference)
-      if(isJet){ event_weight*=0.028 ; }
+      event_weight=makeEventWeight(crossSec,lumi,nrEvents,photonpt,isMC,isZnnG,ewkZG,ewkWG,isEle,isJet);
   
-      // if event passes MonoPhoton triggers (HLT_Photon165_HE10_v)
-      // https://github.com/cmkuo/ggAnalysis/blob/master/ggNtuplizer/plugins/ggNtuplizer_globalEvent.cc#L179
-      bool passTrig =( 
-       ( (HLTPho>>7&1) == 1 ) ||
-       ( (HLTPho>>8&1) == 1 ) ||
-       ( (HLTPho>>9&1) == 1 ) ||
-       ( (HLTPho>>10&1) == 1 ) ||
-       ( (HLTPho>>11&1) == 1 ) ||
-       ( (HLTPho>>12&1) == 1 )
-      );
-      //bool passTrig =( (HLTPho>>12&1) == 1);
-      if(isMC){ passTrig=true; }
+      passTrig = askPassTrig(isMC);
 
-      bool passShape = phoSigmaIEtaIEtaFull5x5->at(candphotonindex)  <  0.0102;
-      if(isJet){ passShape = true; }
-      if(isHalo){ passShape = phoSigmaIEtaIEtaFull5x5->at(candphotonindex)  <  0.0165; }
-      if(isSpike){ passShape = phoSigmaIEtaIEtaFull5x5->at(candphotonindex)  <  0.001; }
+      passShape = askPassShape(candphotonindex,isJet,isHalo,isSpike) ;
 
-      bool passSeed = phohasPixelSeed->at(candphotonindex) == 0;
-      if(isEle){passSeed = phohasPixelSeed->at(candphotonindex) == 1; }
+      passSeed = askPassSeed(candphotonindex,isEle);
 
-      // spike cleaning
-      int iphi = 41; 
-      int ieta = 5;
-      //bool passSpike = true; // if isMC
-      bool passSpike = !(phoIPhi->at(candphotonindex) == iphi && phoIEta->at(candphotonindex) == ieta) ;
-      if(isSpike){ passSpike = true ; }
-      if(isMC){ passSpike = true ; }
+      passSpike = askPassSpike(candphotonindex,isMC,isSpike);
 
-      bool passSeedTime = false;
-      if( phoseedTimeFull5x5->size() > candphotonindex ){ passSeedTime = (fabs(phoseedTimeFull5x5->at(candphotonindex)) < 3.); }
-      bool passSpikeShape = ( (phoSigmaIEtaIEtaFull5x5->at(candphotonindex) > 0.001)
-                           && (phoSigmaIPhiIPhiFull5x5->at(candphotonindex) > 0.001) );
-      if(isSpike){ passSpikeShape = ! ( (phoSigmaIEtaIEtaFull5x5->at(candphotonindex) > 0.001)
-                           && (phoSigmaIPhiIPhiFull5x5->at(candphotonindex) > 0.001) ); }
-      bool passNoncoll = ( passSpikeShape 
-                        && (phoR9->at(candphotonindex) < 1) 
-                        && passSeedTime
-                        );
-                        //&& (fabs(phoseedTimeFull5x5->at(candphotonindex)) < 3.) );
+      passNoncoll = askPassNonColl(candphotonindex,isSpike);
 
+      passMIP = askPassMIP(candphotonindex,isHalo);
 
-      bool passMIP = phomipTotEnergy->at(candphotonindex) < 4.9;
-      if(isHalo){ passMIP = phomipTotEnergy->at(candphotonindex) > 4.9; }
+      passLepRej = askPassLepRej(candphotonindex);
 
-      // lepton rejection
-      std::vector<int> elelist = electron_passLooseID(candphotonindex, 10.);
-      std::vector<int> mulist = muon_passLooseID(candphotonindex, 10.);
-      bool passLepRej = false;
-      if( elelist.size()==0 && mulist.size()==0 ){ passLepRej = true; }
-
-
-      // MET SELECTIONS
-      bool passMETfilters = ( metFilters==0 ) ;
-      if(isMC){ passMETfilters = true ; }
-      bool passMET = (pfMET > 170.) ;
+      passMET = askPassMET(pfMET,isMC);
 
       // dPhi( Jets, MET )
-      std::vector<int>  jetindexvector = selectedJets(candphotonindex);
-      bool passdPhiJM = passdphiJetMET(&jetindexvector, pfMETPhi);
+      passdPhiJM = askPassdPhiJM(candphotonindex,pfMETPhi);
 
       // dPhi( photon, MET )
-      bool passdPhiPhoMET = ( DeltaPhi(phoPhi->at(candphotonindex),pfMETPhi)>2.0 ) ;
+      passdPhiPhoMET = askPassdPhiPhoMET(candphotonindex,pfMETPhi);
 
       // gen photon match
       bool genPhoMatch = false;
@@ -310,7 +248,6 @@ void analyzeGenSignal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Dou
       if(passNoncoll    ){ ++n_passNoncoll    ;}
       if(passMIP        ){ ++n_passMIP        ;}
       if(passLepRej     ){ ++n_passLepRej     ;}
-      if(passMETfilters ){ ++n_passMETfilters ;}
       if(passMET        ){ ++n_passMET        ;}
       if(passdPhiJM     ){ ++n_passdPhiJM     ;}
       if(passdPhiPhoMET ){ ++n_passdPhiPhoMET ;}
@@ -329,15 +266,12 @@ void analyzeGenSignal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Dou
             ++cf_passMIP;
             if( passLepRej ){ 
              ++cf_passLepRej;
-             if( passMETfilters ){ 
-              ++cf_passMETfilters;
-              if( passMET ){ 
-               ++cf_passMET;
-               if( passdPhiJM ){ 
-                ++cf_passdPhiJM;
-                if( passdPhiPhoMET ){ 
-                 ++cf_passdPhiPhoMET;
-                }
+             if( passMET ){ 
+              ++cf_passMET;
+              if( passdPhiJM ){ 
+               ++cf_passdPhiJM;
+               if( passdPhiPhoMET ){ 
+                ++cf_passdPhiPhoMET;
                }
               }
              }
@@ -357,24 +291,22 @@ void analyzeGenSignal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Dou
       && passNoncoll
       && passMIP
       && passLepRej
-      && passMETfilters
       && passMET
       && passdPhiJM
       && passdPhiPhoMET)
       {
        printf("%i:%i:%lli \n",run,lumis,event);
        if(!isMC){
-        std::cout<<"  uncorret: "<<uncorrectedPhoEt<<"  et: "<<phopt<<"  eta: "<<phoEta->at(candphotonindex)<<std::endl;
+        std::cout<<"  pt: "<<photonpt<<"  eta: "<<phoEta->at(candphotonindex)<<std::endl;
         std::cout<<"  phi: "<<phoPhi->at(candphotonindex)<<"  met: "<<pfMET<<std::endl;
        }
-        callFillSigHist(0, lastptbin, inclptbin, candphotonindex, event_weight);
-        nc++;
+       callFillSigHist(0, lastptbin, inclptbin, candphotonindex, event_weight);
+       nc++;
 
         if( genPhoMatch ){
          callFillSigHistGen(0, lastptbin, inclptbin, candphotonindex, genphotonindex, event_weight); 
          ng++;
         }
-
       }
       // end fill histograms
      } //end if phoCand[0].size()>0
