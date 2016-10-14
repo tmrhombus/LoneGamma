@@ -43,37 +43,67 @@ public :
         h_sig_uncorret[7], 
         h_sig_eta[7], 
         h_sig_sieieF5x5[7], 
-        h_sig_pfMET[7];
+        h_sig_pfMET[7],
+        h_sig_et5[7],
+        h_sig_et15[7],
+        h_sig_et25[7],
+        h_sig_et55[7],
+        h_sig_et75[7],
+        h_sig_et165[7],
+        h_sig_et275[7],
+        h_sig_met5[7],
+        h_sig_met15[7],
+        h_sig_met25[7],
+        h_sig_met55[7],
+        h_sig_met75[7],
+        h_sig_met165[7],
+        h_sig_met275[7];
 
    std::vector<int> phoCand;
 
+   Double_t event_weight;
+
+   Bool_t passTrig       ;
+   Bool_t passShape      ;
+   Bool_t passSeed       ;
+   Bool_t passSpike      ;
+   Bool_t passNoncoll    ;
+   Bool_t passMIP        ;
+   Bool_t passLepRej     ;
+   Bool_t passMET        ;
+   Bool_t passdPhiJM     ;
+   Bool_t passdPhiPhoMET ;
+
    Double_t crossSecScl;
 
-   // variables constructed for histograms
-   //TLorentzVector fourVec_e1, fourVec_e2; 
-   //TLorentzVector fourVec_m1, fourVec_m2; 
-   TLorentzVector fourVec_ee, fourVec_mm, fourVec_ll; 
-   TLorentzVector fourVec_l1, fourVec_l2; 
-   TLorentzVector fourVec_met; 
-   TLorentzVector fourVec_leptomet;
-   Double_t dilep_mass;
+//   // variables constructed for histograms
+//   //TLorentzVector fourVec_e1, fourVec_e2; 
+//   //TLorentzVector fourVec_m1, fourVec_m2; 
+//   TLorentzVector fourVec_ee, fourVec_mm, fourVec_ll; 
+//   TLorentzVector fourVec_l1, fourVec_l2; 
+//   TLorentzVector fourVec_met; 
+//   TLorentzVector fourVec_leptomet;
+//   Double_t dilep_mass;
+//
+//   Double_t leptoMET;
+//   Double_t leptoMEPhi;
 
-   Double_t leptoMET;
-   Double_t leptoMEPhi;
+   TFile *f_ewk_corr      ;
+   TH1D  *ewkZGCorrection ;
+   TH1D  *ewkWGCorrection ;
 
-   //TLorentzVector fourVec_e1, fourVec_e2; 
-   //TLorentzVector fourVec_m1, fourVec_m2; 
-   TLorentzVector fourVec_genee, fourVec_genmm, fourVec_genll; 
-   TLorentzVector fourVec_genl1, fourVec_genl2; 
-   TLorentzVector fourVec_genMET; 
-   TLorentzVector fourVec_genLeptoMET;
-   Double_t gen_dilep_mass;
-
-   Double_t genLeptoMET;
-   Double_t genLeptoMEPhi;
+//   //TLorentzVector fourVec_e1, fourVec_e2; 
+//   //TLorentzVector fourVec_m1, fourVec_m2; 
+//   TLorentzVector fourVec_genee, fourVec_genmm, fourVec_genll; 
+//   TLorentzVector fourVec_genl1, fourVec_genl2; 
+//   TLorentzVector fourVec_genMET; 
+//   TLorentzVector fourVec_genLeptoMET;
+//   Double_t gen_dilep_mass;
+//
+//   Double_t genLeptoMET;
+//   Double_t genLeptoMEPhi;
 
    Int_t gencount;
-   double event_weight;
 
    // common
    Int_t           run;
@@ -952,6 +982,19 @@ public :
    virtual void     callFillSigHist(int selbin, int lastptbin, int inclptbin, int candphotonindex, float event_weight);
    Bool_t           WriteHistograms(int ptbin, int sysbin);
 
+   Double_t         makeEventWeight(Double_t crossSec, Double_t lumi, Double_t nrEvents, Double_t photonpt, Bool_t isMC, Bool_t isZnnG, Bool_t ewkZG, Bool_t ewkWG, Bool_t isEle, Bool_t isJet);
+
+   Bool_t           askPassTrig(Bool_t isMC);
+   Bool_t           askPassShape(int candphotonindex, Bool_t isJet, Bool_t isHalo, Bool_t isSpike);
+   Bool_t           askPassSeed(int candphotonindex, Bool_t isEle);
+   Bool_t           askPassSpike(int candphotonindex, Bool_t isMC, Bool_t isSpike);
+   Bool_t           askPassNonColl(int candphotonindex, Bool_t isSpike);
+   Bool_t           askPassMIP(int candphotonindex, Bool_t isHalo);
+   Bool_t           askPassLepRej(int candphotonindex);
+   Bool_t           askPassMET(Float_t theMET, Bool_t isMC);
+   Bool_t           askPassdPhiJM(int candphotonindex,Float_t theMETPhi);
+   Bool_t           askPassdPhiPhoMET(int candphotonindex,Float_t theMETPhi);
+
 };
 
 ///#endif
@@ -1029,43 +1072,36 @@ void postAnalyzer_Base::Init(TTree *tree, Bool_t isMC)
 //   int nsieiebins;
    for(unsigned int i=0; i<ptbinnames.size(); ++i){
     //for(unsigned int j=0; j<sysbinnames.size(); ++j){
-//     // set up names
-     //TString histname_sig_et  = "h_sig_et_"+ptbinnames[i]+sysbinnames[j];
-     //TString histname_sig_eta = "h_sig_eta_"+ptbinnames[i]+sysbinnames[j];
-     //TString histname_sig_sieieF5x5 = "h_sig_sieieF5x5_"+ptbinnames[i]+sysbinnames[j];
-     //TString histname_sig_pfMET = "h_sig_pfMET_"+ptbinnames[i]+sysbinnames[j];
-     //TString histname_sig_leptoMET = "h_sig_leptoMET_"+ptbinnames[i]+sysbinnames[j];
-     //TString histname_sig_dilep_mass = "h_sig_dilep_mass_"+ptbinnames[i]+sysbinnames[j];
-
-     TString histname_sig_et  = "h_sig_et_"+ptbinnames[i];
-     TString histname_sig_uncorret = "h_sig_uncorret_"+ptbinnames[i];
-     TString histname_sig_eta = "h_sig_eta_"+ptbinnames[i];
+     // set up names
+     TString histname_sig_et        = "h_sig_et_"+ptbinnames[i];
+     TString histname_sig_uncorret  = "h_sig_uncorret_"+ptbinnames[i];
+     TString histname_sig_eta       = "h_sig_eta_"+ptbinnames[i];
      TString histname_sig_sieieF5x5 = "h_sig_sieieF5x5_"+ptbinnames[i];
-     TString histname_sig_pfMET = "h_sig_pfMET_"+ptbinnames[i];
+     TString histname_sig_pfMET     = "h_sig_pfMET_"+ptbinnames[i];
 
-//     TString histname_mu_et  = "h_mu_et_"+ptbinnames[i]+selbinnames[j];
-//     TString histname_mu_uncorret  = "h_mu_uncorret_"+ptbinnames[i]+selbinnames[j];
-//     TString histname_mu_eta = "h_mu_eta_"+ptbinnames[i]+selbinnames[j];
-//     TString histname_mu_sieieF5x5 = "h_mu_sieieF5x5_"+ptbinnames[i]+selbinnames[j];
-//     TString histname_mu_pfMET = "h_mu_pfMET_"+ptbinnames[i]+selbinnames[j];
-//     TString histname_mu_leptoMET = "h_mu_leptoMET_"+ptbinnames[i]+selbinnames[j];
-//     TString histname_mu_dilep_mass = "h_mu_dilep_mass_"+ptbinnames[i]+selbinnames[j];
-//     TString histname_mu_diele_mass = "h_mu_diele_mass_"+ptbinnames[i]+selbinnames[j];
-//     TString histname_mu_dimu_mass = "h_mu_dimu_mass_"+ptbinnames[i]+selbinnames[j];
-//
-//     TString histname_ele_et  = "h_ele_et_"+ptbinnames[i]+selbinnames[j];
-//     TString histname_ele_uncorret  = "h_ele_uncorret_"+ptbinnames[i]+selbinnames[j];
-//     TString histname_ele_eta = "h_ele_eta_"+ptbinnames[i]+selbinnames[j];
-//     TString histname_ele_sieieF5x5 = "h_ele_sieieF5x5_"+ptbinnames[i]+selbinnames[j];
-//     TString histname_ele_pfMET = "h_ele_pfMET_"+ptbinnames[i]+selbinnames[j];
-//     TString histname_ele_leptoMET = "h_ele_leptoMET_"+ptbinnames[i]+selbinnames[j];
-//     TString histname_ele_dilep_mass = "h_ele_dilep_mass_"+ptbinnames[i]+selbinnames[j];
-//     TString histname_ele_diele_mass = "h_ele_diele_mass_"+ptbinnames[i]+selbinnames[j];
-//     TString histname_ele_dimu_mass = "h_ele_dimu_mass_"+ptbinnames[i]+selbinnames[j];
+     TString histname_sig_et5     = "h_sig_et5_"+ptbinnames[i]    ;
+     TString histname_sig_et15    = "h_sig_et15_"+ptbinnames[i]   ;
+     TString histname_sig_et25    = "h_sig_et25_"+ptbinnames[i]   ;
+     TString histname_sig_et55    = "h_sig_et55_"+ptbinnames[i]   ;
+     TString histname_sig_et75    = "h_sig_et75_"+ptbinnames[i]   ;
+     TString histname_sig_et165   = "h_sig_et165_"+ptbinnames[i]  ;
+     TString histname_sig_et275   = "h_sig_et275_"+ptbinnames[i]  ;
+     TString histname_sig_met5    = "h_sig_met5_"+ptbinnames[i]   ;
+     TString histname_sig_met15   = "h_sig_met15_"+ptbinnames[i]  ;
+     TString histname_sig_met25   = "h_sig_met25_"+ptbinnames[i]  ;
+     TString histname_sig_met55   = "h_sig_met55_"+ptbinnames[i]  ;
+     TString histname_sig_met75   = "h_sig_met75_"+ptbinnames[i]  ;
+     TString histname_sig_met165  = "h_sig_met165_"+ptbinnames[i] ;
+     TString histname_sig_met275  = "h_sig_met275_"+ptbinnames[i] ;
+
+     // binning
+     Float_t binspt[] = { 175., 195., 250., 400., 700., 1000. };
+     Int_t  binnumpt = sizeof(binspt)/sizeof(Float_t) - 1;
 
      // reserve histograms
      h_sig_et[i].Clear();
-     h_sig_et[i] = TH1F(histname_sig_et,"Photon Transverse Energy",165,175.,1000.);
+     h_sig_et[i] = TH1F(histname_sig_et,"Photon Transverse Energy",binnumpt,binspt);
+     //h_sig_et[i] = TH1F(histname_sig_et,"Photon Transverse Energy",165,175.,1000.);
      h_sig_et[i].Sumw2();
      //
      h_sig_uncorret[i].Clear();
@@ -1083,6 +1119,64 @@ void postAnalyzer_Base::Init(TTree *tree, Bool_t isMC)
      h_sig_pfMET[i].Clear();
      h_sig_pfMET[i] = TH1F(histname_sig_pfMET,"ParticleFlow MET",166,170.,1000.);
      h_sig_pfMET[i].Sumw2();
+     //
+
+     h_sig_et5[i].Clear();
+     h_sig_et5[i] = TH1F(histname_sig_et5,"Photon Transverse Energy",165,175.,1000.);
+     h_sig_et5[i].Sumw2();
+     //
+     h_sig_et15[i].Clear();
+     h_sig_et15[i] = TH1F(histname_sig_et15,"Photon Transverse Energy",55,175.,1000.);
+     h_sig_et15[i].Sumw2();
+     //
+     h_sig_et25[i].Clear();
+     h_sig_et25[i] = TH1F(histname_sig_et25,"Photon Transverse Energy",33,175.,1000.);
+     h_sig_et25[i].Sumw2();
+     //
+     h_sig_et55[i].Clear();
+     h_sig_et55[i] = TH1F(histname_sig_et55,"Photon Transverse Energy",15,175.,1000.);
+     h_sig_et55[i].Sumw2();
+     //
+     h_sig_et75[i].Clear();
+     h_sig_et75[i] = TH1F(histname_sig_et75,"Photon Transverse Energy",11,175.,1000.);
+     h_sig_et75[i].Sumw2();
+     //
+     h_sig_et165[i].Clear();
+     h_sig_et165[i] = TH1F(histname_sig_et165,"Photon Transverse Energy",5,175.,1000.);
+     h_sig_et165[i].Sumw2();
+     //
+     h_sig_et275[i].Clear();
+     h_sig_et275[i] = TH1F(histname_sig_et275,"Photon Transverse Energy",3,175.,1000.);
+     h_sig_et275[i].Sumw2();
+     //
+
+     h_sig_met5[i].Clear();
+     h_sig_met5[i] = TH1F(histname_sig_met5,"Missing Transverse Energy",165,175.,1000.);
+     h_sig_met5[i].Sumw2();
+     //
+     h_sig_met15[i].Clear();
+     h_sig_met15[i] = TH1F(histname_sig_met15,"Missing Transverse Energy",55,175.,1000.);
+     h_sig_met15[i].Sumw2();
+     //
+     h_sig_met25[i].Clear();
+     h_sig_met25[i] = TH1F(histname_sig_met25,"Missing Transverse Energy",33,175.,1000.);
+     h_sig_met25[i].Sumw2();
+     //
+     h_sig_met55[i].Clear();
+     h_sig_met55[i] = TH1F(histname_sig_met55,"Missing Transverse Energy",15,175.,1000.);
+     h_sig_met55[i].Sumw2();
+     //
+     h_sig_met75[i].Clear();
+     h_sig_met75[i] = TH1F(histname_sig_met75,"Missing Transverse Energy",11,175.,1000.);
+     h_sig_met75[i].Sumw2();
+     //
+     h_sig_met165[i].Clear();
+     h_sig_met165[i] = TH1F(histname_sig_met165,"Missing Transverse Energy",5,175.,1000.);
+     h_sig_met165[i].Sumw2();
+     //
+     h_sig_met275[i].Clear();
+     h_sig_met275[i] = TH1F(histname_sig_met275,"Missing Transverse Energy",3,175.,1000.);
+     h_sig_met275[i].Sumw2();
      //
 
     //}
@@ -1935,6 +2029,21 @@ Bool_t postAnalyzer_Base::FillSigHistograms(int ptbin, int sysbin, int photonInd
  h_sig_sieieF5x5[ptbin].Fill( phoSigmaIEtaIEtaFull5x5->at(photonIndex), weight );
  h_sig_pfMET[ptbin].Fill( pfMET, weight );
 
+ h_sig_et5   [ptbin].Fill(uncorphoet,weight);  
+ h_sig_et15  [ptbin].Fill(uncorphoet,weight);  
+ h_sig_et25  [ptbin].Fill(uncorphoet,weight);  
+ h_sig_et55  [ptbin].Fill(uncorphoet,weight);  
+ h_sig_et75  [ptbin].Fill(uncorphoet,weight);  
+ h_sig_et165 [ptbin].Fill(uncorphoet,weight);  
+ h_sig_et275 [ptbin].Fill(uncorphoet,weight);  
+ h_sig_met5  [ptbin].Fill(pfMET,weight); 
+ h_sig_met15 [ptbin].Fill(pfMET,weight); 
+ h_sig_met25 [ptbin].Fill(pfMET,weight); 
+ h_sig_met55 [ptbin].Fill(pfMET,weight); 
+ h_sig_met75 [ptbin].Fill(pfMET,weight); 
+ h_sig_met165[ptbin].Fill(pfMET,weight); 
+ h_sig_met275[ptbin].Fill(pfMET,weight); 
+
  return kTRUE;
 }
 
@@ -2001,6 +2110,21 @@ Bool_t postAnalyzer_Base::WriteHistograms(int ptbin, int sysbin){
  h_sig_eta[ptbin].Write();
  h_sig_sieieF5x5[ptbin].Write();
  h_sig_pfMET[ptbin].Write();
+
+ h_sig_et5   [ptbin].Write(); 
+ h_sig_et15  [ptbin].Write(); 
+ h_sig_et25  [ptbin].Write(); 
+ h_sig_et55  [ptbin].Write(); 
+ h_sig_et75  [ptbin].Write(); 
+ h_sig_et165 [ptbin].Write(); 
+ h_sig_et275 [ptbin].Write(); 
+ h_sig_met5  [ptbin].Write(); 
+ h_sig_met15 [ptbin].Write(); 
+ h_sig_met25 [ptbin].Write(); 
+ h_sig_met55 [ptbin].Write(); 
+ h_sig_met75 [ptbin].Write(); 
+ h_sig_met165[ptbin].Write(); 
+ h_sig_met275[ptbin].Write(); 
 
  return kTRUE;
 }
@@ -2580,6 +2704,125 @@ void postAnalyzer_Base::callFillSigHist(int selbin, int lastptbin, int inclptbin
  FillSigHistograms(lastptbin, selbin, candphotonindex, event_weight);
  return;
 }
+
+//----------------------------makeEventWeight
+Double_t postAnalyzer_Base::makeEventWeight(Double_t crossSec, Double_t lumi, Double_t nrEvents, Double_t photonpt, Bool_t isMC, Bool_t isZnnG, Bool_t ewkZG, Bool_t ewkWG, Bool_t isEle, Bool_t isJet){
+
+      //=1.0 for real data
+      event_weight=1.0;
+      crossSecScl = crossSec;
+      if(isZnnG){
+       if      ( photonpt < 190 ) {crossSecScl*=1.39;} 
+       else if ( photonpt < 250 ) {crossSecScl*=1.35;} 
+       else if ( photonpt < 400 ) {crossSecScl*=1.30;} 
+       else if ( photonpt < 700 ) {crossSecScl*=1.23;} 
+       else                               {crossSecScl*=1.23;} 
+      }   
+      if(isMC){ event_weight=0.96*lumi*crossSecScl*(1.013 - 0.0001168*photonpt)/nrEvents; }
+      if(ewkZG){ 
+       Double_t EWK_percent_adjustment = ewkZGCorrection->GetBinContent(ewkZGCorrection->GetXaxis()->FindBin(photonpt));
+       event_weight*=(1.0+.01*EWK_percent_adjustment) ; 
+      }   
+      if(ewkWG){ 
+       Double_t EWK_percent_adjustment = ewkWGCorrection->GetBinContent(ewkWGCorrection->GetXaxis()->FindBin(photonpt));
+       event_weight*=(1.0+.01*EWK_percent_adjustment) ; 
+      }   
+
+      if(isEle){ event_weight*=0.0239 ; } // +- 0.0016(stat.) +-? 0.0012(fit model) +-? 0.0002(sample difference)
+      if(isJet){ event_weight*=0.028 ; } 
+
+      return event_weight;
+}
+
+Bool_t postAnalyzer_Base::askPassTrig(Bool_t isMC){
+  // https://github.com/cmkuo/ggAnalysis/blob/master/ggNtuplizer/plugins/ggNtuplizer_globalEvent.cc#L179
+  Bool_t doespassTrig =(  
+   ( (HLTPho>>7&1) == 1 ) ||
+   ( (HLTPho>>8&1) == 1 ) ||
+   ( (HLTPho>>9&1) == 1 ) ||
+   ( (HLTPho>>10&1) == 1 ) ||
+   ( (HLTPho>>11&1) == 1 ) ||
+   ( (HLTPho>>12&1) == 1 ) 
+  );  
+  //bool passTrig =( (HLTPho>>12&1) == 1);
+  if(isMC){ doespassTrig=true; }
+
+   return doespassTrig;
+}
+
+
+Bool_t postAnalyzer_Base::askPassShape(int candphotonindex, Bool_t isJet, Bool_t isHalo, Bool_t isSpike){
+      Bool_t doespassShape = phoSigmaIEtaIEtaFull5x5->at(candphotonindex)  <  0.0102;
+      if(isJet){ doespassShape = true; }
+      if(isHalo){ doespassShape = phoSigmaIEtaIEtaFull5x5->at(candphotonindex)  <  0.0165; }
+      if(isSpike){ doespassShape = phoSigmaIEtaIEtaFull5x5->at(candphotonindex)  <  0.001; }
+      return doespassShape;
+}
+
+Bool_t postAnalyzer_Base::askPassSeed(int candphotonindex, Bool_t isEle){
+      Bool_t doespassSeed = phohasPixelSeed->at(candphotonindex) == 0;
+      if(isEle){passSeed = phohasPixelSeed->at(candphotonindex) == 1; }
+       return doespassSeed;
+}
+
+Bool_t postAnalyzer_Base::askPassSpike(int candphotonindex, Bool_t isMC, Bool_t isSpike){
+      int iphi = 41; 
+      int ieta = 5;
+      Bool_t doespassSpike = !(phoIPhi->at(candphotonindex) == iphi && phoIEta->at(candphotonindex) == ieta) ;
+      if(isSpike){ doespassSpike = true ; }
+      if(isMC){ doespassSpike = true ; }
+      return doespassSpike;
+}
+
+Bool_t postAnalyzer_Base::askPassNonColl(int candphotonindex, Bool_t isSpike){
+      Bool_t doespassNoncoll = kFALSE;
+
+      bool passSeedTime = false;
+      if( phoseedTimeFull5x5->size() > candphotonindex ){ passSeedTime = (fabs(phoseedTimeFull5x5->at(candphotonindex)) < 3.); }
+      bool passSpikeShape = ( (phoSigmaIEtaIEtaFull5x5->at(candphotonindex) > 0.001)
+                           && (phoSigmaIPhiIPhiFull5x5->at(candphotonindex) > 0.001) );
+      if(isSpike){ passSpikeShape = ! ( (phoSigmaIEtaIEtaFull5x5->at(candphotonindex) > 0.001)
+                           && (phoSigmaIPhiIPhiFull5x5->at(candphotonindex) > 0.001) ); }
+      doespassNoncoll = ( passSpikeShape 
+                        && (phoR9->at(candphotonindex) < 1) 
+                        && passSeedTime
+                        );
+                        //&& (fabs(phoseedTimeFull5x5->at(candphotonindex)) < 3.) );
+      return doespassNoncoll;
+}
+
+Bool_t postAnalyzer_Base::askPassMIP(int candphotonindex, Bool_t isHalo){
+      Bool_t doespassMIP = phomipTotEnergy->at(candphotonindex) < 4.9;
+      if(isHalo){ passMIP = phomipTotEnergy->at(candphotonindex) > 4.9; }
+      return doespassMIP;
+}
+
+Bool_t postAnalyzer_Base::askPassLepRej(int candphotonindex){
+      Bool_t doespassLepRej = false;
+      std::vector<int> elelist = electron_passLooseID(candphotonindex, 10.);
+      std::vector<int> mulist = muon_passLooseID(candphotonindex, 10.);
+      if( elelist.size()==0 && mulist.size()==0 ){ doespassLepRej = true; }
+      return doespassLepRej;
+}
+
+Bool_t postAnalyzer_Base::askPassMET(Float_t theMET, Bool_t isMC){
+      bool passMETfilters = ( metFilters==0 ) ;
+      if(isMC){ passMETfilters = true ; }
+      Bool_t doespassMET = (theMET > 170. && passMETfilters) ;
+      return doespassMET;
+}
+
+Bool_t postAnalyzer_Base::askPassdPhiJM(int candphotonindex,Float_t theMETPhi){
+      std::vector<int>  jetindexvector = selectedJets(candphotonindex);
+      Bool_t doespassdPhiJM = passdphiJetMET(&jetindexvector, theMETPhi);
+      return doespassdPhiJM;
+}
+
+Bool_t postAnalyzer_Base::askPassdPhiPhoMET(int candphotonindex,Float_t theMETPhi){
+      Bool_t doespassdPhiPhoMET = ( DeltaPhi(phoPhi->at(candphotonindex),pfMETPhi)>2.0 ) ;
+      return doespassdPhiPhoMET;
+}
+
 
 ////-------------------------callFillSigHistLep
 //void postAnalyzer_Base::callFillSigHistLep(int selbin, int lastptbin, int inclptbin, int candphotonindex, float event_weight, bool passM){
