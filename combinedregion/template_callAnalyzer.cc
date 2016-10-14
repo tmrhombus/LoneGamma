@@ -50,6 +50,7 @@ void SAMPLENAME_callAnalyzer_REGION(void)
  analyzeREGION  m;
  m.Init(theChain, isMC);
  INITLEP
+ INITGEN
 
  m.Loop(outfilename,isMC,lumi,nrEvents,crossSec,isZnnG,isEle,isHalo,isSpike,isJet,ewkWG,ewkZG);
 }
