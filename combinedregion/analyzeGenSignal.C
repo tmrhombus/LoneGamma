@@ -1,10 +1,10 @@
-#define analyzeZllG_cxx
-#include "analyzeZllG.h"
+#define analyzeGenSignal_cxx
+#include "analyzeGenSignal.h"
 #include <TH2.h>
 #include <TStyle.h>
 #include <TCanvas.h>
 
-void analyzeZllG::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double_t nrEvents, Double_t crossSec,
+void analyzeGenSignal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double_t nrEvents, Double_t crossSec,
   Bool_t isZnnG, Bool_t isEle, Bool_t isHalo, Bool_t isSpike, Bool_t isJet, Bool_t ewkWG, Bool_t ewkZG)
 {
 
@@ -12,13 +12,13 @@ void analyzeZllG::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double_t
  sw.Start();
 
  Int_t nc = 0;
+ Int_t ng = 0;
  Int_t dc = 0;
  gencount = 0;
 
- nrec = 0;
-
  int inclptbin = ptbins.size()-1;
  int lastptbin = ptbinnames.size()-1;
+ int lastsysbin = sysbinnames.size();
 
  int n_initial=0;
  int n_phokin=0;
@@ -34,8 +34,6 @@ void analyzeZllG::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double_t
  int n_passMET=0;
  int n_passdPhiJM=0;
  int n_passdPhiPhoMET=0;
- int n_passZWindow=0;
- int n_passdimass20=0;
 
  int cf_passTrig=0;
  int cf_passShape=0;
@@ -48,9 +46,6 @@ void analyzeZllG::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double_t
  int cf_passMET=0;
  int cf_passdPhiJM=0;
  int cf_passdPhiPhoMET=0;
- int cf_passZWindow=0;
- int cf_passdimass20=0;
-
 
   TFile *f_ewk_corr = new TFile("ewk_corr.root");
   TH1D *ewkZGCorrection = (TH1D*)f_ewk_corr->Get("zg");
@@ -74,6 +69,120 @@ void analyzeZllG::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double_t
   Long64_t ientry = LoadTree(jentry);
   if (ientry < 0) break;
   nb = fChain->GetEntry(jentry);   nbytes += nb;
+
+  //// Gen Level Stuff
+   ///
+    std::vector<int> genPhos, genEleNus, genMuNus, genTauNus, genAntiEleNus, genAntiMuNus, genAntiTauNus;
+    genPhos.clear();
+    genEleNus.clear();
+    genMuNus.clear();
+    genTauNus.clear();
+    genAntiEleNus.clear();
+    genAntiMuNus.clear();
+    genAntiTauNus.clear();
+    TLorentzVector eleNu_4vec, antieleNu_4vec;
+    TLorentzVector muNu_4vec, antimuNu_4vec;
+    TLorentzVector tauNu_4vec, antitauNu_4vec;
+    TLorentzVector dineutrino_4vec, dineutrino_4vec_temp;
+
+    for(int i = 0; i < nMC; ++i)
+    {
+      if(mcPID->at(i) == 22)
+        genPhos.push_back(i);
+      else if(mcPID->at(i) == 12)
+        genEleNus.push_back(i);
+      else if(mcPID->at(i) == 14)
+        genMuNus.push_back(i);
+      else if(mcPID->at(i) == 16)
+        genTauNus.push_back(i);
+      else if(mcPID->at(i) == -12)
+        genAntiEleNus.push_back(i);
+      else if(mcPID->at(i) == -14)
+        genAntiMuNus.push_back(i);
+      else if(mcPID->at(i) == -16)
+        genAntiTauNus.push_back(i);
+    }
+
+///    bool genGammaFound = false;
+///    bool eleNu_pair_found = false;
+///    bool muNu_pair_found = false;
+///    bool tauNu_pair_found = false;
+///    bool genNeutrinoPairFound = false;
+///    if(genPhos.size() > 0)
+///    {
+///      if(mcPt->at(genPhos[0]) > 175 && fabs(mcEta->at(genPhos[0])) < 1.4442)
+///      {
+///        genGammaFound = true;
+///      }
+///    }
+//    //Find a pair of same-flavor opposite-hypercharge neutrinos
+//    if(genEleNus.size() > 0 && genAntiEleNus.size() > 0)
+//    {
+//      eleNu_pair_found = true;
+//      eleNu_4vec.SetPtEtaPhiE(mcPt->at(genEleNus[0]),mcEta->at(genEleNus[0]),mcPhi->at(genEleNus[0]),mcE->at(genEleNus[0]));
+//      antieleNu_4vec.SetPtEtaPhiE(mcPt->at(genAntiEleNus[0]),mcEta->at(genAntiEleNus[0]),mcPhi->at(genAntiEleNus[0]),mcE->at(genAntiEleNus[0]));
+//    }
+//    else if(genMuNus.size() > 0 && genAntiMuNus.size() > 0)
+//    {
+//      muNu_pair_found = true;
+//      muNu_4vec.SetPtEtaPhiE(mcPt->at(genMuNus[0]),mcEta->at(genMuNus[0]),mcPhi->at(genMuNus[0]),mcE->at(genMuNus[0]));
+//      antimuNu_4vec.SetPtEtaPhiE(mcPt->at(genAntiMuNus[0]),mcEta->at(genAntiMuNus[0]),mcPhi->at(genAntiMuNus[0]),mcE->at(genAntiMuNus[0]));
+//    }
+//    else if(genTauNus.size() > 0 && genAntiTauNus.size() > 0)
+//    {
+//      tauNu_pair_found = true;
+//      tauNu_4vec.SetPtEtaPhiE(mcPt->at(genTauNus[0]),mcEta->at(genTauNus[0]),mcPhi->at(genTauNus[0]),mcE->at(genTauNus[0]));
+//      antitauNu_4vec.SetPtEtaPhiE(mcPt->at(genAntiTauNus[0]),mcEta->at(genAntiTauNus[0]),mcPhi->at(genAntiTauNus[0]),mcE->at(genAntiTauNus[0]));
+//    }
+//    //Find the flavored pair with the highest invariant mass
+//    if(eleNu_pair_found)
+//    {
+//      dineutrino_4vec = eleNu_4vec + antieleNu_4vec;
+//      if(muNu_pair_found)
+//      {
+//        dineutrino_4vec_temp = muNu_4vec + antimuNu_4vec;
+//        if(dineutrino_4vec_temp.M() > dineutrino_4vec.M())
+//          dineutrino_4vec = dineutrino_4vec_temp;
+//        if(tauNu_pair_found)
+//        {
+//          dineutrino_4vec_temp = tauNu_4vec + antitauNu_4vec;
+//          if(dineutrino_4vec_temp.M() > dineutrino_4vec.M())
+//            dineutrino_4vec = dineutrino_4vec_temp;
+//        }
+//      }
+//      else if(tauNu_pair_found)
+//      {
+//        dineutrino_4vec_temp = tauNu_4vec + antitauNu_4vec;
+//        if(dineutrino_4vec_temp.M() > dineutrino_4vec.M())
+//          dineutrino_4vec = dineutrino_4vec_temp;
+//      }
+//    }
+//    else if(muNu_pair_found)
+//    {
+//      dineutrino_4vec = muNu_4vec + antimuNu_4vec;
+//      if(tauNu_pair_found)
+//      {
+//        dineutrino_4vec_temp = tauNu_4vec + antitauNu_4vec;
+//        if(dineutrino_4vec_temp.M() > dineutrino_4vec.M())
+//          dineutrino_4vec = dineutrino_4vec_temp;
+//      }
+//    }
+//    else if(tauNu_pair_found)
+//    {
+//      dineutrino_4vec = tauNu_4vec + antitauNu_4vec;
+//    }
+//    //If a dineutrino pair found, check its pt
+//    if(eleNu_pair_found || muNu_pair_found || tauNu_pair_found)
+//    {
+//      if(dineutrino_4vec.Pt() > 170. && dineutrino_4vec.M() > 60. && dineutrino_4vec.M() < 120.)
+//      {
+//        genNeutrinoPairFound = true;
+//      }
+//    }
+
+
+
+
 
   //// vector of ints, each int corresponds to location in vector of photons of photon passing cut
   //// one such vector for each systematic bin
@@ -144,8 +253,11 @@ void analyzeZllG::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double_t
 
       bool passSeedTime = false;
       if( phoseedTimeFull5x5->size() > candphotonindex ){ passSeedTime = (fabs(phoseedTimeFull5x5->at(candphotonindex)) < 3.); }
-      bool passNoncoll = ( (phoSigmaIEtaIEtaFull5x5->at(candphotonindex) > 0.001)
-                        && (phoSigmaIPhiIPhiFull5x5->at(candphotonindex) > 0.001) 
+      bool passSpikeShape = ( (phoSigmaIEtaIEtaFull5x5->at(candphotonindex) > 0.001)
+                           && (phoSigmaIPhiIPhiFull5x5->at(candphotonindex) > 0.001) );
+      if(isSpike){ passSpikeShape = ! ( (phoSigmaIEtaIEtaFull5x5->at(candphotonindex) > 0.001)
+                           && (phoSigmaIPhiIPhiFull5x5->at(candphotonindex) > 0.001) ); }
+      bool passNoncoll = ( passSpikeShape 
                         && (phoR9->at(candphotonindex) < 1) 
                         && passSeedTime
                         );
@@ -155,55 +267,53 @@ void analyzeZllG::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double_t
       bool passMIP = phomipTotEnergy->at(candphotonindex) < 4.9;
       if(isHalo){ passMIP = phomipTotEnergy->at(candphotonindex) > 4.9; }
 
-      fourVec_l1.SetPtEtaPhiE(0,0,0,0);
-      fourVec_l2.SetPtEtaPhiE(0,0,0,0);
+      // lepton rejection
+      std::vector<int> elelist = electron_passLooseID(candphotonindex, 10.);
+      std::vector<int> mulist = muon_passLooseID(candphotonindex, 10.);
+      bool passLepRej = false;
+      if( elelist.size()==0 && mulist.size()==0 ){ passLepRej = true; }
 
-      // get electrons and muons and put into 4vectors
-      bool passMM = false;
-      makeDilep(candphotonindex, &fourVec_l1, &fourVec_l2, &fourVec_ee, &fourVec_mm, &passMM);
-      // make dilepton object and add to met
-      fourVec_ll = fourVec_l1 + fourVec_l2;
-      //printf("  pt: %.4f  eta: %.4f  phi: %.4f  mass: %.4f \n", fourVec_l1.Pt(), fourVec_l1.Eta(), fourVec_l1.Phi(), fourVec_l1.M() );
-      //printf("  pt: %.4f  eta: %.4f  phi: %.4f  mass: %.4f \n", fourVec_l2.Pt(), fourVec_l2.Eta(), fourVec_l2.Phi(), fourVec_l2.M() );
-      //printf("  pt: %.4f  eta: %.4f  phi: %.4f  mass: %.4f \n", fourVec_ll.Pt(), fourVec_ll.Eta(), fourVec_ll.Phi(), fourVec_ll.M() );
-      dilep_mass = fourVec_ll.M();
-      //printf(" dilep mass: %0.1f\n", dilep_mass );
-
-      // Dilepton Mass Window
-      bool passZWindow = (dilep_mass>60. && dilep_mass<120.);
-      bool passdimass20 = (dilep_mass>20.);
-
-      // Lepto MET Creation
-      fourVec_met.SetPtEtaPhiE(pfMET, 0., pfMETPhi, pfMET);
-      fourVec_leptomet = fourVec_met + fourVec_ll;
-
-      leptoMET = fourVec_leptomet.Pt();
-      leptoMEPhi = fourVec_leptomet.Phi();
 
       // MET SELECTIONS
       bool passMETfilters = ( metFilters==0 ) ;
       if(isMC){ passMETfilters = true ; }
-      bool passMET = (leptoMET > 170.) ;
+      bool passMET = (pfMET > 170.) ;
 
       // dPhi( Jets, MET )
       std::vector<int>  jetindexvector = selectedJets(candphotonindex);
-      bool passdPhiJM = passdphiJetMET(&jetindexvector, leptoMEPhi);
+      bool passdPhiJM = passdphiJetMET(&jetindexvector, pfMETPhi);
 
       // dPhi( photon, MET )
-      bool passdPhiPhoMET = ( DeltaPhi(phoPhi->at(candphotonindex),leptoMEPhi)>2.0 ) ;
+      bool passdPhiPhoMET = ( DeltaPhi(phoPhi->at(candphotonindex),pfMETPhi)>2.0 ) ;
 
+      // gen photon match
+      bool genPhoMatch = false;
+      Float_t mindr = 0.1;
+      int ngenpho = genPhos.size();
+      int g = 0;
+      for(; g<ngenpho; ++g){
+       if( dR(mcEta->at(genPhos[g]), mcPhi->at(genPhos[g]), phoEta->at(candphotonindex), phoPhi->at(candphotonindex)) < mindr )
+       {
+         genPhoMatch = true;
+         break;
+       }
+      }
+     int genphotonindex = -1;
+     if ( genPhoMatch ){  
+      genphotonindex = genPhos[g];
+     }
+        
       if(passTrig       ){ ++n_passTrig       ;}
       if(passShape      ){ ++n_passShape      ;}
       if(passSeed       ){ ++n_passSeed       ;}
       if(passSpike      ){ ++n_passSpike      ;}
       if(passNoncoll    ){ ++n_passNoncoll    ;}
       if(passMIP        ){ ++n_passMIP        ;}
+      if(passLepRej     ){ ++n_passLepRej     ;}
       if(passMETfilters ){ ++n_passMETfilters ;}
       if(passMET        ){ ++n_passMET        ;}
       if(passdPhiJM     ){ ++n_passdPhiJM     ;}
       if(passdPhiPhoMET ){ ++n_passdPhiPhoMET ;}
-      if(passZWindow    ){ ++n_passZWindow    ;}
-      if(passdimass20   ){ ++n_passdimass20   ;}
 
       if( passTrig ){ 
        ++cf_passTrig;
@@ -217,19 +327,16 @@ void analyzeZllG::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double_t
            ++cf_passNoncoll;
            if( passMIP ){ 
             ++cf_passMIP;
-            if( passMETfilters ){ 
-             ++cf_passMETfilters;
-             if( passMET ){ 
-              ++cf_passMET;
-              if( passdPhiJM ){ 
-               ++cf_passdPhiJM;
-               if( passdPhiPhoMET ){ 
-                ++cf_passdPhiPhoMET;
-                if( passZWindow ){ 
-                 ++cf_passZWindow;
-                 if( passdimass20 ){ 
-                  ++cf_passdimass20;
-                 }
+            if( passLepRej ){ 
+             ++cf_passLepRej;
+             if( passMETfilters ){ 
+              ++cf_passMETfilters;
+              if( passMET ){ 
+               ++cf_passMET;
+               if( passdPhiJM ){ 
+                ++cf_passdPhiJM;
+                if( passdPhiPhoMET ){ 
+                 ++cf_passdPhiPhoMET;
                 }
                }
               }
@@ -242,28 +349,32 @@ void analyzeZllG::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double_t
        }
       }
 
-       //fill histograms
+      // fill histograms
       if (passTrig
       && passShape
       && passSeed
       && passSpike
       && passNoncoll
       && passMIP
+      && passLepRej
       && passMETfilters
       && passMET
-      //&& passdPhiJM
-      && passdPhiPhoMET
-      && passZWindow
-      && passdimass20)
+      && passdPhiJM
+      && passdPhiPhoMET)
       {
        printf("%i:%i:%lli \n",run,lumis,event);
        if(!isMC){
         std::cout<<"  uncorret: "<<uncorrectedPhoEt<<"  et: "<<phopt<<"  eta: "<<phoEta->at(candphotonindex)<<std::endl;
         std::cout<<"  phi: "<<phoPhi->at(candphotonindex)<<"  met: "<<pfMET<<std::endl;
        }
-       callFillSigHist(0, lastptbin, inclptbin, candphotonindex, event_weight);
-       callFillSigHistLep(0, lastptbin, inclptbin, candphotonindex, event_weight, passMM);
-       nc++;
+        callFillSigHist(0, lastptbin, inclptbin, candphotonindex, event_weight);
+        nc++;
+
+        if( genPhoMatch ){
+         callFillSigHistGen(0, lastptbin, inclptbin, candphotonindex, genphotonindex, event_weight); 
+         ng++;
+        }
+
       }
       // end fill histograms
      } //end if phoCand[0].size()>0
@@ -273,7 +384,7 @@ void analyzeZllG::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double_t
  // write these histograms to file
   std::cout<<std::endl;
   std::cout<<"Total Passing RECO : "<<nc<<std::endl;
-  //std::cout<<"Total Passing GEN  : "<<gencount<<std::endl;
+  std::cout<<"Total Passing GEN  : "<<ng<<std::endl;
   std::cout<<"made it through, about to write"<<std::endl;
 
   printf("lumi         %f\n", lumi);
@@ -295,6 +406,7 @@ void analyzeZllG::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double_t
   printf(" n_passSpike        %i\n", n_passSpike      );
   printf(" n_passNoncoll      %i\n", n_passNoncoll    );
   printf(" n_passMIP          %i\n", n_passMIP        );
+  printf(" n_passLepRej       %i\n", n_passLepRej     );
   printf(" n_passMETfilters   %i\n", n_passMETfilters );
   printf(" n_passMET          %i\n", n_passMET        );
   printf(" n_passdPhiJM       %i\n", n_passdPhiJM     );
@@ -306,19 +418,18 @@ void analyzeZllG::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double_t
   printf(" cf_passSpike       %i\n", cf_passSpike      );
   printf(" cf_passNoncoll     %i\n", cf_passNoncoll    );
   printf(" cf_passMIP         %i\n", cf_passMIP        );
+  printf(" cf_passLepRej      %i\n", cf_passLepRej     );
   printf(" cf_passMETfilters  %i\n", cf_passMETfilters );
   printf(" cf_passMET         %i\n", cf_passMET        );
   printf(" cf_passdPhiJM      %i\n", cf_passdPhiJM     );
   printf(" cf_passdPhiPhoMET  %i\n", cf_passdPhiPhoMET );
-  printf(" cf_passZWindow     %i\n", cf_passZWindow    ); 
-  printf(" cf_passdimass20    %i\n", cf_passdimass20   ); 
 
  TFile *outfile = new TFile(outfilename,"RECREATE");
  outfile->cd();
  for(unsigned int i=0; i<ptbinnames.size(); ++i){
   for(unsigned int j=0; j<sysbinnames.size(); ++j){
    WriteHistograms(i,j);
-   WriteHistogramsLep(i,j);
+   WriteHistogramsGen(i,j);
   }
  }
  outfile->Close();
