@@ -19,6 +19,7 @@ void analyzeWlnG::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double_t
 
  int inclptbin = ptbins.size()-1;
  int lastptbin = ptbinnames.size()-1;
+ int lastsysbin = sysbinnames.size();
 
  int n_initial=0;
  int n_phokin=0;
@@ -77,21 +78,23 @@ void analyzeWlnG::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double_t
 
   //// vector of ints, each int corresponds to location in vector of photons of photon passing cut
   //// one such vector for each systematic bin
-  //for(unsigned int sysb=0; sysb<lastsysbin; ++sysb){
-  // phoCand[sysb] = getPhoCand(175,1.4442);
-  //}
-  if(isJet){ phoCand = getPhoJetCand(175., 1.4442); }
-  else{ phoCand = getPhoCand(175., 1.4442); }
+  for(unsigned int sysb=0; sysb<lastsysbin; ++sysb){
+    sysbinname = sysbinnames.at(sysb);
+
+   if(isJet){ 
+    phoCand =  getPhoJetCand(175., 1.4442, sysbinname);
+   }
+   else{
+    phoCand = getPhoCand(175., 1.4442, sysbinname); 
+   }
    if(phoCand.size()>0)
      {
       n_phokin++; //
       int candphotonindex = phoCand.at(0);
 
-      Double_t photonpt = ((*phoSCRawE)[candphotonindex]/TMath::CosH((*phoSCEta)[candphotonindex]));
-      //Float_t uncorrectedPhoEt = ((*phoSCRawE)[candphotonindex]/TMath::CosH((*phoSCEta)[candphotonindex]));
-      double phopt = phoEt->at(candphotonindex) ;
+      Float_t phoPt = getPhotonPt(candphotonindex, sysbinname) ;
 
-      event_weight=makeEventWeight(crossSec,lumi,nrEvents,photonpt,isMC,isZnnG,ewkZG,ewkWG,isEle,isJet);
+      event_weight=makeEventWeight(crossSec,lumi,nrEvents,phoPt,isMC,isZnnG,ewkZG,ewkWG,isEle,isJet,sysbinname);
   
       passTrig = askPassTrig(isMC);
 
@@ -121,16 +124,41 @@ void analyzeWlnG::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double_t
       fourVec_e.SetPtEtaPhiE(0,0,0,0);
       fourVec_m.SetPtEtaPhiE(0,0,0,0);
       if(passE){
-       fourVec_e.SetPtEtaPhiE(elePt->at(tightEles[0]),eleEta->at(tightEles[0]),elePhi->at(tightEles[0]),eleEn->at(tightEles[0]));
+       //fourVec_e.SetPtEtaPhiE(elePt->at(tightEles[0]),eleEta->at(tightEles[0]),elePhi->at(tightEles[0]),eleEn->at(tightEles[0]));
+       fourVec_e.SetPtEtaPhiE( getElectronPt(tightEles[0],sysbinname),
+                               eleEta->at(tightEles[0]),
+                               elePhi->at(tightEles[0]),
+                               getElectronPt(tightEles[0],sysbinname)*TMath::CosH( eleEta->at(tightEles[0]) ) );
       }    
 
       if(passM){
-       fourVec_m.SetPtEtaPhiE(muPt->at(tightMus[0]),muEta->at(tightMus[0]),muPhi->at(tightMus[0]),muEn->at(tightMus[0]));
+       //fourVec_m.SetPtEtaPhiE(muPt->at(tightMus[0]),muEta->at(tightMus[0]),muPhi->at(tightMus[0]),muEn->at(tightMus[0]));
+       fourVec_m.SetPtEtaPhiE( getMuonPt(tightMus[0],sysbinname),
+                               muEta->at(tightMus[0]),
+                               muPhi->at(tightMus[0]),
+                               getMuonPt(tightMus[0],sysbinname)*TMath::CosH( muEta->at(tightMus[0]) ) );
       }    
       if(passE || passM){passL=true;}
 
+      if(sysbinname==""        ){ theMET=pfMET; }
+      if(sysbinname=="_JERUp"  ){ theMET=pfMET_T1JERUp; }
+      if(sysbinname=="_JERDown"){ theMET=pfMET_T1JERDo; }
+      if(sysbinname=="_JESUp"  ){ theMET=pfMET_T1JESUp; }
+      if(sysbinname=="_JESDown"){ theMET=pfMET_T1JESDo; }
+      if(sysbinname=="_MESUp"  ){ theMET=pfMET_T1MESUp; }
+      if(sysbinname=="_MESDown"){ theMET=pfMET_T1MESDo; }
+      if(sysbinname=="_EESUp"  ){ theMET=pfMET_T1EESUp; }
+      if(sysbinname=="_EESDown"){ theMET=pfMET_T1EESDo; }
+      if(sysbinname=="_PESUp"  ){ theMET=pfMET_T1PESUp; }
+      if(sysbinname=="_PESDown"){ theMET=pfMET_T1PESDo; }
+      if(sysbinname=="_TESUp"  ){ theMET=pfMET_T1TESUp; }
+      if(sysbinname=="_TESDown"){ theMET=pfMET_T1TESDo; }
+      if(sysbinname=="_UESUp"  ){ theMET=pfMET_T1UESUp; }
+      if(sysbinname=="_UESDown"){ theMET=pfMET_T1UESDo; }
+      if(sysbinname=="_EWKUp"  ){ theMET=pfMET; }
+      if(sysbinname=="_EWKDown"){ theMET=pfMET; }
       // Lepto MET Creation
-      fourVec_met.SetPtEtaPhiE(pfMET, 0., pfMETPhi, pfMET);
+      fourVec_met.SetPtEtaPhiE(theMET, 0., pfMETPhi, theMET);
       if(passE){ fourVec_leptomet = fourVec_met + fourVec_e; }
       if(passM){ fourVec_leptomet = fourVec_met + fourVec_m; }
 
@@ -146,6 +174,7 @@ void analyzeWlnG::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double_t
       // dPhi( photon, MET )
       passdPhiPhoMET = askPassdPhiPhoMET(candphotonindex,leptoMEPhi);
 
+      if(sysb==0){
       if(passTrig       ){ ++n_passTrig       ;}
       if(passShape      ){ ++n_passShape      ;}
       if(passSeed       ){ ++n_passSeed       ;}
@@ -183,6 +212,7 @@ void analyzeWlnG::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double_t
         }
        }
       }
+     }
 
        //fill histograms
       if (passTrig
@@ -196,18 +226,19 @@ void analyzeWlnG::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double_t
       && passdPhiPhoMET
       && passL)
       {
-       printf("%i:%i:%lli \n",run,lumis,event);
-       if(!isMC){
-        std::cout<<"  pt: "<<photonpt<<"  eta: "<<phoEta->at(candphotonindex)<<std::endl;
-        std::cout<<"  phi: "<<phoPhi->at(candphotonindex)<<"  met: "<<pfMET<<std::endl;
-       }
-       callFillSigHist(0, lastptbin, inclptbin, candphotonindex, event_weight);
-       callFillSigHistLep(0, lastptbin, inclptbin, candphotonindex, event_weight, passM);
+       if(sysb==0){ printf("%i:%i:%lli \n",run,lumis,event); 
+        if(!isMC){
+         std::cout<<"  pt: "<<phoPt<<"  eta: "<<phoEta->at(candphotonindex)<<std::endl;
+         std::cout<<"  phi: "<<phoPhi->at(candphotonindex)<<"  met: "<<pfMET<<std::endl;
+        }
        nc++;
+       }
+       callFillSigHist(sysb, lastptbin, inclptbin, candphotonindex, event_weight);
+       callFillSigHistLep(sysb, lastptbin, inclptbin, candphotonindex, event_weight, passM);
       }
       // end fill histograms
      } //end if phoCand[0].size()>0
-
+   }
  } //end loop through entries
 
  // write these histograms to file

@@ -19,6 +19,7 @@ void analyzeZllG::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double_t
 
  int inclptbin = ptbins.size()-1;
  int lastptbin = ptbinnames.size()-1;
+ int lastsysbin = sysbinnames.size();
 
  int n_initial=0;
  int n_phokin=0;
@@ -77,21 +78,23 @@ void analyzeZllG::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double_t
 
   //// vector of ints, each int corresponds to location in vector of photons of photon passing cut
   //// one such vector for each systematic bin
-  //for(unsigned int sysb=0; sysb<lastsysbin; ++sysb){
-  // phoCand[sysb] = getPhoCand(175,1.4442);
-  //}
-  if(isJet){ phoCand = getPhoJetCand(175., 1.4442); }
-  else{ phoCand = getPhoCand(175., 1.4442); }
+  for(unsigned int sysb=0; sysb<lastsysbin; ++sysb){
+    sysbinname = sysbinnames.at(sysb);
+
+   if(isJet){ 
+    phoCand =  getPhoJetCand(175., 1.4442, sysbinname);
+   }
+   else{
+    phoCand = getPhoCand(175., 1.4442, sysbinname); 
+   }
    if(phoCand.size()>0)
      {
       n_phokin++; //
       int candphotonindex = phoCand.at(0);
 
-      Double_t photonpt = ((*phoSCRawE)[candphotonindex]/TMath::CosH((*phoSCEta)[candphotonindex]));
-      //Float_t uncorrectedPhoEt = ((*phoSCRawE)[candphotonindex]/TMath::CosH((*phoSCEta)[candphotonindex]));
-      double phopt = phoEt->at(candphotonindex) ;
+      Float_t phoPt = getPhotonPt(candphotonindex, sysbinname) ;
 
-      event_weight=makeEventWeight(crossSec,lumi,nrEvents,photonpt,isMC,isZnnG,ewkZG,ewkWG,isEle,isJet);
+      event_weight=makeEventWeight(crossSec,lumi,nrEvents,phoPt,isMC,isZnnG,ewkZG,ewkWG,isEle,isJet,sysbinname);
   
       passTrig = askPassTrig(isMC);
 
@@ -124,8 +127,25 @@ void analyzeZllG::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double_t
       bool passZWindow = (dilep_mass>60. && dilep_mass<120.);
       bool passdimass20 = (dilep_mass>20.);
 
+      if(sysbinname==""        ){ theMET=pfMET; }
+      if(sysbinname=="_JERUp"  ){ theMET=pfMET_T1JERUp; }
+      if(sysbinname=="_JERDown"){ theMET=pfMET_T1JERDo; }
+      if(sysbinname=="_JESUp"  ){ theMET=pfMET_T1JESUp; }
+      if(sysbinname=="_JESDown"){ theMET=pfMET_T1JESDo; }
+      if(sysbinname=="_MESUp"  ){ theMET=pfMET_T1MESUp; }
+      if(sysbinname=="_MESDown"){ theMET=pfMET_T1MESDo; }
+      if(sysbinname=="_EESUp"  ){ theMET=pfMET_T1EESUp; }
+      if(sysbinname=="_EESDown"){ theMET=pfMET_T1EESDo; }
+      if(sysbinname=="_PESUp"  ){ theMET=pfMET_T1PESUp; }
+      if(sysbinname=="_PESDown"){ theMET=pfMET_T1PESDo; }
+      if(sysbinname=="_TESUp"  ){ theMET=pfMET_T1TESUp; }
+      if(sysbinname=="_TESDown"){ theMET=pfMET_T1TESDo; }
+      if(sysbinname=="_UESUp"  ){ theMET=pfMET_T1UESUp; }
+      if(sysbinname=="_UESDown"){ theMET=pfMET_T1UESDo; }
+      if(sysbinname=="_EWKUp"  ){ theMET=pfMET; }
+      if(sysbinname=="_EWKDown"){ theMET=pfMET; }
       // Lepto MET Creation
-      fourVec_met.SetPtEtaPhiE(pfMET, 0., pfMETPhi, pfMET);
+      fourVec_met.SetPtEtaPhiE(theMET, 0., pfMETPhi, theMET);
       fourVec_leptomet = fourVec_met + fourVec_ll;
 
       leptoMET = fourVec_leptomet.Pt();
@@ -140,6 +160,7 @@ void analyzeZllG::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double_t
       // dPhi( photon, MET )
       passdPhiPhoMET = askPassdPhiPhoMET(candphotonindex,leptoMEPhi);
 
+      if(sysb==0){
       if(passTrig       ){ ++n_passTrig       ;}
       if(passShape      ){ ++n_passShape      ;}
       if(passSeed       ){ ++n_passSeed       ;}
@@ -185,6 +206,7 @@ void analyzeZllG::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double_t
         }
        }
       }
+     }
 
        //fill histograms
       if (passTrig
@@ -199,18 +221,19 @@ void analyzeZllG::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double_t
       && passZWindow
       && passdimass20)
       {
-       printf("%i:%i:%lli \n",run,lumis,event);
-       if(!isMC){
-        std::cout<<"  pt: "<<photonpt<<"  eta: "<<phoEta->at(candphotonindex)<<std::endl;
-        std::cout<<"  phi: "<<phoPhi->at(candphotonindex)<<"  met: "<<pfMET<<std::endl;
-       }
-       callFillSigHist(0, lastptbin, inclptbin, candphotonindex, event_weight);
-       callFillSigHistLep(0, lastptbin, inclptbin, candphotonindex, event_weight, passMM);
+       if(sysb==0){ printf("%i:%i:%lli \n",run,lumis,event); 
+        if(!isMC){
+         std::cout<<"  pt: "<<phoPt<<"  eta: "<<phoEta->at(candphotonindex)<<std::endl;
+         std::cout<<"  phi: "<<phoPhi->at(candphotonindex)<<"  met: "<<pfMET<<std::endl;
+        }
        nc++;
+       }
+       callFillSigHist(sysb, lastptbin, inclptbin, candphotonindex, event_weight);
+       callFillSigHistLep(sysb, lastptbin, inclptbin, candphotonindex, event_weight, passMM);
       }
       // end fill histograms
      } //end if phoCand[0].size()>0
-
+   }
  } //end loop through entries
 
  // write these histograms to file

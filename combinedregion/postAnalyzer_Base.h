@@ -34,31 +34,45 @@ public :
 
    // 6 pT bins: 175 190 250 400 700 1000 
    // 7 pt bin names : "175to190" "190to250" "250to400" "400to700" "700to1000" "175to1000" "allpt"
-   // 8 syst bins: ""  "_sbUp" "_sbDown" "_metUp" "_metDown" "_binUp" "_binDown" "_noPiso"
+   // 17 syst bins: "" 
+      // jet energy resolution
+      // jet energy scale
+      // muon energy scale
+      // electron energy scale
+      // photon energy scale 1.5%
+      // tau energy scale
+      // unclustered energy scale
+      // electroweak correction
+
    std::vector<int> ptbins;          //6
    std::vector<TString> ptbinnames;  //7 = (6-1)+1+1
-   std::vector<TString> sysbinnames; //0
+   std::vector<TString> sysbinnames; // 17
 
-   TH1F h_sig_et[7], 
-        h_sig_uncorret[7], 
-        h_sig_eta[7], 
-        h_sig_sieieF5x5[7], 
-        h_sig_pfMET[7],
-        h_sig_et5[7],
-        h_sig_et15[7],
-        h_sig_et25[7],
-        h_sig_et55[7],
-        h_sig_et75[7],
-        h_sig_et165[7],
-        h_sig_et275[7],
-        h_sig_met5[7],
-        h_sig_met15[7],
-        h_sig_met25[7],
-        h_sig_met55[7],
-        h_sig_met75[7],
-        h_sig_met165[7],
-        h_sig_met275[7];
+   TString sysbinname;
 
+   TH1F h_sig_et[7][17], 
+        h_sig_uncorret[7][17], 
+        h_sig_eta[7][17], 
+        h_sig_sieieF5x5[7][17], 
+        h_sig_pfMET[7][17],
+        h_sig_et5[7][17],
+        h_sig_et15[7][17],
+        h_sig_et25[7][17],
+        h_sig_et55[7][17],
+        h_sig_et75[7][17],
+        h_sig_et165[7][17],
+        h_sig_et275[7][17],
+        h_sig_met5[7][17],
+        h_sig_met15[7][17],
+        h_sig_met25[7][17],
+        h_sig_met55[7][17],
+        h_sig_met75[7][17],
+        h_sig_met165[7][17],
+        h_sig_met275[7][17];
+
+   //int phoCand[][];
+   //std::vector< std::vector<int> > phoCand;
+   //std::vector<int> pCtemp;
    std::vector<int> phoCand;
 
    Double_t event_weight;
@@ -76,34 +90,12 @@ public :
 
    Double_t crossSecScl;
 
-//   // variables constructed for histograms
-//   //TLorentzVector fourVec_e1, fourVec_e2; 
-//   //TLorentzVector fourVec_m1, fourVec_m2; 
-//   TLorentzVector fourVec_ee, fourVec_mm, fourVec_ll; 
-//   TLorentzVector fourVec_l1, fourVec_l2; 
-//   TLorentzVector fourVec_met; 
-//   TLorentzVector fourVec_leptomet;
-//   Double_t dilep_mass;
-//
-//   Double_t leptoMET;
-//   Double_t leptoMEPhi;
-
    TFile *f_ewk_corr      ;
    TH1D  *ewkZGCorrection ;
    TH1D  *ewkWGCorrection ;
 
-//   //TLorentzVector fourVec_e1, fourVec_e2; 
-//   //TLorentzVector fourVec_m1, fourVec_m2; 
-//   TLorentzVector fourVec_genee, fourVec_genmm, fourVec_genll; 
-//   TLorentzVector fourVec_genl1, fourVec_genl2; 
-//   TLorentzVector fourVec_genMET; 
-//   TLorentzVector fourVec_genLeptoMET;
-//   Double_t gen_dilep_mass;
-//
-//   Double_t genLeptoMET;
-//   Double_t genLeptoMEPhi;
-
    Int_t gencount;
+   Float_t theMET;
 
    // common
    Int_t           run;
@@ -950,30 +942,18 @@ public :
    virtual Int_t    GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
    virtual void     Init(TTree *tree, Bool_t isMC);
-//   virtual void     Loop(TString outfilename, Bool_t isMC,
-//                         Double_t lumi, Double_t nrEvents,
-//                         Double_t crossSec, Bool_t isZnnG,
-//                         Bool_t isEle, Bool_t isHalo,
-//                         Bool_t isSpike, Bool_t isJet,
-//                         Bool_t ewkWG, Bool_t ewkZG);
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
-   virtual vector<int> getPhoCand(double phoPtCut=175., double phoEtaCut=1.4442);
-   virtual vector<int> getPhoJetCand(double phoPtCut=175., double phoEtaCut=1.4442);
+   virtual vector<int> getPhoCand(double phoPtCut=175., double phoEtaCut=1.4442, TString sysbinname="");
+   virtual vector<int> getPhoJetCand(double phoPtCut=175., double phoEtaCut=1.4442, TString sysbinname="");
    vector<int>      selectedJets(int pho_index);
    double           dR(double eta1, double phi1, double eta2, double phi2);
    double           DeltaPhi(double phi1, double phi2);
    bool             passdphiJetMET(std::vector<int> *jets, double mephi);
-//   virtual void     makeDilep(int pho_index, TLorentzVector *fv_1, TLorentzVector *fv_2,
-//                                             TLorentzVector *fv_ee, TLorentzVector *fv_mm);
-   //virtual void     makeGenDilep(int pho_index,                 //
-   //  std::vector<int> elelist, std::vector<int> mulist,         //
-   //  TLorentzVector *fv_1, TLorentzVector *fv_2,                //
-   //  TLorentzVector *fv_ee, TLorentzVector *fv_mm);             //
-   vector<int>      electron_passLooseID(int pho_index, float elePtCut);
-   vector<int>      electron_passTightID(int pho_index, float elePtCut);
-   vector<int>      muon_passLooseID(int pho_index, float muPtCut);
-   vector<int>      muon_passTightID(int pho_index, float muPtCut);
+   vector<int>      electron_passLooseID(int pho_index, float elePtCut, TString sysbinname="");
+   vector<int>      electron_passTightID(int pho_index, float elePtCut, TString sysbinname="");
+   vector<int>      muon_passLooseID(int pho_index, float muPtCut, TString sysbinname="");
+   vector<int>      muon_passTightID(int pho_index, float muPtCut, TString sysbinname="");
    Double_t         EAchargedworst(Double_t eta);
    Double_t         EAcharged(Double_t eta);
    Double_t         EAneutral(Double_t eta);
@@ -982,7 +962,7 @@ public :
    virtual void     callFillSigHist(int selbin, int lastptbin, int inclptbin, int candphotonindex, float event_weight);
    Bool_t           WriteHistograms(int ptbin, int sysbin);
 
-   Double_t         makeEventWeight(Double_t crossSec, Double_t lumi, Double_t nrEvents, Double_t photonpt, Bool_t isMC, Bool_t isZnnG, Bool_t ewkZG, Bool_t ewkWG, Bool_t isEle, Bool_t isJet);
+   Double_t         makeEventWeight(Double_t crossSec, Double_t lumi, Double_t nrEvents, Double_t photonpt, Bool_t isMC, Bool_t isZnnG, Bool_t ewkZG, Bool_t ewkWG, Bool_t isEle, Bool_t isJet, TString sysbinname="");
 
    Bool_t           askPassTrig(Bool_t isMC);
    Bool_t           askPassShape(int candphotonindex, Bool_t isJet, Bool_t isHalo, Bool_t isSpike);
@@ -994,6 +974,10 @@ public :
    Bool_t           askPassMET(Float_t theMET, Bool_t isMC);
    Bool_t           askPassdPhiJM(int candphotonindex,Float_t theMETPhi);
    Bool_t           askPassdPhiPhoMET(int candphotonindex,Float_t theMETPhi);
+
+   Float_t          getPhotonPt(int idnr, TString sysbinname);
+   Float_t          getElectronPt(int i, TString sysbinname);
+   Float_t          getMuonPt(int i, TString sysbinname);
 
 };
 
@@ -1061,126 +1045,135 @@ void postAnalyzer_Base::Init(TTree *tree, Bool_t isMC)
    ptbinnames.push_back("allpt");
 
    sysbinnames.push_back("");
-   // sysbinnames.push_back("_sbUp");
-   // sysbinnames.push_back("_sbDown");
-   // sysbinnames.push_back("_metUp");
-   // sysbinnames.push_back("_metDown");
-   // sysbinnames.push_back("_binUp");
-   // sysbinnames.push_back("_binDown");
-   // sysbinnames.push_back("_noPiso");
+   sysbinnames.push_back("_JERUp");    // jet energy resolution
+   sysbinnames.push_back("_JERDown");
+   sysbinnames.push_back("_JESUp");    // jet energy scale
+   sysbinnames.push_back("_JESDown");
+   sysbinnames.push_back("_MESUp");    // muon energy scale
+   sysbinnames.push_back("_MESDown");
+   sysbinnames.push_back("_EESUp");    // electron energy scale
+   sysbinnames.push_back("_EESDown");
+   sysbinnames.push_back("_PESUp");    // photon energy scale 1.5%
+   sysbinnames.push_back("_PESDown");
+   sysbinnames.push_back("_TESUp");    // tau energy scale
+   sysbinnames.push_back("_TESDown");
+   sysbinnames.push_back("_UESUp");    // unclustered energy scale
+   sysbinnames.push_back("_UESDown");
+   sysbinnames.push_back("_EWKUp");    // electroweak correction
+   sysbinnames.push_back("_EWKDown");
 
 //   int nsieiebins;
    for(unsigned int i=0; i<ptbinnames.size(); ++i){
-    //for(unsigned int j=0; j<sysbinnames.size(); ++j){
+    for(unsigned int j=0; j<sysbinnames.size(); ++j){
      // set up names
-     TString histname_sig_et        = "h_sig_et_"+ptbinnames[i];
-     TString histname_sig_uncorret  = "h_sig_uncorret_"+ptbinnames[i];
-     TString histname_sig_eta       = "h_sig_eta_"+ptbinnames[i];
-     TString histname_sig_sieieF5x5 = "h_sig_sieieF5x5_"+ptbinnames[i];
-     TString histname_sig_pfMET     = "h_sig_pfMET_"+ptbinnames[i];
+     TString histname_sig_et        = "h_sig_et_"+ptbinnames[i]+sysbinnames[j];
+     TString histname_sig_uncorret  = "h_sig_uncorret_"+ptbinnames[i]+sysbinnames[j];
+     TString histname_sig_eta       = "h_sig_eta_"+ptbinnames[i]+sysbinnames[j];
+     TString histname_sig_sieieF5x5 = "h_sig_sieieF5x5_"+ptbinnames[i]+sysbinnames[j];
+     TString histname_sig_pfMET     = "h_sig_pfMET_"+ptbinnames[i]+sysbinnames[j];
 
-     TString histname_sig_et5     = "h_sig_et5_"+ptbinnames[i]    ;
-     TString histname_sig_et15    = "h_sig_et15_"+ptbinnames[i]   ;
-     TString histname_sig_et25    = "h_sig_et25_"+ptbinnames[i]   ;
-     TString histname_sig_et55    = "h_sig_et55_"+ptbinnames[i]   ;
-     TString histname_sig_et75    = "h_sig_et75_"+ptbinnames[i]   ;
-     TString histname_sig_et165   = "h_sig_et165_"+ptbinnames[i]  ;
-     TString histname_sig_et275   = "h_sig_et275_"+ptbinnames[i]  ;
-     TString histname_sig_met5    = "h_sig_met5_"+ptbinnames[i]   ;
-     TString histname_sig_met15   = "h_sig_met15_"+ptbinnames[i]  ;
-     TString histname_sig_met25   = "h_sig_met25_"+ptbinnames[i]  ;
-     TString histname_sig_met55   = "h_sig_met55_"+ptbinnames[i]  ;
-     TString histname_sig_met75   = "h_sig_met75_"+ptbinnames[i]  ;
-     TString histname_sig_met165  = "h_sig_met165_"+ptbinnames[i] ;
-     TString histname_sig_met275  = "h_sig_met275_"+ptbinnames[i] ;
+     TString histname_sig_et5     = "h_sig_et5_"+ptbinnames[i]+sysbinnames[j]    ;
+     TString histname_sig_et15    = "h_sig_et15_"+ptbinnames[i]+sysbinnames[j]   ;
+     TString histname_sig_et25    = "h_sig_et25_"+ptbinnames[i]+sysbinnames[j]   ;
+     TString histname_sig_et55    = "h_sig_et55_"+ptbinnames[i]+sysbinnames[j]   ;
+     TString histname_sig_et75    = "h_sig_et75_"+ptbinnames[i]+sysbinnames[j]   ;
+     TString histname_sig_et165   = "h_sig_et165_"+ptbinnames[i]+sysbinnames[j]  ;
+     TString histname_sig_et275   = "h_sig_et275_"+ptbinnames[i]+sysbinnames[j]  ;
+     TString histname_sig_met5    = "h_sig_met5_"+ptbinnames[i]+sysbinnames[j]   ;
+     TString histname_sig_met15   = "h_sig_met15_"+ptbinnames[i]+sysbinnames[j]  ;
+     TString histname_sig_met25   = "h_sig_met25_"+ptbinnames[i]+sysbinnames[j]  ;
+     TString histname_sig_met55   = "h_sig_met55_"+ptbinnames[i]+sysbinnames[j]  ;
+     TString histname_sig_met75   = "h_sig_met75_"+ptbinnames[i]+sysbinnames[j]  ;
+     TString histname_sig_met165  = "h_sig_met165_"+ptbinnames[i]+sysbinnames[j] ;
+     TString histname_sig_met275  = "h_sig_met275_"+ptbinnames[i]+sysbinnames[j] ;
 
      // binning
      Float_t binspt[] = { 175., 195., 250., 400., 700., 1000. };
      Int_t  binnumpt = sizeof(binspt)/sizeof(Float_t) - 1;
 
      // reserve histograms
-     h_sig_et[i].Clear();
-     h_sig_et[i] = TH1F(histname_sig_et,"Photon Transverse Energy",binnumpt,binspt);
-     //h_sig_et[i] = TH1F(histname_sig_et,"Photon Transverse Energy",165,175.,1000.);
-     h_sig_et[i].Sumw2();
+     h_sig_et[i][j].Clear();
+     h_sig_et[i][j] = TH1F(histname_sig_et,"Photon Transverse Energy",binnumpt,binspt);
+     //h_sig_et[i][j] = TH1F(histname_sig_et,"Photon Transverse Energy",165,175.,1000.);
+     h_sig_et[i][j].Sumw2();
      //
-     h_sig_uncorret[i].Clear();
-     h_sig_uncorret[i] = TH1F(histname_sig_uncorret,"Uncorrected p_{T}^{#gamma}",165,175.,1000.);
-     h_sig_uncorret[i].Sumw2();
+     h_sig_uncorret[i][j].Clear();
+     h_sig_uncorret[i][j] = TH1F(histname_sig_uncorret,"Uncorrected p_{T}^{#gamma}",165,175.,1000.);
+     h_sig_uncorret[i][j].Sumw2();
      //
-     h_sig_eta[i].Clear();
-     h_sig_eta[i] = TH1F(histname_sig_eta,"Leading Photon Eta",100,-2.,2.);
-     h_sig_eta[i].Sumw2();
+     h_sig_eta[i][j].Clear();
+     h_sig_eta[i][j] = TH1F(histname_sig_eta,"Leading Photon Eta",100,-2.,2.);
+     h_sig_eta[i][j].Sumw2();
      //
-     h_sig_sieieF5x5[i].Clear();
-     h_sig_sieieF5x5[i] = TH1F(histname_sig_sieieF5x5,"Leading Photon SigmaIetaIeta",100,0.,0.025);
-     h_sig_sieieF5x5[i].Sumw2();
+     h_sig_sieieF5x5[i][j].Clear();
+     h_sig_sieieF5x5[i][j] = TH1F(histname_sig_sieieF5x5,"Leading Photon SigmaIetaIeta",100,0.,0.025);
+     h_sig_sieieF5x5[i][j].Sumw2();
      //
-     h_sig_pfMET[i].Clear();
-     h_sig_pfMET[i] = TH1F(histname_sig_pfMET,"ParticleFlow MET",166,170.,1000.);
-     h_sig_pfMET[i].Sumw2();
-     //
-
-     h_sig_et5[i].Clear();
-     h_sig_et5[i] = TH1F(histname_sig_et5,"Photon Transverse Energy",165,175.,1000.);
-     h_sig_et5[i].Sumw2();
-     //
-     h_sig_et15[i].Clear();
-     h_sig_et15[i] = TH1F(histname_sig_et15,"Photon Transverse Energy",55,175.,1000.);
-     h_sig_et15[i].Sumw2();
-     //
-     h_sig_et25[i].Clear();
-     h_sig_et25[i] = TH1F(histname_sig_et25,"Photon Transverse Energy",33,175.,1000.);
-     h_sig_et25[i].Sumw2();
-     //
-     h_sig_et55[i].Clear();
-     h_sig_et55[i] = TH1F(histname_sig_et55,"Photon Transverse Energy",15,175.,1000.);
-     h_sig_et55[i].Sumw2();
-     //
-     h_sig_et75[i].Clear();
-     h_sig_et75[i] = TH1F(histname_sig_et75,"Photon Transverse Energy",11,175.,1000.);
-     h_sig_et75[i].Sumw2();
-     //
-     h_sig_et165[i].Clear();
-     h_sig_et165[i] = TH1F(histname_sig_et165,"Photon Transverse Energy",5,175.,1000.);
-     h_sig_et165[i].Sumw2();
-     //
-     h_sig_et275[i].Clear();
-     h_sig_et275[i] = TH1F(histname_sig_et275,"Photon Transverse Energy",3,175.,1000.);
-     h_sig_et275[i].Sumw2();
+     h_sig_pfMET[i][j].Clear();
+     h_sig_pfMET[i][j] = TH1F(histname_sig_pfMET,"ParticleFlow MET",166,170.,1000.);
+     h_sig_pfMET[i][j].Sumw2();
      //
 
-     h_sig_met5[i].Clear();
-     h_sig_met5[i] = TH1F(histname_sig_met5,"Missing Transverse Energy",165,175.,1000.);
-     h_sig_met5[i].Sumw2();
+     h_sig_et5[i][j].Clear();
+     h_sig_et5[i][j] = TH1F(histname_sig_et5,"Photon Transverse Energy",165,175.,1000.);
+     h_sig_et5[i][j].Sumw2();
      //
-     h_sig_met15[i].Clear();
-     h_sig_met15[i] = TH1F(histname_sig_met15,"Missing Transverse Energy",55,175.,1000.);
-     h_sig_met15[i].Sumw2();
+     h_sig_et15[i][j].Clear();
+     h_sig_et15[i][j] = TH1F(histname_sig_et15,"Photon Transverse Energy",55,175.,1000.);
+     h_sig_et15[i][j].Sumw2();
      //
-     h_sig_met25[i].Clear();
-     h_sig_met25[i] = TH1F(histname_sig_met25,"Missing Transverse Energy",33,175.,1000.);
-     h_sig_met25[i].Sumw2();
+     h_sig_et25[i][j].Clear();
+     h_sig_et25[i][j] = TH1F(histname_sig_et25,"Photon Transverse Energy",33,175.,1000.);
+     h_sig_et25[i][j].Sumw2();
      //
-     h_sig_met55[i].Clear();
-     h_sig_met55[i] = TH1F(histname_sig_met55,"Missing Transverse Energy",15,175.,1000.);
-     h_sig_met55[i].Sumw2();
+     h_sig_et55[i][j].Clear();
+     h_sig_et55[i][j] = TH1F(histname_sig_et55,"Photon Transverse Energy",15,175.,1000.);
+     h_sig_et55[i][j].Sumw2();
      //
-     h_sig_met75[i].Clear();
-     h_sig_met75[i] = TH1F(histname_sig_met75,"Missing Transverse Energy",11,175.,1000.);
-     h_sig_met75[i].Sumw2();
+     h_sig_et75[i][j].Clear();
+     h_sig_et75[i][j] = TH1F(histname_sig_et75,"Photon Transverse Energy",11,175.,1000.);
+     h_sig_et75[i][j].Sumw2();
      //
-     h_sig_met165[i].Clear();
-     h_sig_met165[i] = TH1F(histname_sig_met165,"Missing Transverse Energy",5,175.,1000.);
-     h_sig_met165[i].Sumw2();
+     h_sig_et165[i][j].Clear();
+     h_sig_et165[i][j] = TH1F(histname_sig_et165,"Photon Transverse Energy",5,175.,1000.);
+     h_sig_et165[i][j].Sumw2();
      //
-     h_sig_met275[i].Clear();
-     h_sig_met275[i] = TH1F(histname_sig_met275,"Missing Transverse Energy",3,175.,1000.);
-     h_sig_met275[i].Sumw2();
+     h_sig_et275[i][j].Clear();
+     h_sig_et275[i][j] = TH1F(histname_sig_et275,"Photon Transverse Energy",3,175.,1000.);
+     h_sig_et275[i][j].Sumw2();
      //
 
-    //}
-   }
+     h_sig_met5[i][j].Clear();
+     h_sig_met5[i][j] = TH1F(histname_sig_met5,"Missing Transverse Energy",165,175.,1000.);
+     h_sig_met5[i][j].Sumw2();
+     //
+     h_sig_met15[i][j].Clear();
+     h_sig_met15[i][j] = TH1F(histname_sig_met15,"Missing Transverse Energy",55,175.,1000.);
+     h_sig_met15[i][j].Sumw2();
+     //
+     h_sig_met25[i][j].Clear();
+     h_sig_met25[i][j] = TH1F(histname_sig_met25,"Missing Transverse Energy",33,175.,1000.);
+     h_sig_met25[i][j].Sumw2();
+     //
+     h_sig_met55[i][j].Clear();
+     h_sig_met55[i][j] = TH1F(histname_sig_met55,"Missing Transverse Energy",15,175.,1000.);
+     h_sig_met55[i][j].Sumw2();
+     //
+     h_sig_met75[i][j].Clear();
+     h_sig_met75[i][j] = TH1F(histname_sig_met75,"Missing Transverse Energy",11,175.,1000.);
+     h_sig_met75[i][j].Sumw2();
+     //
+     h_sig_met165[i][j].Clear();
+     h_sig_met165[i][j] = TH1F(histname_sig_met165,"Missing Transverse Energy",5,175.,1000.);
+     h_sig_met165[i][j].Sumw2();
+     //
+     h_sig_met275[i][j].Clear();
+     h_sig_met275[i][j] = TH1F(histname_sig_met275,"Missing Transverse Energy",3,175.,1000.);
+     h_sig_met275[i][j].Sumw2();
+     //
+
+    } // sysbinnames
+   }  // ptbinnames
 
    //Common
    phoE = 0;
@@ -2012,119 +2005,54 @@ Int_t postAnalyzer_Base::Cut(Long64_t entry)
    return 1;
 }
 
-//Bool_t postAnalyzer_Base::FillGenHistograms(int ptbin, int sysbin, int photonIndex, double weight){
-// weight = 1;
-// h_gen_et[ptbin].Fill( mcEt->at(photonIndex), weight );
-// h_gen_eta[ptbin].Fill( mcEta->at(photonIndex), weight );
-// h_gen_pfMET[ptbin].Fill( genMET, weight );
-//
-// return kTRUE;
-//}
-
 Bool_t postAnalyzer_Base::FillSigHistograms(int ptbin, int sysbin, int photonIndex, double weight){
- Float_t uncorphoet = ((*phoSCRawE)[photonIndex]/TMath::CosH((*phoSCEta)[photonIndex]));
- h_sig_et[ptbin].Fill( phoEt->at(photonIndex), weight );
- h_sig_uncorret[ptbin].Fill( uncorphoet, weight );
- h_sig_eta[ptbin].Fill( phoEta->at(photonIndex), weight );
- h_sig_sieieF5x5[ptbin].Fill( phoSigmaIEtaIEtaFull5x5->at(photonIndex), weight );
- h_sig_pfMET[ptbin].Fill( pfMET, weight );
+ Float_t phoPt = getPhotonPt(photonIndex,sysbinname);
+ h_sig_et       [ptbin][sysbin].Fill( phoEt->at(photonIndex), weight );
+ h_sig_uncorret [ptbin][sysbin].Fill( phoPt, weight );
+ h_sig_eta      [ptbin][sysbin].Fill( phoEta->at(photonIndex), weight );
+ h_sig_sieieF5x5[ptbin][sysbin].Fill( phoSigmaIEtaIEtaFull5x5->at(photonIndex), weight );
+ h_sig_pfMET    [ptbin][sysbin].Fill( theMET, weight );
 
- h_sig_et5   [ptbin].Fill(uncorphoet,weight);  
- h_sig_et15  [ptbin].Fill(uncorphoet,weight);  
- h_sig_et25  [ptbin].Fill(uncorphoet,weight);  
- h_sig_et55  [ptbin].Fill(uncorphoet,weight);  
- h_sig_et75  [ptbin].Fill(uncorphoet,weight);  
- h_sig_et165 [ptbin].Fill(uncorphoet,weight);  
- h_sig_et275 [ptbin].Fill(uncorphoet,weight);  
- h_sig_met5  [ptbin].Fill(pfMET,weight); 
- h_sig_met15 [ptbin].Fill(pfMET,weight); 
- h_sig_met25 [ptbin].Fill(pfMET,weight); 
- h_sig_met55 [ptbin].Fill(pfMET,weight); 
- h_sig_met75 [ptbin].Fill(pfMET,weight); 
- h_sig_met165[ptbin].Fill(pfMET,weight); 
- h_sig_met275[ptbin].Fill(pfMET,weight); 
+ h_sig_et5   [ptbin][sysbin].Fill(phoPt,weight);  
+ h_sig_et15  [ptbin][sysbin].Fill(phoPt,weight);  
+ h_sig_et25  [ptbin][sysbin].Fill(phoPt,weight);  
+ h_sig_et55  [ptbin][sysbin].Fill(phoPt,weight);  
+ h_sig_et75  [ptbin][sysbin].Fill(phoPt,weight);  
+ h_sig_et165 [ptbin][sysbin].Fill(phoPt,weight);  
+ h_sig_et275 [ptbin][sysbin].Fill(phoPt,weight);  
+ h_sig_met5  [ptbin][sysbin].Fill(theMET,weight); 
+ h_sig_met15 [ptbin][sysbin].Fill(theMET,weight); 
+ h_sig_met25 [ptbin][sysbin].Fill(theMET,weight); 
+ h_sig_met55 [ptbin][sysbin].Fill(theMET,weight); 
+ h_sig_met75 [ptbin][sysbin].Fill(theMET,weight); 
+ h_sig_met165[ptbin][sysbin].Fill(theMET,weight); 
+ h_sig_met275[ptbin][sysbin].Fill(theMET,weight); 
 
  return kTRUE;
 }
 
 
-///Bool_t postAnalyzer_Base::FillSigHistogramsLep(int ptbin, int selbin, int photonIndex, double weight, bool passM){
-/// Float_t uncorphoet = ((*phoSCRawE)[photonIndex]/TMath::CosH((*phoSCEta)[photonIndex]));
-///
-/// if(passM){
-///  h_mu_uncorret[ptbin][selbin].Fill(uncorphoet, weight );
-///  h_mu_et[ptbin][selbin].Fill( phoEt->at(photonIndex), weight );
-///  h_mu_eta[ptbin][selbin].Fill( phoEta->at(photonIndex), weight );
-///  h_mu_sieieF5x5[ptbin][selbin].Fill( phoSigmaIEtaIEtaFull5x5->at(photonIndex), weight );
-///  h_mu_pfMET[ptbin][selbin].Fill( pfMET, weight );
-///  h_mu_leptoMET[ptbin][selbin].Fill( leptoMET, weight );
-///  h_mu_dilep_mass[ptbin][selbin].Fill( dilep_mass, weight );
-///  h_mu_dimu_mass[ptbin][selbin].Fill( fourVec_mm.M(), weight );
-///  h_mu_diele_mass[ptbin][selbin].Fill( fourVec_ee.M(), weight );
-/// }
-/// else{
-///  h_ele_uncorret[ptbin][selbin].Fill(uncorphoet, weight );
-///  h_ele_et[ptbin][selbin].Fill( phoEt->at(photonIndex), weight );
-///  h_ele_eta[ptbin][selbin].Fill( phoEta->at(photonIndex), weight );
-///  h_ele_sieieF5x5[ptbin][selbin].Fill( phoSigmaIEtaIEtaFull5x5->at(photonIndex), weight );
-///  h_ele_pfMET[ptbin][selbin].Fill( pfMET, weight );
-///  h_ele_leptoMET[ptbin][selbin].Fill( leptoMET, weight );
-///  h_ele_dilep_mass[ptbin][selbin].Fill( dilep_mass, weight );
-///  h_ele_dimu_mass[ptbin][selbin].Fill( fourVec_mm.M(), weight );
-///  h_ele_diele_mass[ptbin][selbin].Fill( fourVec_ee.M(), weight );
-/// }
-///
-/// return kTRUE;
-///}
-///
-///
-///
-///Bool_t postAnalyzer_Base::WriteHistogramsLep(int ptbin, int sysbin){
-///
-///  h_ele_uncorret[ptbin][selbin]  .Write(); 
-///  h_ele_et[ptbin][selbin]        .Write(); 
-///  h_ele_eta[ptbin][selbin]       .Write(); 
-///  h_ele_sieieF5x5[ptbin][selbin] .Write(); 
-///  h_ele_pfMET[ptbin][selbin]     .Write(); 
-///  h_ele_leptoMET[ptbin][selbin]  .Write(); 
-///  h_ele_dilep_mass[ptbin][selbin].Write(); 
-///  h_ele_dimu_mass[ptbin][selbin] .Write(); 
-///  h_ele_diele_mass[ptbin][selbin].Write(); 
-///
-///  h_mu_uncorret[ptbin][selbin]  .Write(); 
-///  h_mu_et[ptbin][selbin]        .Write(); 
-///  h_mu_eta[ptbin][selbin]       .Write(); 
-///  h_mu_sieieF5x5[ptbin][selbin] .Write(); 
-///  h_mu_pfMET[ptbin][selbin]     .Write(); 
-///  h_mu_leptoMET[ptbin][selbin]  .Write(); 
-///  h_mu_dilep_mass[ptbin][selbin].Write(); 
-///  h_mu_dimu_mass[ptbin][selbin] .Write(); 
-///  h_mu_diele_mass[ptbin][selbin].Write(); 
-///
-/// return kTRUE;
-///}
-
 Bool_t postAnalyzer_Base::WriteHistograms(int ptbin, int sysbin){
- h_sig_et[ptbin].Write();
- h_sig_uncorret[ptbin].Write();
- h_sig_eta[ptbin].Write();
- h_sig_sieieF5x5[ptbin].Write();
- h_sig_pfMET[ptbin].Write();
+ h_sig_et       [ptbin][sysbin].Write();
+ h_sig_uncorret [ptbin][sysbin].Write();
+ h_sig_eta      [ptbin][sysbin].Write();
+ h_sig_sieieF5x5[ptbin][sysbin].Write();
+ h_sig_pfMET    [ptbin][sysbin].Write();
 
- h_sig_et5   [ptbin].Write(); 
- h_sig_et15  [ptbin].Write(); 
- h_sig_et25  [ptbin].Write(); 
- h_sig_et55  [ptbin].Write(); 
- h_sig_et75  [ptbin].Write(); 
- h_sig_et165 [ptbin].Write(); 
- h_sig_et275 [ptbin].Write(); 
- h_sig_met5  [ptbin].Write(); 
- h_sig_met15 [ptbin].Write(); 
- h_sig_met25 [ptbin].Write(); 
- h_sig_met55 [ptbin].Write(); 
- h_sig_met75 [ptbin].Write(); 
- h_sig_met165[ptbin].Write(); 
- h_sig_met275[ptbin].Write(); 
+ h_sig_et5   [ptbin][sysbin].Write(); 
+ h_sig_et15  [ptbin][sysbin].Write(); 
+ h_sig_et25  [ptbin][sysbin].Write(); 
+ h_sig_et55  [ptbin][sysbin].Write(); 
+ h_sig_et75  [ptbin][sysbin].Write(); 
+ h_sig_et165 [ptbin][sysbin].Write(); 
+ h_sig_et275 [ptbin][sysbin].Write(); 
+ h_sig_met5  [ptbin][sysbin].Write(); 
+ h_sig_met15 [ptbin][sysbin].Write(); 
+ h_sig_met25 [ptbin][sysbin].Write(); 
+ h_sig_met55 [ptbin][sysbin].Write(); 
+ h_sig_met75 [ptbin][sysbin].Write(); 
+ h_sig_met165[ptbin][sysbin].Write(); 
+ h_sig_met275[ptbin][sysbin].Write(); 
 
  return kTRUE;
 }
@@ -2182,7 +2110,7 @@ Double_t postAnalyzer_Base::EAphoton(Double_t eta){
 
 
 //-------------------------muon_passLooseID
-std::vector<int> postAnalyzer_Base::muon_passLooseID(int pho_index, float muPtCut)
+std::vector<int> postAnalyzer_Base::muon_passLooseID(int pho_index, float muPtCut, TString sysbinname)
 {
   std::vector<int> mulist;
 
@@ -2225,7 +2153,8 @@ std::vector<int> postAnalyzer_Base::muon_passLooseID(int pho_index, float muPtCu
       if(pass_PFMuon && (pass_globalMuon || pass_trackerMuon) )
         {    
           //Muon passes pt cut 
-          if(muPt->at(i) > muPtCut)
+          Float_t muonPt = getMuonPt(i,sysbinname);
+          if(muonPt > muPtCut)
             {    
               //Muon does not overlap photon
               if(dR(muEta->at(i),muPhi->at(i),phoSCEta->at(pho_index),phoSCPhi->at(pho_index)) > 0.5) 
@@ -2239,7 +2168,7 @@ std::vector<int> postAnalyzer_Base::muon_passLooseID(int pho_index, float muPtCu
 }
 
 //-------------------------muon_passTightID
-std::vector<int> postAnalyzer_Base::muon_passTightID(int pho_index, float muPtCut)
+std::vector<int> postAnalyzer_Base::muon_passTightID(int pho_index, float muPtCut, TString sysbinname)
 {
   std::vector<int> mu_cands;
   mu_cands.clear();
@@ -2278,8 +2207,9 @@ std::vector<int> postAnalyzer_Base::muon_passTightID(int pho_index, float muPtCu
     //Muon passes Tight Muon ID
     if(pass_globalMuon && pass_PFMuon && pass_chi2ndf && pass_chamberHit && pass_matchedStations && pass_dxy && pass_dz && pass_pixelHits && pass_trackLayers)
     {    
-      //Muon passes pt cut
-      if(muPt->at(i) > muPtCut)
+      //Muon passes pt cut 
+      Float_t muonPt = getMuonPt(i,sysbinname);
+      if(muonPt > muPtCut)
       {    
         //Muon does not overlap photon
         if(dR(muEta->at(i),muPhi->at(i),phoSCEta->at(pho_index),phoSCPhi->at(pho_index)) > 0.5) 
@@ -2294,7 +2224,7 @@ std::vector<int> postAnalyzer_Base::muon_passTightID(int pho_index, float muPtCu
 
 
 //-------------------------electron_passLooseID
-std::vector<int> postAnalyzer_Base::electron_passLooseID(int pho_index, float elePtCut)
+std::vector<int> postAnalyzer_Base::electron_passLooseID(int pho_index, float elePtCut, TString sysbinname)
 {
   //bool veto_passed = true; //pass veto if no good electron found 
   std::vector<int> elelist;
@@ -2373,8 +2303,9 @@ std::vector<int> postAnalyzer_Base::electron_passLooseID(int pho_index, float el
       //Electron passes Loose Electron ID cuts 
       if(pass_SigmaIEtaIEtaFull5x5 && pass_dEtaIn && pass_dPhiIn && pass_HoverE && pass_iso && pass_ooEmooP && pass_d0 && pass_dz && pass_missingHits && pass_convVeto)    
         {    
-          //Electron passes pt cut 
-          if(elePt->at(i) > elePtCut)
+            //Electron passes pt cut 
+            Float_t electronPt = getElectronPt(i,sysbinname);
+            if(electronPt > elePtCut)
             {    
               //Electron does not overlap photon 
               if(dR(eleSCEta->at(i),eleSCPhi->at(i),phoSCEta->at(pho_index),phoSCPhi->at(pho_index)) > 0.5) 
@@ -2388,7 +2319,7 @@ std::vector<int> postAnalyzer_Base::electron_passLooseID(int pho_index, float el
 }
 
 //-------------------------electron_passTightID
-std::vector<int> postAnalyzer_Base::electron_passTightID(int pho_index, float elePtCut)
+std::vector<int> postAnalyzer_Base::electron_passTightID(int pho_index, float elePtCut, TString sysbinname)
 {
 
   std::vector<int> ele_cands;
@@ -2467,8 +2398,9 @@ std::vector<int> postAnalyzer_Base::electron_passTightID(int pho_index, float el
       //Electron passes Loose Electron ID cuts
     if(pass_SigmaIEtaIEtaFull5x5 && pass_dEtaIn && pass_dPhiIn && pass_HoverE && pass_iso && pass_ooEmooP && pass_d0 && pass_dz && pass_missingHits && pass_convVeto)
     {
-      //Electron passes pt cut
-      if(elePt->at(i) > elePtCut)
+      //Electron passes pt cut 
+      Float_t electronPt = getElectronPt(i,sysbinname);
+      if(electronPt > elePtCut)
       {
         //Electron does not overlap photon
         if(dR(eleSCEta->at(i),eleSCPhi->at(i),phoSCEta->at(pho_index),phoSCPhi->at(pho_index)) > 0.5)
@@ -2562,8 +2494,50 @@ bool postAnalyzer_Base::passdphiJetMET(std::vector<int> *jets, double mephi)
   return passes;
 }
 
+//-------------------------getMuonPt
+Float_t postAnalyzer_Base::getMuonPt(int i, TString sysbinname){
+
+      //Muon passes pt cut 
+      Float_t muonPt = muPt->at(i);
+      Float_t muonEnergy = muonPt*TMath::CosH( muEta->at(i) );
+      if(sysbinname=="_MESUp"  ){ muonEnergy*=(1.0 + 0.015); }
+      if(sysbinname=="_MESDown"){ muonEnergy*=(1.0 - 0.015); }
+
+      muonPt = muonEnergy/TMath::CosH( muEta->at(i) );
+  return muonPt;
+
+}
+
+//-------------------------getElectronPt
+Float_t postAnalyzer_Base::getElectronPt(int i, TString sysbinname){
+
+      //Electron passes pt cut 
+      Float_t electronPt = elePt->at(i);
+      Float_t electronEnergy = electronPt*TMath::CosH( eleEta->at(i) );
+      if(sysbinname=="_EESUp"  ){ electronEnergy*=(1.0 + 0.015); }
+      if(sysbinname=="_EESDown"){ electronEnergy*=(1.0 - 0.015); }
+
+      electronPt = electronEnergy/TMath::CosH( eleEta->at(i) );
+
+  return electronPt;
+
+}
+
+//-------------------------getPhotonPt
+Float_t postAnalyzer_Base::getPhotonPt(int idnr, TString sysbinname){
+
+      Float_t photonenergy = phoSCRawE->at(idnr);
+      if(sysbinname=="_PESUp"  ){ photonenergy*=(1. + 0.015); }
+      if(sysbinname=="_PESDown"){ photonenergy*=(1. - 0.015); }
+
+      Float_t phoPt = photonenergy/TMath::CosH( (*phoSCEta)[idnr] );
+
+  return phoPt;
+
+}
+
 //-------------------------getPhoCand 
-std::vector<int> postAnalyzer_Base::getPhoCand(double phoPtCut, double phoEtaCut){
+std::vector<int> postAnalyzer_Base::getPhoCand(double phoPtCut, double phoEtaCut, TString sysbinname){
 
   std::vector<int> pholist;
   pholist.clear();
@@ -2571,20 +2545,20 @@ std::vector<int> postAnalyzer_Base::getPhoCand(double phoPtCut, double phoEtaCut
   //Loop over photons                   
   for(int p=0;p<nPho;p++)
     {    
-      Float_t uncorrectedPhoEt = ((*phoSCRawE)[p]/TMath::CosH((*phoSCEta)[p]));
 
-      bool kinematic = uncorrectedPhoEt > phoPtCut && fabs((*phoSCEta)[p])<phoEtaCut;
+      Float_t phoPt = getPhotonPt(p,sysbinname);
+
+      bool kinematic = phoPt > phoPtCut && fabs((*phoSCEta)[p])<phoEtaCut;
 
       bool photonId = (
                        ((*phoHoverE)[p]                <  0.05   ) && 
                        ( TMath::Max( ( (*phoPFChIso)[p]       - rho*EAcharged((*phoSCEta)[p]) ), 0.0) < 1.37 )  &&
                        ( TMath::Max( ( (*phoPFChWorstIso)[p]  - rho*EAchargedworst((*phoSCEta)[p]) ), 0.0) < 1.37 )  &&
                        ( TMath::Max( ( (*phoPFNeuIso)[p] - rho*EAneutral((*phoSCEta)[p]) ), 0.0) <
-                        (1.06 + (0.014 * uncorrectedPhoEt) + (0.000019 * pow(uncorrectedPhoEt, 2.0))) )  &&
+                        (1.06 + (0.014 * phoPt) + (0.000019 * pow(phoPt, 2.0))) )  &&
                        ( TMath::Max( ( (*phoPFPhoIso)[p] - rho*EAphoton((*phoSCEta)[p])  ), 0.0) < 
-                        (0.28 + (0.0053 * uncorrectedPhoEt)) ) 
+                        (0.28 + (0.0053 * phoPt)) ) 
                       );   
-
 
       if(photonId && kinematic ){
         pholist.push_back(p);
@@ -2593,37 +2567,10 @@ std::vector<int> postAnalyzer_Base::getPhoCand(double phoPtCut, double phoEtaCut
 
   return pholist;
 
-//  std::vector<int> pholist;
-//  pholist.clear();
-//
-//  //Loop over photons
-//  for(int p=0;p<nPho;p++)
-//    {
-//      double uncorrectedPhoEt = ((*phoSCRawE)[p]/TMath::CosH((*phoSCEta)[p]));
-//
-//      bool kinematic = uncorrectedPhoEt > phoPtCut && fabs((*phoSCEta)[p])<phoEtaCut;
-//
-//      bool photonId = (
-//                       ((*phoHoverE)[p]                <  0.05   ) &&
-//                       ( TMath::Max( (*phoPFChIso)[p] - 0.0, 0.0) < 1.37 )  &&
-//                       ( TMath::Max( ( (*phoPFChWorstIso)[p]  - rho*EAchargedworst((*phoSCEta)[p]) ), 0.0) < 1.37 )  &&
-//                       ( TMath::Max( ( (*phoPFNeuIso)[p] - rho*EAneutral((*phoSCEta)[p]) ), 0.0) <
-//                        (1.06 + (0.014 * uncorrectedPhoEt) + (0.000019 * pow(uncorrectedPhoEt, 2.0))) )  &&
-//                       ( TMath::Max( ( (*phoPFPhoIso)[p] - rho*EAphoton((*phoSCEta)[p])  ), 0.0) <
-//                        (0.28 + (0.0053 * uncorrectedPhoEt)) )
-//                      );
-//
-//      if(photonId && kinematic){
-//        pholist.push_back(p);
-//      }
-//    }
-//
-//  return pholist;
-
 }
 
 //-------------------------getPhoJetCand 
-std::vector<int> postAnalyzer_Base::getPhoJetCand(double phoPtCut, double phoEtaCut){
+std::vector<int> postAnalyzer_Base::getPhoJetCand(double phoPtCut, double phoEtaCut, TString sysbinname){
 
   std::vector<int> pholist;
   pholist.clear();
@@ -2631,9 +2578,10 @@ std::vector<int> postAnalyzer_Base::getPhoJetCand(double phoPtCut, double phoEta
   //Loop over photons                                                                                                                                                             
   for(int p=0;p<nPho;p++)
     {
-      Float_t uncorrectedPhoEt = ((*phoSCRawE)[p]/TMath::CosH((*phoSCEta)[p]));
 
-      bool kinematic = uncorrectedPhoEt > phoPtCut && fabs((*phoSCEta)[p])<phoEtaCut;
+      Float_t phoPt = getPhotonPt(p,sysbinname);
+
+      bool kinematic = phoPt > phoPtCut && fabs((*phoSCEta)[p])<phoEtaCut;
 
       bool photonId = (
                        ((*phoHoverE)[p]                <  0.05   ) &&
@@ -2642,9 +2590,9 @@ std::vector<int> postAnalyzer_Base::getPhoJetCand(double phoPtCut, double phoEta
                        ( TMath::Max( (*phoPFChIso)[p] - 0.0, 0.0) < 1.37 )  && // wtf TMath - shouldn't do anything since we have worstCHiso ..
                        ( TMath::Max( ( (*phoPFChWorstIso)[p]  - rho*EAchargedworst((*phoSCEta)[p]) ), 0.0) < 1.37 )  &&
                        ( TMath::Max( ( (*phoPFNeuIso)[p] - rho*EAneutral((*phoSCEta)[p]) ), 0.0) <
-                        (1.06 + (0.014 * uncorrectedPhoEt) + (0.000019 * pow(uncorrectedPhoEt, 2.0))) )  &&
+                        (1.06 + (0.014 * phoPt) + (0.000019 * pow(phoPt, 2.0))) )  &&
                        ( TMath::Max( ( (*phoPFPhoIso)[p] - rho*EAphoton((*phoSCEta)[p])  ), 0.0) <
-                        (0.28 + (0.0053 * uncorrectedPhoEt)) )
+                        (0.28 + (0.0053 * phoPt)) )
                       );
 
 
@@ -2652,9 +2600,9 @@ std::vector<int> postAnalyzer_Base::getPhoJetCand(double phoPtCut, double phoEta
 
      bool passHoE = ( (*phoHoverE)[p] < 0.05 );
 
-     double vloosePFCharged= TMath::Min(5.0*(3.32) , 0.20 *  uncorrectedPhoEt);
-     double vloosePFPhoton = TMath::Min(5.0*(0.81+ (0.0053 * uncorrectedPhoEt)) , 0.20*uncorrectedPhoEt);
-     double vloosePFNeutral= TMath::Min(5.0*(1.92 + (0.014 * uncorrectedPhoEt) + (0.000019 * pow(uncorrectedPhoEt, 2.0))) , 0.20*uncorrectedPhoEt);
+     double vloosePFCharged= TMath::Min(5.0*(3.32) , 0.20 *  phoPt);
+     double vloosePFPhoton = TMath::Min(5.0*(0.81+ (0.0053 * phoPt)) , 0.20*phoPt);
+     double vloosePFNeutral= TMath::Min(5.0*(1.92 + (0.014 * phoPt) + (0.000019 * pow(phoPt, 2.0))) , 0.20*phoPt);
      bool passVLooseIso = (
                       ( TMath::Max( ( (*phoPFChWorstIso)[p]  - rho*EAchargedworst((*phoSCEta)[p]) ), 0.0) < vloosePFCharged )  &&
                       ( TMath::Max( ( (*phoPFChIso)[p] - 0.0 ), 0.0) < vloosePFCharged )  &&
@@ -2663,12 +2611,12 @@ std::vector<int> postAnalyzer_Base::getPhoJetCand(double phoPtCut, double phoEta
                      );
      bool passLoosePIso =
                      ( TMath::Max( ( (*phoPFPhoIso)[p] - rho*EAphoton((*phoSCEta)[p])  ), 0.0) <
-                       (0.81 + (0.0053 * uncorrectedPhoEt)) );
+                       (0.81 + (0.0053 * phoPt)) );
      bool passLooseIso = (  // deno must fail this cut
                      ( TMath::Max( ( (*phoPFChIso)[p] - 0.0 ), 0.0) < 3.32 )  &&
                      ( TMath::Max( ( (*phoPFChWorstIso)[p]  - rho*EAchargedworst((*phoSCEta)[p]) ), 0.0) < 3.32 )  &&
                      ( TMath::Max( ( (*phoPFNeuIso)[p] - rho*EAneutral((*phoSCEta)[p]) ), 0.0) <
-                       (1.92 + (0.014* uncorrectedPhoEt) + (0.000019 * pow(uncorrectedPhoEt, 2.0))))  &&
+                       (1.92 + (0.014* phoPt) + (0.000019 * pow(phoPt, 2.0))))  &&
                      passLoosePIso
                     );
 
@@ -2685,18 +2633,20 @@ std::vector<int> postAnalyzer_Base::getPhoJetCand(double phoPtCut, double phoEta
 
 //-------------------------callFillSigHist
 void postAnalyzer_Base::callFillSigHist(int selbin, int lastptbin, int inclptbin, int candphotonindex, float event_weight){
- Float_t uncorrectedPhoEt = ((*phoSCRawE)[candphotonindex]/TMath::CosH((*phoSCEta)[candphotonindex]));
+
+ Float_t phoPt = getPhotonPt(candphotonindex,sysbinname);
+
  for(unsigned int ptb=0; ptb<lastptbin-2; ++ptb){ // break into pT bins
   if( 
-     ( uncorrectedPhoEt > ptbins[ptb]) &&
-     ( uncorrectedPhoEt < ptbins[ptb+1])
+     ( phoPt > ptbins[ptb]) &&
+     ( phoPt < ptbins[ptb+1])
     ){  
    FillSigHistograms(ptb, selbin, candphotonindex, event_weight);
   } // end if passes pt cuts then fill
  } // end pt bin loop
  if(  // do an inclusive pT plot from bins
-    ( uncorrectedPhoEt > ptbins[0]) &&
-    ( uncorrectedPhoEt < ptbins[inclptbin])
+    ( phoPt > ptbins[0]) &&
+    ( phoPt < ptbins[inclptbin])
    ){  
   FillSigHistograms(lastptbin-1, selbin, candphotonindex, event_weight);
  }
@@ -2706,7 +2656,7 @@ void postAnalyzer_Base::callFillSigHist(int selbin, int lastptbin, int inclptbin
 }
 
 //----------------------------makeEventWeight
-Double_t postAnalyzer_Base::makeEventWeight(Double_t crossSec, Double_t lumi, Double_t nrEvents, Double_t photonpt, Bool_t isMC, Bool_t isZnnG, Bool_t ewkZG, Bool_t ewkWG, Bool_t isEle, Bool_t isJet){
+Double_t postAnalyzer_Base::makeEventWeight(Double_t crossSec, Double_t lumi, Double_t nrEvents, Double_t photonpt, Bool_t isMC, Bool_t isZnnG, Bool_t ewkZG, Bool_t ewkWG, Bool_t isEle, Bool_t isJet, TString sysbinname){
 
       //=1.0 for real data
       event_weight=1.0;
@@ -2716,15 +2666,19 @@ Double_t postAnalyzer_Base::makeEventWeight(Double_t crossSec, Double_t lumi, Do
        else if ( photonpt < 250 ) {crossSecScl*=1.35;} 
        else if ( photonpt < 400 ) {crossSecScl*=1.30;} 
        else if ( photonpt < 700 ) {crossSecScl*=1.23;} 
-       else                               {crossSecScl*=1.23;} 
+       else                       {crossSecScl*=1.23;} 
       }   
       if(isMC){ event_weight=0.96*lumi*crossSecScl*(1.013 - 0.0001168*photonpt)/nrEvents; }
       if(ewkZG){ 
        Double_t EWK_percent_adjustment = ewkZGCorrection->GetBinContent(ewkZGCorrection->GetXaxis()->FindBin(photonpt));
+       if(sysbinname=="_EWKUp"  ){ EWK_percent_adjustment*=2; }
+       if(sysbinname=="_EWKDown"){ EWK_percent_adjustment=0; }
        event_weight*=(1.0+.01*EWK_percent_adjustment) ; 
       }   
       if(ewkWG){ 
        Double_t EWK_percent_adjustment = ewkWGCorrection->GetBinContent(ewkWGCorrection->GetXaxis()->FindBin(photonpt));
+       if(sysbinname=="_EWKUp"  ){ EWK_percent_adjustment*=2; }
+       if(sysbinname=="_EWKDown"){ EWK_percent_adjustment=0; }
        event_weight*=(1.0+.01*EWK_percent_adjustment) ; 
       }   
 
@@ -2782,10 +2736,10 @@ Bool_t postAnalyzer_Base::askPassNonColl(int candphotonindex, Bool_t isSpike){
       bool passSpikeShape = ( (phoSigmaIEtaIEtaFull5x5->at(candphotonindex) > 0.001)
                            && (phoSigmaIPhiIPhiFull5x5->at(candphotonindex) > 0.001) );
       if(isSpike){ passSpikeShape = ! ( (phoSigmaIEtaIEtaFull5x5->at(candphotonindex) > 0.001)
-                           && (phoSigmaIPhiIPhiFull5x5->at(candphotonindex) > 0.001) ); }
+                                     && (phoSigmaIPhiIPhiFull5x5->at(candphotonindex) > 0.001) ); }
       doespassNoncoll = ( passSpikeShape 
-                        && (phoR9->at(candphotonindex) < 1) 
-                        && passSeedTime
+                     && ( phoR9->at(candphotonindex) < 1 )
+                     && passSeedTime
                         );
                         //&& (fabs(phoseedTimeFull5x5->at(candphotonindex)) < 3.) );
       return doespassNoncoll;
@@ -2819,33 +2773,8 @@ Bool_t postAnalyzer_Base::askPassdPhiJM(int candphotonindex,Float_t theMETPhi){
 }
 
 Bool_t postAnalyzer_Base::askPassdPhiPhoMET(int candphotonindex,Float_t theMETPhi){
-      Bool_t doespassdPhiPhoMET = ( DeltaPhi(phoPhi->at(candphotonindex),pfMETPhi)>2.0 ) ;
+      Bool_t doespassdPhiPhoMET = ( DeltaPhi(phoPhi->at(candphotonindex),theMETPhi)>2.0 ) ;
       return doespassdPhiPhoMET;
 }
-
-
-////-------------------------callFillSigHistLep
-//void postAnalyzer_Base::callFillSigHistLep(int selbin, int lastptbin, int inclptbin, int candphotonindex, float event_weight, bool passM){
-// Float_t uncorrectedPhoEt = ((*phoSCRawE)[candphotonindex]/TMath::CosH((*phoSCEta)[candphotonindex]));
-// for(unsigned int ptb=0; ptb<lastptbin-2; ++ptb){ // break into pT bins
-//  if( 
-//     ( uncorrectedPhoEt > ptbins[ptb]) &&
-//     ( uncorrectedPhoEt < ptbins[ptb+1])
-//    ){  
-//   FillSigHistogramsLep(ptb, selbin, candphotonindex, event_weight, passM);
-//  } // end if passes pt cuts then fill
-// } // end pt bin loop
-// if(  // do an inclusive pT plot from bins
-//    ( uncorrectedPhoEt > ptbins[0]) &&
-//    ( uncorrectedPhoEt < ptbins[inclptbin])
-//   ){  
-//  FillSigHistogramsLep(lastptbin-1, selbin, candphotonindex, event_weight, passM);
-// }
-// // and one fully inclusive in pT
-// FillSigHistogramsLep(lastptbin, selbin, candphotonindex, event_weight, passM);
-// return;
-//}
-
-
 
 #endif // #ifdef postAnalyzer_Base_cxx

@@ -1,6 +1,6 @@
 
-//#include "analyzeSignal.C"
-#include "analyzeGenSignal.C"
+#include "analyzeSignal.C"
+//#include "analyzeGenSignal.C"
 //#include "analyzeZllG.C"
 //#include "analyzeWlnG.C"
 
@@ -30,16 +30,16 @@ void callAnalyzer(void)
  //TString inputListName=path+"/hdfslist_SinglePhoton.txt";
  //TString inputListName=path+"/filenames_SinglePhoton2016_10.txt";
 
-//  Bool_t isMC=kFALSE;
-//  Bool_t isZnnG=kFALSE;
-//  Bool_t ewkZG=kFALSE;
-//  Bool_t ewkWG=kFALSE;
-//  Bool_t isHalo=kFALSE;
-//  Bool_t isSpike=kFALSE;
-//  Bool_t isEle=kFALSE;
-//  Bool_t isJet=kFALSE;
-//  TString outfilename=path+"/ZnnG_Datafewer.root";
-//  TString inputListName=path+"/SPD.fewer";
+  Bool_t isMC=kFALSE;
+  Bool_t isZnnG=kFALSE;
+  Bool_t ewkZG=kFALSE;
+  Bool_t ewkWG=kFALSE;
+  Bool_t isHalo=kFALSE;
+  Bool_t isSpike=kFALSE;
+  Bool_t isEle=kFALSE;
+  Bool_t isJet=kFALSE;
+  TString outfilename=path+"/ZnnG_Datafewer.root";
+  TString inputListName=path+"/SPD.fewer";
 ////    TString outfilename=path+"/ZnnG_Data_204.root";
 ////    TString inputListName=path+"/SinglePhotonData_callpostAnalyzer_Base-ggtree_data_204.inputs";
 ////    TString outfilename=path+"/ZnnG_Data_204_small.root";
@@ -85,19 +85,19 @@ void callAnalyzer(void)
 //  TString outfilename=path+"/WlnG_WZ_2.root";
 //  TString inputListName=path+"/hdfslist_WZ.txt";
 
-  Bool_t isMC=kTRUE;
-  Bool_t isZnnG=kTRUE;
-  Bool_t ewkZG=kTRUE;
-  Bool_t ewkWG=kFALSE;
-  Bool_t isEle=kFALSE;
-  Bool_t isJet=kFALSE;
-  Bool_t isHalo=kFALSE;
-  Bool_t isSpike=kFALSE;
-          lumi = 40000. ;
-          nrEvents = 375920 ;
-          crossSec = 0.1903 ;
-  TString outfilename=path+"/Gen_ZnnG_v2.root";
-  TString inputListName=path+"/hdfslist_ZnnGJets.txt";
+//  Bool_t isMC=kTRUE;
+//  Bool_t isZnnG=kTRUE;
+//  Bool_t ewkZG=kTRUE;
+//  Bool_t ewkWG=kFALSE;
+//  Bool_t isEle=kFALSE;
+//  Bool_t isJet=kFALSE;
+//  Bool_t isHalo=kFALSE;
+//  Bool_t isSpike=kFALSE;
+//          lumi = 40000. ;
+//          nrEvents = 375920 ;
+//          crossSec = 0.1903 ;
+//  TString outfilename=path+"/Gen_ZnnG_v2.root";
+//  TString inputListName=path+"/hdfslist_ZnnGJets.txt";
 
 
 // Bool_t isMC = kTRUE ;
@@ -161,8 +161,8 @@ void callAnalyzer(void)
   infilename_dump.push_back(infilename);
  } //while !inputList.eof()
 
-//  analyzeSignal m;
-//  m.Init(theChain,isMC);
+  analyzeSignal m;
+  m.Init(theChain,isMC);
 
 //  analyzeZllG m;
 //  m.Init(theChain,isMC);
@@ -172,9 +172,9 @@ void callAnalyzer(void)
 //  m.Init(theChain,isMC);
 //  m.InitLep();
 
-  analyzeGenSignal m;
-  m.Init(theChain,isMC);
-  m.InitGen();
+//  analyzeGenSignal m;
+//  m.Init(theChain,isMC);
+//  m.InitGen();
 
   m.Loop(outfilename,isMC,lumi,nrEvents,crossSec,isZnnG,isEle,isHalo,isSpike,isJet,ewkWG,ewkZG);
 }
