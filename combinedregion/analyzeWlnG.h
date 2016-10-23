@@ -4,7 +4,6 @@
 
 #include "postAnalyzer_Lep.h"
 
-
 class analyzeWlnG : public postAnalyzer_Lep {
 
  public:

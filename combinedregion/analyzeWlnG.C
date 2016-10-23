@@ -174,6 +174,8 @@ void analyzeWlnG::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double_t
       // dPhi( photon, MET )
       passdPhiPhoMET = askPassdPhiPhoMET(candphotonindex,leptoMEPhi);
 
+      theMET = leptoMET;
+
       if(sysb==0){
       if(passTrig       ){ ++n_passTrig       ;}
       if(passShape      ){ ++n_passShape      ;}
