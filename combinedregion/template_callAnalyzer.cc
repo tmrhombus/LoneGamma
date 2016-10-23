@@ -51,6 +51,7 @@ void SAMPLENAME_callAnalyzer_REGION(void)
  m.Init(theChain, isMC);
  INITLEP
  INITGEN
+ INITPDF
 
  m.Loop(outfilename,isMC,lumi,nrEvents,crossSec,isZnnG,isEle,isHalo,isSpike,isJet,ewkWG,ewkZG);
 }
