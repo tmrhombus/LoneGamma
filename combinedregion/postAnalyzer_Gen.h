@@ -1,9 +1,9 @@
 #ifndef postAnalyzer_Gen_h
 #define postAnalyzer_Gen_h
 
-#include "postAnalyzer_Base.h"
+#include "postAnalyzer_Lep.h"
 
-class postAnalyzer_Gen : public postAnalyzer_Base {
+class postAnalyzer_Gen : public postAnalyzer_Lep {
 
  public:
    TH1F h_gen_et[7],

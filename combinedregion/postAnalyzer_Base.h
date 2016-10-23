@@ -2709,7 +2709,9 @@ Bool_t postAnalyzer_Base::askPassShape(int candphotonindex, Bool_t isJet, Bool_t
       Bool_t doespassShape = phoSigmaIEtaIEtaFull5x5->at(candphotonindex)  <  0.0102;
       if(isJet){ doespassShape = true; }
       if(isHalo){ doespassShape = phoSigmaIEtaIEtaFull5x5->at(candphotonindex)  <  0.0165; }
-      if(isSpike){ doespassShape = phoSigmaIEtaIEtaFull5x5->at(candphotonindex)  <  0.001; }
+      if(isSpike){ doespassShape = ( (phoSigmaIEtaIEtaFull5x5->at(candphotonindex)  < 0.001) ||
+                                     (phoSigmaIPhiIPhiFull5x5->at(candphotonindex)  < 0.001) );
+ }
       return doespassShape;
 }
 

@@ -91,6 +91,12 @@ class postAnalyzer_Lep : public postAnalyzer_Base {
 void postAnalyzer_Lep::InitLep()
 {
 
+   std::vector<int> ptbins;          //6  
+   std::vector<TString> ptbinnames;  //7 = (6-1)+1+1
+   std::vector<TString> sysbinnames; // 17
+
+   TString sysbinname;
+
    std::cout<<"Initializing leptons"<<std::endl;
 
    ptbins.clear();
