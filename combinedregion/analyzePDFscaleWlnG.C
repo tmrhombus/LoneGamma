@@ -292,6 +292,7 @@ void analyzePDFscaleWlnG::Loop(TString outfilename, Bool_t isMC, Double_t lumi, 
    WriteHistograms(i,j);
    WriteHistogramsLep(i,j);
   }
+  WriteHistogramsPDFscale(i);
  }
  outfile->Close();
  sw.Stop();

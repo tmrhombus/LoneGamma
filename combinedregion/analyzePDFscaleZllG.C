@@ -160,6 +160,8 @@ void analyzePDFscaleZllG::Loop(TString outfilename, Bool_t isMC, Double_t lumi, 
       // dPhi( photon, MET )
       passdPhiPhoMET = askPassdPhiPhoMET(candphotonindex,leptoMEPhi);
 
+      theMET = leptoMET;
+
       if(sysb==0){
       if(passTrig       ){ ++n_passTrig       ;}
       if(passShape      ){ ++n_passShape      ;}
@@ -287,6 +289,7 @@ void analyzePDFscaleZllG::Loop(TString outfilename, Bool_t isMC, Double_t lumi, 
    WriteHistograms(i,j);
    WriteHistogramsLep(i,j);
   }
+  WriteHistogramsPDFscale(i);
  }
  outfile->Close();
  sw.Stop();
