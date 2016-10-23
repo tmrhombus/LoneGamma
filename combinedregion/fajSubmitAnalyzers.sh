@@ -15,11 +15,15 @@ mkdir -p "${submitbase}/gitignore/${version}/submit"
 #lumi=40000. # /pb
 lumi=12900. # /pb
 
+#  "GenSignal"  
+# "PDFscaleZllG"   \
+# "PDFscaleSignal" \
+# "PDFscaleWlnG" 
+
 for region in \
-  "GenSignal" \
-  "Signal"    \
-  "WlnG"      \
-  "ZllG" 
+ "Signal" \
+ "ZllG"   \
+ "WlnG"   
 
 do
 
@@ -110,6 +114,7 @@ do
  
    initlep=""
    initgen=""
+   initpdf=""
    if [ ${region} = "GenSignal" ]
     then
     initgen="m.InitGen() ;"
@@ -125,12 +130,33 @@ do
     initlep="m.InitLep() ;"
    fi
 
+   if [ ${region} = "PDFscaleSignal" ]
+    then
+    initgen="m.InitGen() ;"
+    initpdf="m.InitPDFscale() ;"
+   fi
+
+   if [ ${region} = "PDFscaleZllG" ]
+    then
+    initgen="m.InitGen() ;"
+    initlep="m.InitLep() ;"
+    initpdf="m.InitPDFscale() ;"
+   fi
+
+   if [ ${region} = "PDFscaleWlnG" ]
+    then
+    initgen="m.InitGen() ;"
+    initlep="m.InitLep() ;"
+    initpdf="m.InitPDFscale() ;"
+   fi
+
    # make correct executable xx_callpostAnalyzer_Signal
    cp template_callAnalyzer.cc             "${submitbase}/gitignore/${version}/submit/${submitname}_callAnalyzer_${region}.cc"
    sed -i "s@SAMPLENAME@${submitname}@g"   "${submitbase}/gitignore/${version}/submit/${submitname}_callAnalyzer_${region}.cc"
    sed -i "s@REGION@${region}@g"           "${submitbase}/gitignore/${version}/submit/${submitname}_callAnalyzer_${region}.cc"
    sed -i "s@INITLEP@${initlep}@g"         "${submitbase}/gitignore/${version}/submit/${submitname}_callAnalyzer_${region}.cc"
    sed -i "s@INITGEN@${initgen}@g"         "${submitbase}/gitignore/${version}/submit/${submitname}_callAnalyzer_${region}.cc"
+   sed -i "s@INITPDF@${initpdf}@g"         "${submitbase}/gitignore/${version}/submit/${submitname}_callAnalyzer_${region}.cc"
    sed -i "s@TREENAME@${treename}@g"       "${submitbase}/gitignore/${version}/submit/${submitname}_callAnalyzer_${region}.cc"
    sed -i "s@ISMC@${isMC}@g"               "${submitbase}/gitignore/${version}/submit/${submitname}_callAnalyzer_${region}.cc"
    sed -i "s@ISZNNG@${isZnnG}@g"           "${submitbase}/gitignore/${version}/submit/${submitname}_callAnalyzer_${region}.cc"
@@ -156,7 +182,7 @@ do
     --input-file-list=${xrdlist} \
     --input-files-per-job=100 \
     --use-hdfs \
-    --extra-inputs=${submitbase}/analyze${region}.C,${submitbase}/analyze${region}.h,${submitbase}/ewk_corr.root,${submitbase}/postAnalyzer_Base.h,${submitbase}/postAnalyzer_Lep.h,${submitbase}/postAnalyzer_Gen.h \
+    --extra-inputs=${submitbase}/analyze${region}.C,${submitbase}/analyze${region}.h,${submitbase}/ewk_corr.root,${submitbase}/postAnalyzer_Base.h,${submitbase}/postAnalyzer_Lep.h,${submitbase}/postAnalyzer_Gen.h,${submitbase}/postAnalyzer_PDFscale.h \
     ${version} \
     "${submitbase}/gitignore/${version}/submit/${submitname}_callAnalyzer_${region}.cc"
  
@@ -229,6 +255,7 @@ do
  
       initlep=""
       initgen=""
+      initpdf=""
    
       if [ ${region} = "ZllG" ]
        then
@@ -246,6 +273,7 @@ do
       sed -i "s@REGION@${region}@g"               "${submitbase}/gitignore/${version}/submit/${submitname}_callAnalyzer_${region}.cc"
       sed -i "s@INITLEP@${initlep}@g"             "${submitbase}/gitignore/${version}/submit/${submitname}_callAnalyzer_${region}.cc"
       sed -i "s@INITGEN@${initgen}@g"             "${submitbase}/gitignore/${version}/submit/${submitname}_callAnalyzer_${region}.cc"
+      sed -i "s@INITPDF@${initpdf}@g"             "${submitbase}/gitignore/${version}/submit/${submitname}_callAnalyzer_${region}.cc"
       sed -i "s@TREENAME@${treename}@g"           "${submitbase}/gitignore/${version}/submit/${submitname}_callAnalyzer_${region}.cc"
       sed -i "s@ISMC@${isMC}@g"                   "${submitbase}/gitignore/${version}/submit/${submitname}_callAnalyzer_${region}.cc"
       sed -i "s@ISZNNG@${isZnnG}@g"               "${submitbase}/gitignore/${version}/submit/${submitname}_callAnalyzer_${region}.cc"
