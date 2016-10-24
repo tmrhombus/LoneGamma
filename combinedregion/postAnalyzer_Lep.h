@@ -99,43 +99,6 @@ void postAnalyzer_Lep::InitLep()
 
    std::cout<<"Initializing leptons"<<std::endl;
 
-   ptbins.clear();
-   ptbinnames.clear();
-   sysbinnames.clear();
-
-   ptbins.push_back(175);
-   ptbins.push_back(190);
-   ptbins.push_back(250);
-   ptbins.push_back(400);
-   ptbins.push_back(700);
-   ptbins.push_back(1000);
-
-   ptbinnames.push_back("175to190");
-   ptbinnames.push_back("190to250");
-   ptbinnames.push_back("250to400");
-   ptbinnames.push_back("400to700");
-   ptbinnames.push_back("700to1000");
-   ptbinnames.push_back("175to1000");
-   ptbinnames.push_back("allpt");
-
-   sysbinnames.push_back("");
-   sysbinnames.push_back("_JERUp");    // jet energy resolution
-   sysbinnames.push_back("_JERDown");
-   sysbinnames.push_back("_JESUp");    // jet energy scale
-   sysbinnames.push_back("_JESDown");
-   sysbinnames.push_back("_MESUp");    // muon energy scale
-   sysbinnames.push_back("_MESDown");
-   sysbinnames.push_back("_EESUp");    // electron energy scale
-   sysbinnames.push_back("_EESDown");
-   sysbinnames.push_back("_PESUp");    // photon energy scale 1.5%
-   sysbinnames.push_back("_PESDown");
-   sysbinnames.push_back("_TESUp");    // tau energy scale
-   sysbinnames.push_back("_TESDown");
-   sysbinnames.push_back("_UESUp");    // unclustered energy scale
-   sysbinnames.push_back("_UESDown");
-   sysbinnames.push_back("_EWKUp");    // electroweak correction
-   sysbinnames.push_back("_EWKDown");
-
    for(unsigned int i=0; i<ptbinnames.size(); ++i){
     for(unsigned int j=0; j<sysbinnames.size(); ++j){
 //     // set up names

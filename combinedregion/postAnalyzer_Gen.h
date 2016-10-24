@@ -182,24 +182,6 @@ void postAnalyzer_Gen::InitGen()
 
    std::cout<<"Initializing Gen"<<std::endl;
 
-   ptbins.clear();
-   ptbinnames.clear();
-
-   ptbins.push_back(175);
-   ptbins.push_back(190);
-   ptbins.push_back(250);
-   ptbins.push_back(400);
-   ptbins.push_back(700);
-   ptbins.push_back(1000);
-
-   ptbinnames.push_back("175to190");
-   ptbinnames.push_back("190to250");
-   ptbinnames.push_back("250to400");
-   ptbinnames.push_back("400to700");
-   ptbinnames.push_back("700to1000");
-   ptbinnames.push_back("175to1000");
-   ptbinnames.push_back("allpt");
-
    for(unsigned int i=0; i<ptbinnames.size(); ++i){
 //     // set up names
      TString histname_gen_et  = "h_gen_et_"+ptbinnames[i];
