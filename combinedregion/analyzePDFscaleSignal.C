@@ -256,6 +256,32 @@ void analyzePDFscaleSignal::Loop(TString outfilename, Bool_t isMC, Double_t lumi
   printf(" cf_passdPhiJM      %i\n", cf_passdPhiJM     );
   printf(" cf_passdPhiPhoMET  %i\n", cf_passdPhiPhoMET );
 
+  for(unsigned int i=0; i<ptbinnames.size(); ++i){ 
+
+   double sum_scales = std::accumulate(vec_scales[i].begin(), vec_scales[i].end(), 0.0);
+   double mean_scales = sum_scales / vec_scales[i].size();
+   double sq_sum_scales = std::inner_product(vec_scales[i].begin(), vec_scales[i].end(), vec_scales[i].begin(), 0.0);
+   double stdev_scales = std::sqrt(sq_sum_scales / vec_scales[i].size() - mean_scales * mean_scales);
+   
+   double sum_pdfs = std::accumulate(vec_pdfs[i].begin(), vec_pdfs[i].end(), 0.0);
+   double mean_pdfs = sum_pdfs / vec_pdfs[i].size();
+   double sq_sum_pdfs = std::inner_product(vec_pdfs[i].begin(), vec_pdfs[i].end(), vec_pdfs[i].begin(), 0.0);
+   double stdev_pdfs = std::sqrt(sq_sum_pdfs / vec_pdfs[i].size() - mean_pdfs * mean_pdfs);
+   
+   std::cout<<"::::: "<<ptbinnames[i]<<" :::::"<<std::endl;
+   std::cout<<std::endl<<"PDFs"<<std::endl;
+   std::cout<<"   Mean = "<<mean_pdfs<<" std: "<<stdev_pdfs<<" = "<<stdev_pdfs/mean_pdfs<<std::endl;
+   std::cout<<std::endl<<"scales"<<std::endl;
+   std::cout<<"   Mean = "<<mean_scales<<" std: "<<stdev_scales<<" = "<<stdev_scales/mean_scales<<std::endl<<std::endl;
+   
+//   for(int i=0; i<vec_pdfs[i].size(); ++i)
+//     std::cout << vec_pdfs[i].at(i) << ' ';
+//   
+//   for(int i=0; i<vec_scales[i].size(); ++i)
+//     std::cout << vec_scales[i].at(i) << ' '<<std::endl<<std::endl;;
+ 
+  }
+
  TFile *outfile = new TFile(outfilename,"RECREATE");
  outfile->cd();
  for(unsigned int i=0; i<ptbinnames.size(); ++i){
