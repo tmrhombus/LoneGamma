@@ -3,8 +3,8 @@
 #voms-proxy-init --voms cms --valid 100:00
 
 domc=true
-dodata=true
-dosubmit=false
+dodata=false
+dosubmit=true
 
 START=$(date +%s);
 printf "Started at `date`\n\n"
@@ -16,14 +16,14 @@ mkdir -p "${submitbase}/gitignore/${version}/submit"
 lumi=12900. # /pb
 
 #  "GenSignal"  
-# "PDFscaleZllG"   \
-# "PDFscaleSignal" \
-# "PDFscaleWlnG" 
+# "Signal" \
+# "ZllG"   \
+# "WlnG"   
 
 for region in \
- "Signal" \
- "ZllG"   \
- "WlnG"   
+ "PDFscaleZllG"   \
+ "PDFscaleSignal" \
+ "PDFscaleWlnG" 
 
 do
 
@@ -34,20 +34,23 @@ do
  
   initevents="${CMSSW_BASE}/src/LoneGamma/lists/initialEvents.txt"
  
+#   "GJetsHT"   \
+#   "ZllJetsHT" \
+#   "ZnnGJets"  \
+#   "ZllGJets"  \
+#   "WlnGJets"  \
+#   "Wmn"       \
+#   "Wtn"       \
+#   "WWG"       \
+#   "TTGJets"   \
+#   "GGJets"    \
+#   "TGJets"    \
+#   "WZ"        \
+#   "ZZ"
   for mc_samplename in \
-   "GJetsHT"   \
-   "ZllJetsHT" \
    "ZnnGJets"  \
    "ZllGJets"  \
-   "WlnGJets"  \
-   "Wmn"       \
-   "Wtn"       \
-   "WWG"       \
-   "TTGJets"   \
-   "GGJets"    \
-   "TGJets"    \
-   "WZ"        \
-   "ZZ"
+   "WlnGJets" 
  
   do
  

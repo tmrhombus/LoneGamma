@@ -14,24 +14,50 @@ void plotsr::Loop()
  inpath = TString(Tsubmitbase+"/gitignore/"+Tversion+"/analyzed");
  outpath = TString(Tsubmitbase+"/gitignore/"+Tversion+"/plots");
 
-// regions.push_back("GenSignal");
- regions.push_back("Signal");
+//// regions.push_back("GenSignal");
+// regions.push_back("Signal");
  regions.push_back("WlnG");
  regions.push_back("ZllG");
 
 // variablenames.push_back("etres"  );  
 // variablenames.push_back("metres" ); 
 
+// variablenames.push_back("et5");  
+// variablenames.push_back("et15"); 
+// variablenames.push_back("et25"); 
+// variablenames.push_back("et55"); 
+// variablenames.push_back("et75"); 
+// variablenames.push_back("et165");
+// variablenames.push_back("et275");
+
  variablenames.push_back("uncorret"  );
-// variablenames.push_back("et"        ); 
-// variablenames.push_back("eta"       ); 
-// variablenames.push_back("sieieF5x5" ); 
 // variablenames.push_back("pfMET"     ); 
 // variablenames.push_back("leptoMET"  ); 
+//// variablenames.push_back("et"        ); 
+//// variablenames.push_back("eta"       ); 
+//// variablenames.push_back("sieieF5x5" ); 
 // variablenames.push_back("dilep_mass"); 
 // variablenames.push_back("dimu_mass" ); 
 // variablenames.push_back("diele_mass"); 
 
+   selectionnames.push_back("");
+   selectionnames.push_back("_JERUp");    // jet energy resolution
+   selectionnames.push_back("_JERDown");
+   selectionnames.push_back("_JESUp");    // jet energy scale
+   selectionnames.push_back("_JESDown");
+   selectionnames.push_back("_MESUp");    // muon energy scale
+   selectionnames.push_back("_MESDown");
+   selectionnames.push_back("_EESUp");    // electron energy scale
+   selectionnames.push_back("_EESDown");
+   selectionnames.push_back("_PESUp");    // photon energy scale 1.5%
+   selectionnames.push_back("_PESDown");
+   selectionnames.push_back("_TESUp");    // tau energy scale
+   selectionnames.push_back("_TESDown");
+   selectionnames.push_back("_UESUp");    // unclustered energy scale
+   selectionnames.push_back("_UESDown");
+   selectionnames.push_back("_EWKUp");    // electroweak correction
+   selectionnames.push_back("_EWKDown");
+
  rebins.push_back(1);
  rebins.push_back(1);
  rebins.push_back(1);
@@ -62,8 +88,6 @@ void plotsr::Loop()
 // rebins.push_back(1);
 // rebins.push_back(1);
 
-// selectionnames.push_back("m110");
- selectionnames.push_back("m170");
 
  ptrangenames.push_back("allpt");
  //ptrangenames.push_back("175to1000");
@@ -151,18 +175,23 @@ void plotsr::Loop()
    for(unsigned int v=0; v<variablenames.size(); ++v){
    TString variablename = variablenames[v];
    Int_t rebin = rebins[v];
-//    for(unsigned int s=0; s<selectionnames.size(); ++s){
-//    TString selectionname = selectionnames[s];
-     for(unsigned int p=0; p<ptrangenames.size(); ++p){
-     TString ptrangename = ptrangenames[p];
+    for(unsigned int p=0; p<ptrangenames.size(); ++p){
+    TString ptrangename = ptrangenames[p];
+    file_out =  new TFile(outpath+"/histos_"+region+"_"+variablename+"_"+ptrangename+".root","RECREATE");
+     for(unsigned int s=0; s<selectionnames.size(); ++s){
+     TString selectionname = selectionnames[s];
  
      canvas->Clear();
  
-     TString tailname = variablename+"_"+ptrangename; //+"_"+selectionname;
+     TString tailname = variablename+"_"+ptrangename+selectionname;
+     TString tailnamed = variablename+"_"+ptrangename;
      outname = "plot"+region+"_"+tailname+extraname; 
-     histname = "h_sig_"+tailname;
      //histname = "h_mu_"+tailname;
-     file_out =  new TFile(outpath+"/"+outname+".root","RECREATE");
+     //TString histnamed = "h_mu_"+tailnamed;
+     ////histname = "h_ele_"+tailname;
+     ////TString histnamed = "h_ele_"+tailnamed;
+     histname = "h_sig_"+tailname;
+     TString histnamed = "h_sig_"+tailnamed;
 
      ofstream log; 
      log.open (outpath+"/"+outname+".log");
@@ -188,7 +217,7 @@ void plotsr::Loop()
      printf(outname+"\n");
      printf(histname+"\n");
  
-     raw_data_obs = (TH1F*)file_SinglePhotonData->Get(histname)->Clone("raw_data_obs");
+     raw_data_obs   = (TH1F*)file_SinglePhotonData->Get(histnamed)->Clone("raw_data_obs");
  
      h_raw_EFake    = (TH1F*)file_SinglePhotonEle   ->Get(histname)->Clone("h_raw_EFake")    ;   
      h_raw_JFake    = (TH1F*)file_SinglePhotonJet   ->Get(histname)->Clone("h_raw_JFake")    ;   
@@ -292,10 +321,10 @@ void plotsr::Loop()
      h_raw_GJets   ->SetFillColor( kRed-10 );  
      h_raw_Wmn     ->SetFillColor( kRed-10 );
      h_raw_Wtn     ->SetFillColor( kRed-10 );
-     h_raw_ZllGJets->SetFillColor( kRed-10 );
      h_raw_TTGJets ->SetFillColor( kRed-10 ); 
      h_raw_TGJets  ->SetFillColor( kRed-10 ); 
      h_raw_ZllJets ->SetFillColor( kRed-10 );  
+     h_raw_GGJets  ->SetFillColor( kRed-10 );
      // h_VV
      h_raw_WZ      ->SetFillColor(TColor::GetColor("#CCCA2A"));
      h_raw_ZZ      ->SetFillColor(TColor::GetColor("#CCCA2A"));
@@ -307,13 +336,13 @@ void plotsr::Loop()
      h_raw_EFake   ->SetFillColor( kBlue-8   );
      h_raw_WlnGJets->SetFillColor( kRed-6    );  
      h_raw_ZnnGJets->SetFillColor( kOrange-4 );
-     h_raw_GGJets  ->SetFillColor( kBlue-7   );
+     h_raw_ZllGJets->SetFillColor( kBlue-7 );
 
      // h_GWZtt
      h_raw_GWZtt = (TH1F*)h_raw_GJets->Clone("h_raw_GWZtt") ;
      h_raw_GWZtt -> Add(h_raw_Wmn     ) ;
      h_raw_GWZtt -> Add(h_raw_Wtn     ) ;
-     h_raw_GWZtt -> Add(h_raw_ZllGJets) ;
+     h_raw_GWZtt -> Add(h_raw_GGJets  ) ;
      h_raw_GWZtt -> Add(h_raw_TTGJets ) ;
      h_raw_GWZtt -> Add(h_raw_TGJets  ) ;
      h_raw_GWZtt -> Add(h_raw_ZllJets ) ;
@@ -331,12 +360,22 @@ void plotsr::Loop()
        region=="WlnG" ||
        region=="ZllG"
       ){
-       h_raw_Halo ->  Scale(0.01/max(1.,h_raw_Halo->Integral(1,-1)  ) );
-       h_raw_Spike->  Scale(0.01/max(1.,h_raw_Spike->Integral(1,-1) ) );
-       h_raw_JFake->  Scale(0.01/max(1.,h_raw_JFake->Integral(-1,-1)) );
-       h_raw_EFake->  Scale(0.01/max(1.,h_raw_EFake->Integral(-1,-1)) );
+       int nbinsx = h_raw_Halo->GetXaxis()->GetNbins();
+       for(int ibin=1; ibin<=nbinsx+1; ibin++)
+        {     
+            h_raw_Halo->SetBinContent(ibin,0.0001);
+            h_raw_Halo->SetBinError(ibin,0.0001);
+            h_raw_Spike->SetBinContent(ibin,0.0001);
+            h_raw_Spike->SetBinError(ibin,0.0001);
+        }   
       }
 
+//// for standard binning
+//     TH1 *data_obs   = (TH1F*)raw_data_obs  ->Clone("data_obs");
+//     TH1 *h_EFake    = (TH1F*)h_raw_EFake   ->Clone("h_EFake");
+//     TH1 *h_JFake    = (TH1F*)h_raw_JFake   ->Clone("h_JFake");
+//     TH1 *h_Halo     = (TH1F*)h_raw_Halo    ->Clone("h_Halo");
+//     TH1 *h_Spike    = (TH1F*)h_raw_Spike   ->Clone("h_Spike");
 //     TH1 *h_GJets    = (TH1F*)h_raw_GJets   ->Clone("h_GJets");
 //     TH1 *h_TTGJets  = (TH1F*)h_raw_TTGJets ->Clone("h_TTGJets");
 //     TH1 *h_TGJets   = (TH1F*)h_raw_TGJets  ->Clone("h_TGJets");
@@ -355,26 +394,26 @@ void plotsr::Loop()
  
  
      Double_t xbins[6] = {175,190,250,400,700,1000};
-     TH1 *data_obs   = raw_data_obs  ->Rebin(5,"data_obs",xbins);    
-     TH1 *h_GJets    = h_raw_GJets   ->Rebin(5,"h_GJets",   xbins);    
-     TH1 *h_TTGJets  = h_raw_TTGJets ->Rebin(5,"h_TTGJets", xbins);    
-     TH1 *h_TGJets   = h_raw_TGJets  ->Rebin(5,"h_TGJets",  xbins);    
-     TH1 *h_WlnGJets = h_raw_WlnGJets->Rebin(5,"h_WlnGJets",xbins);    
-     TH1 *h_ZllGJets = h_raw_ZllGJets->Rebin(5,"h_ZllGJets",xbins);    
-     TH1 *h_ZllJets  = h_raw_ZllJets ->Rebin(5,"h_ZllJets", xbins);    
-     TH1 *h_GGJets   = h_raw_GGJets  ->Rebin(5,"h_GGJets",  xbins);
-     TH1 *h_EFake    = h_raw_EFake   ->Rebin(5,"h_EFake",   xbins);
-     TH1 *h_JFake    = h_raw_JFake   ->Rebin(5,"h_JFake",   xbins);
-     TH1 *h_Halo     = h_raw_Halo    ->Rebin(5,"h_Halo",    xbins);
-     TH1 *h_Spike    = h_raw_Spike   ->Rebin(5,"h_Spike",   xbins);
-     TH1 *h_WWG      = h_raw_WWG     ->Rebin(5,"h_WWG",     xbins);
-     TH1 *h_WZ       = h_raw_WZ      ->Rebin(5,"h_WZ",      xbins);
-     TH1 *h_Wmn      = h_raw_Wmn     ->Rebin(5,"h_Wmn",     xbins);
-     TH1 *h_Wtn      = h_raw_Wtn     ->Rebin(5,"h_Wtn",     xbins);
-     TH1 *h_ZZ       = h_raw_ZZ      ->Rebin(5,"h_ZZ",      xbins);
-     TH1 *h_ZnnGJets = h_raw_ZnnGJets->Rebin(5,"h_ZnnGJets",xbins);
-     TH1 *h_GWZtt    = h_raw_GWZtt   ->Rebin(5,"h_GWZtt",   xbins);
-     TH1 *h_VV       = h_raw_VV      ->Rebin(5,"h_VV",      xbins);
+     TH1 *data_obs   = raw_data_obs  ->Rebin(5,"data_obs"+selectionname,  xbins);    
+     TH1 *h_GJets    = h_raw_GJets   ->Rebin(5,"h_GJets"+selectionname,   xbins);    
+     TH1 *h_TTGJets  = h_raw_TTGJets ->Rebin(5,"h_TTGJets"+selectionname, xbins);    
+     TH1 *h_TGJets   = h_raw_TGJets  ->Rebin(5,"h_TGJets"+selectionname,  xbins);    
+     TH1 *h_WlnGJets = h_raw_WlnGJets->Rebin(5,"h_WlnGJets"+selectionname,xbins);    
+     TH1 *h_ZllGJets = h_raw_ZllGJets->Rebin(5,"h_ZllGJets"+selectionname,xbins);    
+     TH1 *h_ZllJets  = h_raw_ZllJets ->Rebin(5,"h_ZllJets"+selectionname, xbins);    
+     TH1 *h_GGJets   = h_raw_GGJets  ->Rebin(5,"h_GGJets"+selectionname,  xbins);
+     TH1 *h_EFake    = h_raw_EFake   ->Rebin(5,"h_EFake"+selectionname,   xbins);
+     TH1 *h_JFake    = h_raw_JFake   ->Rebin(5,"h_JFake"+selectionname,   xbins);
+     TH1 *h_Halo     = h_raw_Halo    ->Rebin(5,"h_Halo"+selectionname,    xbins);
+     TH1 *h_Spike    = h_raw_Spike   ->Rebin(5,"h_Spike"+selectionname,   xbins);
+     TH1 *h_WWG      = h_raw_WWG     ->Rebin(5,"h_WWG"+selectionname,     xbins);
+     TH1 *h_WZ       = h_raw_WZ      ->Rebin(5,"h_WZ"+selectionname,      xbins);
+     TH1 *h_Wmn      = h_raw_Wmn     ->Rebin(5,"h_Wmn"+selectionname,     xbins);
+     TH1 *h_Wtn      = h_raw_Wtn     ->Rebin(5,"h_Wtn"+selectionname,     xbins);
+     TH1 *h_ZZ       = h_raw_ZZ      ->Rebin(5,"h_ZZ"+selectionname,      xbins);
+     TH1 *h_ZnnGJets = h_raw_ZnnGJets->Rebin(5,"h_ZnnGJets"+selectionname,xbins);
+     TH1 *h_GWZtt    = h_raw_GWZtt   ->Rebin(5,"h_GWZtt"+selectionname,   xbins);
+     TH1 *h_VV       = h_raw_VV      ->Rebin(5,"h_VV"+selectionname,      xbins);
 
      log<<boost::format("             total   bin1   bin2   bin3   bin4   bin5   bin6\n");
      log<<boost::format("data_obs    %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f\n") %data_obs  ->Integral(1,-1) %data_obs  ->GetBinContent(1) %data_obs  ->GetBinContent(2) %data_obs  ->GetBinContent(3) %data_obs  ->GetBinContent(4) %data_obs  ->GetBinContent(5) %data_obs  ->GetBinContent(6) ;
@@ -483,14 +522,14 @@ void plotsr::Loop()
      thestack->Add(h_EFake   );
      thestack->Add(h_WlnGJets);
      thestack->Add(h_ZnnGJets);
-     thestack->Add(h_GGJets  );
+     thestack->Add(h_ZllGJets);
 
      TLegend *leg = new TLegend(0.20,0.7,0.88,0.85 );
      //TLegend *leg = new TLegend(0.60,0.5,0.88,0.88 );
      leg-> SetNColumns(2);
      leg->SetBorderSize(0);
      leg->SetFillColor(kWhite);
-     leg->AddEntry( h_GWZtt   ,"#gamma+jet,W(#mu#nu,#tau#nu),Z(ll)#gamma,t#bar{t}#gamma,t#gamma" , "f");
+     leg->AddEntry( h_GWZtt   ,"#gamma#gamma+jets,#gamma+jet,W(#mu#nu,#tau#nu),t#bar{t}#gamma,t#gamma" , "f");
      leg->AddEntry( h_VV      ,"WZ,ZZ,WW#gamma", "f");
      leg->AddEntry( h_Halo    ,"Beam halo", "f");
      leg->AddEntry( h_Spike   ,"Spikes", "f");
@@ -498,7 +537,7 @@ void plotsr::Loop()
      leg->AddEntry( h_EFake   ,"e#rightarrow#gamma misID", "f");  
      leg->AddEntry( h_WlnGJets,"W(l#nu)#gamma", "f");  
      leg->AddEntry( h_ZnnGJets,"Z(#nu#nu)#gamma", "f");  
-     leg->AddEntry( h_GGJets  ,"#gamma#gamma+jets", "f");  
+     leg->AddEntry( h_ZllGJets,"Z(ll)#gamma", "f");  
      leg->AddEntry( data_obs  ,"data", "lep");
  
      canvas->cd();
@@ -518,11 +557,14 @@ void plotsr::Loop()
       data_obs->SetMinimum(0.0005);
      }
      data_obs->GetYaxis()->SetTitleOffset(1.4);
+
+     thestack->Draw("hist,sames");
  
+//     h_ZllGJets->Draw("hist");
      data_obs->Draw("");
      thestack->Draw("hist,sames");
      data_obs->Draw("sames");
-     data_obs->GetXaxis()->Draw();
+//     data_obs->GetXaxis()->Draw();
      leg->Draw("same");
  
        // h_ZnnGJets carries title
@@ -566,7 +608,7 @@ void plotsr::Loop()
      h_EFake   ->Write();
      h_WlnGJets->Write();
      h_ZnnGJets->Write();
-     h_GGJets  ->Write();
+     h_ZllGJets->Write();
 
      canvas->SaveAs(outpath+"/"+outname+".pdf");
  
@@ -614,11 +656,11 @@ void plotsr::Loop()
      h_GWZtt    ->Delete();   
      h_VV       ->Delete();
  
-     file_out->Close();
      log.close();
  
-     } //  for(unsigned int p=0; p<ptrangenames.size(); ++p)
-    //} //  for(unsigned int s=0; s<selectionnames.size(); ++s)
+     } //  for(unsigned int s=0; s<selectionnames.size(); ++s)
+    file_out->Close();
+    } //  for(unsigned int p=0; p<ptrangenames.size(); ++p)
    } //  for(unsigned int v=0; v<variablenames.size(); ++v)
  }
 }

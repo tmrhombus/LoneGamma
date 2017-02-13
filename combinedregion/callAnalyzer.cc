@@ -1,6 +1,9 @@
 
-#include "analyzeSignal.C"
+#include "analyzePDFscaleZllG.C"
+//#include "analyzePDFscaleWlnG.C"
+//#include "analyzePDFscaleSignal.C"
 //#include "analyzeGenSignal.C"
+//#include "analyzeSignal.C"
 //#include "analyzeZllG.C"
 //#include "analyzeWlnG.C"
 
@@ -30,16 +33,16 @@ void callAnalyzer(void)
  //TString inputListName=path+"/hdfslist_SinglePhoton.txt";
  //TString inputListName=path+"/filenames_SinglePhoton2016_10.txt";
 
-  Bool_t isMC=kFALSE;
-  Bool_t isZnnG=kFALSE;
-  Bool_t ewkZG=kFALSE;
-  Bool_t ewkWG=kFALSE;
-  Bool_t isHalo=kFALSE;
-  Bool_t isSpike=kFALSE;
-  Bool_t isEle=kFALSE;
-  Bool_t isJet=kFALSE;
-  TString outfilename=path+"/ZnnG_Datafewer.root";
-  TString inputListName=path+"/SPD.fewer";
+//  Bool_t isMC=kFALSE;
+//  Bool_t isZnnG=kFALSE;
+//  Bool_t ewkZG=kFALSE;
+//  Bool_t ewkWG=kFALSE;
+//  Bool_t isHalo=kFALSE;
+//  Bool_t isSpike=kFALSE;
+//  Bool_t isEle=kFALSE;
+//  Bool_t isJet=kFALSE;
+//  TString outfilename=path+"/ZnnG_Datafewer.root";
+//  TString inputListName=path+"/SPD.fewer";
 ////    TString outfilename=path+"/ZnnG_Data_204.root";
 ////    TString inputListName=path+"/SinglePhotonData_callpostAnalyzer_Base-ggtree_data_204.inputs";
 ////    TString outfilename=path+"/ZnnG_Data_204_small.root";
@@ -52,16 +55,16 @@ void callAnalyzer(void)
   //TString inputListName=path+"/filenames_SinglePhoton2016_10.txt";
 
 
-//  Bool_t isMC=kTRUE;
-//  Bool_t isZnnG=kFALSE;
-//  Bool_t ewkZG=kTRUE;
-//  Bool_t ewkWG=kFALSE;
-//  Bool_t isEle=kFALSE;
-//  Bool_t isJet=kFALSE;
-//  Bool_t isHalo=kFALSE;
-//  Bool_t isSpike=kFALSE;
-//  TString outfilename=path+"/ZllG_ZllG_v2.root";
-//  TString inputListName=path+"/hdfslist_ZllGJets.txt";
+  Bool_t isMC=kTRUE;
+  Bool_t isZnnG=kFALSE;
+  Bool_t ewkZG=kTRUE;
+  Bool_t ewkWG=kFALSE;
+  Bool_t isEle=kFALSE;
+  Bool_t isJet=kFALSE;
+  Bool_t isHalo=kFALSE;
+  Bool_t isSpike=kFALSE;
+  TString outfilename=path+"/ZllG_ZllG_v2.root";
+  TString inputListName=path+"/hdfslist_ZllGJets.txt";
 
 //  Bool_t isMC=kTRUE;
 //  Bool_t isZnnG=kFALSE;
@@ -75,17 +78,6 @@ void callAnalyzer(void)
 //  TString inputListName=path+"/hdfslist_WlnGJets.txt";
 
 //  Bool_t isMC=kTRUE;
-//  Bool_t isZnnG=kFALSE;
-//  Bool_t ewkZG=kFALSE;
-//  Bool_t ewkWG=kFALSE;
-//  Bool_t isEle=kFALSE;
-//  Bool_t isJet=kFALSE;
-//  Bool_t isHalo=kFALSE;
-//  Bool_t isSpike=kFALSE;
-//  TString outfilename=path+"/WlnG_WZ_2.root";
-//  TString inputListName=path+"/hdfslist_WZ.txt";
-
-//  Bool_t isMC=kTRUE;
 //  Bool_t isZnnG=kTRUE;
 //  Bool_t ewkZG=kTRUE;
 //  Bool_t ewkWG=kFALSE;
@@ -96,7 +88,7 @@ void callAnalyzer(void)
 //          lumi = 40000. ;
 //          nrEvents = 375920 ;
 //          crossSec = 0.1903 ;
-//  TString outfilename=path+"/Gen_ZnnG_v2.root";
+//  TString outfilename=path+"/Signal_ZnnG_v2.root";
 //  TString inputListName=path+"/hdfslist_ZnnGJets.txt";
 
 
@@ -112,6 +104,20 @@ void callAnalyzer(void)
 //        nrEvents = 375920 ;
 //        crossSec = 0.1903 ;
 //  TString outfilename=path+"/ZnnG_ZnnGJets.root";
+//  TString inputListName=path+"/hdfslist_ZnnGJets.txt";
+
+// Bool_t isMC = kTRUE ;
+// Bool_t isZnnG = kTRUE ;
+// Bool_t isEle = kFALSE;
+// Bool_t isHalo = kFALSE;
+// Bool_t isSpike = kFALSE;
+// Bool_t isJet = kFALSE;
+// Bool_t ewkWG = kFALSE;
+// Bool_t ewkZG = kTRUE;
+//        lumi = 12900. ;
+//        nrEvents = 375920 ;
+//        crossSec = 0.1903 ;
+//  TString outfilename=path+"/ZnnGPDFS_ZnnGJets.root";
 //  TString inputListName=path+"/hdfslist_ZnnGJets.txt";
 
 
@@ -161,8 +167,8 @@ void callAnalyzer(void)
   infilename_dump.push_back(infilename);
  } //while !inputList.eof()
 
-  analyzeSignal m;
-  m.Init(theChain,isMC);
+//  analyzeSignal m;
+//  m.Init(theChain,isMC);
 
 //  analyzeZllG m;
 //  m.Init(theChain,isMC);
@@ -175,6 +181,23 @@ void callAnalyzer(void)
 //  analyzeGenSignal m;
 //  m.Init(theChain,isMC);
 //  m.InitGen();
+
+//  analyzePDFscaleSignal m;
+//  m.Init(theChain,isMC);
+//  m.InitGen();
+//  m.InitPDFscale();
+
+//  analyzePDFscaleWlnG m;
+//  m.Init(theChain,isMC);
+//  m.InitLep();
+//  m.InitGen();
+//  m.InitPDFscale();
+
+  analyzePDFscaleZllG m;
+  m.Init(theChain,isMC);
+  m.InitLep();
+  m.InitGen();
+  m.InitPDFscale();
 
   m.Loop(outfilename,isMC,lumi,nrEvents,crossSec,isZnnG,isEle,isHalo,isSpike,isJet,ewkWG,ewkZG);
 }

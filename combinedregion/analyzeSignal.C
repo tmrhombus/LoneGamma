@@ -130,6 +130,19 @@ void analyzeSignal::Loop(TString outfilename, Bool_t isMC, Double_t lumi, Double
       // dPhi( photon, MET )
       passdPhiPhoMET = askPassdPhiPhoMET(candphotonindex,pfMETPhi);
 
+//https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections#JetCorApplication
+//edm::ESHandle<JetCorrectorParametersCollection> JetCorParColl;
+//iSetup.get<JetCorrectionsRecord>().get("AK5PF",JetCorParColl); 
+//JetCorrectorParameters const & JetCorPar = (*JetCorParColl)["Uncertainty"];
+//JetCorrectionUncertainty *jecUnc = new JetCorrectionUncertainty(JetCorPar);
+//for (PFJetCollection::const_iterator jet = jets->begin(); jet != jets->end(); jet++)  {
+//  ...............................
+//  jecUnc->setJetEta(eta);
+//  jecUnc->setJetPt(ptCor); // here you must use the CORRECTED jet pt
+//  double unc = jecUnc->getUncertainty(true);
+//  double ptCor_shifted = ptCor(1+shift*unc) ; // shift = +1(up), or -1(down)
+//}
+
       if(sysb==0){
        if(passTrig       ){ ++n_passTrig       ;}
        if(passShape      ){ ++n_passShape      ;}
